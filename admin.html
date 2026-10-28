@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LUNÉRA Management</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    background:#f7f4ef;
+    color:#171515;
+    font-family:Montserrat,Arial,sans-serif;
+}
+
+header{
+    background:#151212;
+    color:white;
+    padding:28px 7%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-family:"Bodoni Moda",serif;
+    font-size:30px;
+    letter-spacing:4px;
+}
+
+.header-right{
+    font-size:11px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+}
+
+.hero{
+    padding:75px 7% 45px;
+    border-bottom:1px solid #ddd5cc;
+}
+
+.hero small{
+    font-size:11px;
+    letter-spacing:3px;
+    color:#777;
+}
+
+.hero h1{
+    font-family:"Bodoni Moda",serif;
+    font-size:58px;
+    font-weight:400;
+    margin-top:15px;
+}
+
+.hero p{
+    margin-top:15px;
+    color:#777;
+    font-size:13px;
+}
+
+.products{
+    padding:50px 7%;
+}
+
+.product-card{
+    background:white;
+    border:1px solid #e3ddd5;
+    margin-bottom:25px;
+    padding:28px;
+    display:grid;
+    grid-template-columns:180px 1fr;
+    gap:30px;
+}
+
+.product-image{
+    width:180px;
+    height:220px;
+    object-fit:cover;
+    background:#eee;
+}
+
+.product-info h2{
+    font-family:"Bodoni Moda",serif;
+    font-size:27px;
+    font-weight:400;
+    margin-bottom:8px;
+}
+
+.product-id{
+    font-size:10px;
+    color:#999;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    margin-bottom:25px;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+}
+
+.field{
+    display:flex;
+    flex-direction:column;
+    gap:7px;
+}
+
+.field.full{
+    grid-column:1 / -1;
+}
+
+label{
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:#666;
+}
+
+input,
+textarea{
+    width:100%;
+    border:1px solid #d8d0c8;
+    background:#faf9f7;
+    padding:13px;
+    font-family:Montserrat,Arial,sans-serif;
+    font-size:13px;
+    color:#171515;
+    outline:none;
+}
+
+input:focus,
+textarea:focus{
+    border-color:#17352b;
+}
+
+textarea{
+    min-height:90px;
+    resize:vertical;
+}
+
+.actions{
+    margin-top:25px;
+    display:flex;
+    gap:10px;
+}
+
+button{
+    border:none;
+    cursor:pointer;
+    padding:14px 22px;
+    font-family:Montserrat,Arial,sans-serif;
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+
+.save-btn{
+    background:#17352b;
+    color:white;
+}
+
+.reset-btn{
+    background:#eee9e3;
+    color:#333;
+}
+
+.status{
+    margin-top:12px;
+    font-size:11px;
+    color:#17352b;
+    display:none;
+}
+
+footer{
+    background:#151212;
+    color:white;
+    text-align:center;
+    padding:35px;
+    margin-top:30px;
+}
+
+footer .footer-logo{
+    font-family:"Bodoni Moda",serif;
+    font-size:25px;
+    letter-spacing:4px;
+}
+
+footer p{
+    margin-top:10px;
+    font-size:9px;
+    letter-spacing:1px;
+    color:#aaa;
+}
+
+@media(max-width:800px){
+
+    .hero h1{
+        font-size:42px;
+    }
+
+    .product-card{
+        grid-template-columns:1fr;
+    }
+
+    .product-image{
+        width:100%;
+        height:300px;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .field.full{
+        grid-column:auto;
+    }
+
+}
+
+
+/* LUNÉRA responsive safeguards — preserves the existing palette, fonts and visual theme */
+img, video, iframe { max-width: 100%; }
+input, textarea, select, button { max-width: 100%; }
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-wrap: break-word; }
+table { max-width: 100%; }
+@media (max-width: 760px) {
+  header { gap: 14px; flex-wrap: wrap; }
+  main, .page, .container, .content, .checkout-container, .cart-container {
+    width: min(92%, 100%) !important;
+    max-width: 100%;
+  }
+  .products, .product-grid, .product-list, .form-grid, .checkout-grid,
+  .cart-layout, .order-layout, .hero-grid, .category-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .product-card, .hero-settings, .category-card, .order-box, .cart-item {
+    min-width: 0;
+  }
+  .product-card img, .product-image, .product-preview {
+    max-width: 100%;
+  }
+  .actions, .buttons, .header-right, nav {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  button, .button, input[type="submit"] {
+    min-height: 44px;
+  }
+}
+@media (max-width: 420px) {
+  .page { margin-top: 34px !important; }
+  h1 { overflow-wrap: anywhere; }
+  .logo-text { letter-spacing: 3px !important; }
+  .hero-preview { height: auto !important; max-height: 300px; }
+  .product-preview, .product-image { height: auto; }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">LUNÉRA</div>
+
+    <div class="header-right">
+        Management Panel
+    </div>
+
+</header>
+
+
+<section class="hero">
+
+    <small>THE HOUSE OF LUNÉRA</small>
+
+    <h1>Product Management</h1>
+
+    <p>
+        Edit product information without changing the website code.
+    </p>
+
+</section>
+
+
+<section class="products" id="productsContainer">
+</section>
+
+
+<footer>
+
+    <div class="footer-logo">LUNÉRA</div>
+
+    <p>MANAGEMENT PANEL · ELEGANCE IN EVERY LAYER.</p>
+
+</footer>
+
+
+<script>
+
+/* ==========================================
+   DEFAULT LUNÉRA PRODUCTS
+========================================== */
+
+const defaultProducts = [
+
+{
+    id:"signature-bra",
+    name:"The Signature Bra",
+    category:"Bras · Lace · Signature",
+    price:"1499",
+    description:"A refined lace essential designed around everyday comfort, confident support and timeless LUNÉRA elegance.",
+    image:"https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1800&q=95",
+    sizes:"32, 34, 36, 38, 40"
+},
+
+{
+    id:"everyday-brief",
+    name:"The Everyday Brief",
+    category:"Panties · Everyday",
+    price:"699",
+    description:"A refined everyday essential designed for comfortable wear and an effortless finish.",
+    image:"https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1800&q=95",
+    sizes:"S, M, L, XL"
+},
+
+{
+    id:"signature-set",
+    name:"The Signature Set",
+    category:"Lingerie Sets · Signature",
+    price:"2499",
+    description:"A coordinated LUNÉRA set bringing together refined design, comfort and timeless elegance.",
+    image:"https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=1800&q=95",
+    sizes:"S, M, L, XL"
+},
+
+{
+    id:"soft-form",
+    name:"The Soft Form",
+    category:"Bras · Wireless",
+    price:"1299",
+    description:"A softly structured everyday bra created for easy movement and comfortable support.",
+    image:"https://images.unsplash.com/photo-1583743814966-8936f37f384c?auto=format&fit=crop&w=1800&q=95",
+    sizes:"32, 34, 36, 38, 40"
+},
+
+{
+    id:"seamless-essential",
+    name:"The Seamless Essential",
+    category:"Essentials · Seamless",
+    price:"899",
+    description:"A clean seamless essential designed to sit smoothly beneath everyday outfits.",
+    image:"https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1800&q=95",
+    sizes:"S, M, L, XL"
+},
+
+{
+    id:"evening-set",
+    name:"The Evening Set",
+    category:"Nightwear · Lounge",
+    price:"1899",
+    description:"An elegant lounge set designed for relaxed evenings and effortless comfort.",
+    image:"https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=1800&q=95",
+    sizes:"S, M, L, XL"
+},
+
+{
+    id:"lace-frame",
+    name:"The Lace Frame",
+    category:"Bras · Lace",
+    price:"1599",
+    description:"A refined lace design combining delicate detailing with comfortable everyday wear.",
+    image:"https://images.unsplash.com/photo-1506629905607-d9a0c1eecb3a?auto=format&fit=crop&w=1800&q=95",
+    sizes:"32, 34, 36, 38, 40"
+},
+
+{
+    id:"pure-essential",
+    name:"The Pure Essential",
+    category:"Essentials · Cotton",
+    price:"799",
+    description:"A clean cotton essential created for dependable everyday comfort.",
+    image:"https://images.unsplash.com/photo-1581044777550-4cfa60707c03?auto=format&fit=crop&w=1800&q=95",
+    sizes:"S, M, L, XL"
+},
+
+{
+    id:"bridal-collection",
+    name:"The Bridal Collection",
+    category:"Lingerie Sets · Bridal",
+    price:"2799",
+    description:"A carefully designed coordinated collection for special occasions, combining refined details with comfort.",
+    image:"https://images.unsplash.com/photo-1571513722275-4b41940f54b8?auto=format&fit=crop&w=1800&q=95",
+    sizes:"S, M, L, XL"
+}
+
+];
+
+
+/* ==========================================
+   LOAD PRODUCTS
+========================================== */
+
+let products = JSON.parse(
+    localStorage.getItem("luneraProducts")
+) || defaultProducts;
+
+
+/* ==========================================
+   DISPLAY PRODUCTS
+========================================== */
+
+function displayProducts(){
+
+    const container = document.getElementById("productsContainer");
+
+    container.innerHTML = "";
+
+    products.forEach((product,index)=>{
+
+        container.innerHTML += `
+
+        <div class="product-card">
+
+            <img
+                class="product-image"
+                src="${product.image}"
+                alt="${product.name}"
+                id="image-${index}"
+            >
+
+            <div class="product-info">
+
+                <h2>${product.name}</h2>
+
+                <div class="product-id">
+                    Product ID · ${product.id}
+                </div>
+
+
+                <div class="form-grid">
+
+
+                    <div class="field">
+
+                        <label>Product Name</label>
+
+                        <input
+                            type="text"
+                            id="name-${index}"
+                            value="${product.name}"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>Price ₹</label>
+
+                        <input
+                            type="number"
+                            id="price-${index}"
+                            value="${product.price}"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>Category</label>
+
+                        <input
+                            type="text"
+                            id="category-${index}"
+                            value="${product.category}"
+                        >
+
+                    </div>
+
+
+                    <div class="field">
+
+                        <label>Available Sizes</label>
+
+                        <input
+                            type="text"
+                            id="sizes-${index}"
+                            value="${product.sizes}"
+                        >
+
+                    </div>
+
+
+                    <div class="field full">
+
+                        <label>Image URL</label>
+
+                        <input
+                            type="text"
+                            id="imageUrl-${index}"
+                            value="${product.image}"
+                            oninput="previewImage(${index})"
+                        >
+
+                    </div>
+
+
+                    <div class="field full">
+
+                        <label>Description</label>
+
+                        <textarea
+                            id="description-${index}"
+                        >${product.description}</textarea>
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="actions">
+
+                    <button
+                        class="save-btn"
+                        onclick="saveProduct(${index})"
+                    >
+                        Save Changes
+                    </button>
+
+                    <button
+                        class="reset-btn"
+                        onclick="resetProduct(${index})"
+                    >
+                        Reset
+                    </button>
+
+                </div>
+
+
+                <div
+                    class="status"
+                    id="status-${index}"
+                >
+                    Changes saved successfully.
+                </div>
+
+
+            </div>
+
+        </div>
+
+        `;
+
+    });
+
+}
+
+
+/* ==========================================
+   IMAGE PREVIEW
+========================================== */
+
+function previewImage(index){
+
+    const url =
+        document.getElementById(
+            "imageUrl-" + index
+        ).value;
+
+    document.getElementById(
+        "image-" + index
+    ).src = url;
+
+}
+
+
+/* ==========================================
+   SAVE PRODUCT
+========================================== */
+
+function saveProduct(index){
+
+    products[index].name =
+        document.getElementById(
+            "name-" + index
+        ).value;
+
+    products[index].price =
+        document.getElementById(
+            "price-" + index
+        ).value;
+
+    products[index].category =
+        document.getElementById(
+            "category-" + index
+        ).value;
+
+    products[index].sizes =
+        document.getElementById(
+            "sizes-" + index
+        ).value;
+
+    products[index].image =
+        document.getElementById(
+            "imageUrl-" + index
+        ).value;
+
+    products[index].description =
+        document.getElementById(
+            "description-" + index
+        ).value;
+
+
+    localStorage.setItem(
+        "luneraProducts",
+        JSON.stringify(products)
+    );
+
+
+    displayProducts();
+
+
+    const status =
+        document.getElementById(
+            "status-" + index
+        );
+
+    if(status){
+
+        status.style.display = "block";
+
+        setTimeout(()=>{
+
+            status.style.display = "none";
+
+        },2500);
+
+    }
+
+}
+
+
+/* ==========================================
+   RESET PRODUCT
+========================================== */
+
+function resetProduct(index){
+
+    products[index] = {
+        ...defaultProducts[index]
+    };
+
+    localStorage.setItem(
+        "luneraProducts",
+        JSON.stringify(products)
+    );
+
+    displayProducts();
+
+}
+
+
+/* ==========================================
+   START
+========================================== */
+
+displayProducts();
+
+</script>
+
+
+<!-- Security lock: this static management page is intentionally unavailable until server-backed authentication is configured. -->
+<div id="lunera-admin-lock" role="alert" style="position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:#f7f4ef;color:#151212;text-align:center;">
+  <div style="width:min(560px,100%);padding:36px 28px;background:#fff;border:1px solid #e1dbd2;">
+    <div style="font-family:'Bodoni Moda',serif;font-size:30px;letter-spacing:5px;margin-bottom:18px;">LUNÉRA</div>
+    <h1 style="font-family:'Bodoni Moda',serif;font-weight:400;font-size:clamp(28px,5vw,42px);margin-bottom:16px;">Management Locked</h1>
+    <p style="font:12px/1.8 Montserrat,Arial,sans-serif;color:#5f5a54;">Admin access must be connected to secure Firebase Authentication before this page can be used online. A browser-only password is not secure.</p>
+    <a href="index.html" style="display:inline-block;margin-top:24px;background:#151212;color:white;padding:14px 22px;text-decoration:none;font:10px Montserrat,Arial,sans-serif;letter-spacing:2px;">RETURN TO STORE</a>
+  </div>
+</div>
+
+</body>
+</html>

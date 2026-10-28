@@ -1,0 +1,20 @@
+Paste this body into the EmailJS template connected to service_26ob5sw / template e00x0gi.
+Set the template's recipient to lunerastore26@gmail.com in the EmailJS dashboard.
+
+New order received on LUNÉRA!
+
+Order ID: {{order_id}}
+Customer Name: {{customer_name}}
+Phone: {{customer_phone}}
+Customer Email: {{customer_email}}
+
+Delivery Address:
+{{delivery_address}}
+
+Order Details:
+{{order_details}}
+
+Total Amount: {{order_total}}
+
+Customer Notes:
+{{customer_notes}}

@@ -1,0 +1,44 @@
+LUNÉRA — ORDER, PAYMENT & CUSTOMER SUPPORT STATUS
+Updated: 28 October 2026
+
+WHAT IS FIXED IN THIS PACKAGE
+- All required storefront pages are included at the ZIP root: index.html, product.html, detail.html, cart.html, checkout.html, admin.html, manage.html, and lunera-logo.png.
+- Local page links were checked against the files included in this package.
+- JavaScript syntax was checked for all HTML pages.
+- Product and cart prices now use INR consistently, and product/cart/checkout code can parse both numeric prices and values such as ₹1,499.
+- Checkout validates the required customer details, stores an order under localStorage key luneraOrders, clears luneraCart only after the order has been saved, and shows a confirmation.
+- Order email notification is attempted using EmailJS. Email failure no longer blocks the local order confirmation; the checkout page displays a clear notification status instead.
+- The checkout flow was tested with a simulated browser form and verified to save an order and clear the cart after successful local storage.
+
+IMPORTANT LIMITATIONS — PLEASE READ
+1. This is still a static GitHub Pages website. Orders saved to localStorage exist only in the browser/device that placed the order. They are not a central cloud order database and will not automatically appear on another device.
+2. EmailJS delivery has not been verified against the live EmailJS account from this package-building environment. Confirm that service_26ob5sw and template e00x0gi are active, that the template recipient is lunerastore26@gmail.com, and that it uses the template variables below. If the email fails, checkout still confirms the locally saved order and displays a warning.
+3. No real online payment is collected or verified. The order is marked payment pending. Do not mark an order paid based only on a browser redirect or customer screenshot.
+4. Admin/manage pages remain locked or limited until server-backed authentication is connected. Browser-only passwords and localStorage are not secure for customer order administration.
+5. Do not use localStorage as the only production order record. Before taking real public orders at scale, connect a backend/database, server-side email sending, secure admin authentication, and a verified payment gateway if online payment is needed.
+
+EMAILJS TEMPLATE VARIABLES
+The EmailJS template should include these fields:
+
+New order received on LUNÉRA!
+
+Order ID: {{order_id}}
+Customer Name: {{customer_name}}
+Phone: {{customer_phone}}
+Customer Email: {{customer_email}}
+
+Delivery Address:
+{{delivery_address}}
+
+Order Details:
+{{order_details}}
+
+Total Amount: {{order_total}}
+
+Customer Notes:
+{{customer_notes}}
+
+The recipient should be set to lunerastore26@gmail.com in the EmailJS template/dashboard. Never put a private email password or payment secret in frontend HTML.
+
+DEPLOYMENT
+Extract the ZIP and upload the files inside it directly to the root of the GitHub Pages repository. Do not upload an extra parent folder. Keep filenames exactly as supplied. Then test: Home → Collection → product → Add to Bag → Bag → Proceed to Checkout → Place Order. Use a real test order only after confirming the email template and privacy handling.

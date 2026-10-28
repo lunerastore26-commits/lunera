@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LUNÉRA — Management</title>
+<link rel="icon" type="image/png" href="lunera-logo.png?v=9">
+
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f7f4ef;color:#151212;font-family:Arial}
+header{background:#151212;color:white;padding:28px 7%;display:flex;justify-content:space-between;align-items:center}
+.logo{display:flex;align-items:center;text-decoration:none;color:white}
+.logo img{width:52px;height:52px;object-fit:contain;display:block}
+.logo-text{font:500 27px 'Bodoni Moda';letter-spacing:8px;margin-left:12px}
+.back{color:white;text-decoration:none;font:9px 'Montserrat';letter-spacing:2px;border:1px solid #ffffff88;padding:11px 16px}
+.page{width:84%;max-width:1400px;margin:70px auto 100px}
+.eyebrow{font:10px 'Montserrat';letter-spacing:5px;text-transform:uppercase;opacity:.5;margin-bottom:18px}
+h1{font:400 clamp(50px,6vw,82px) 'Bodoni Moda'}
+.intro{margin-top:20px;max-width:650px;font:11px/1.8 'Montserrat';opacity:.6}
+.section{margin-top:70px;border-top:1px solid #d8d1c7;padding-top:35px}
+.section-title{font:400 38px 'Bodoni Moda';margin-bottom:30px}
+.hero-settings,.product-card,.category-card{background:white;border:1px solid #e1dbd2;padding:30px}
+.hero-preview{width:100%;height:400px;object-fit:cover;margin-bottom:25px}
+.products{display:grid;grid-template-columns:repeat(2,1fr);gap:25px}
+.product-card{padding:25px}
+.product-number{font:9px 'Montserrat';letter-spacing:3px;opacity:.45;margin-bottom:15px;text-transform:uppercase}
+.product-preview{width:100%;height:300px;object-fit:cover;margin-bottom:25px}
+label{display:block;font:9px 'Montserrat';letter-spacing:2px;text-transform:uppercase;margin:18px 0 8px;opacity:.65}
+input,textarea,select{width:100%;padding:13px 14px;border:1px solid #d8d1c7;background:#faf8f4;font:13px Arial}
+textarea{min-height:100px;resize:vertical}
+.actions{margin-top:25px;display:flex;gap:12px;flex-wrap:wrap}
+button{border:0;padding:15px 25px;cursor:pointer;font:9px 'Montserrat';letter-spacing:2px;text-transform:uppercase}
+button:disabled{opacity:.55;cursor:not-allowed}
+.save{background:#17352b;color:white}
+.reset{background:#151212;color:white}
+.secondary{background:#e8e2da;color:#151212}
+.danger{background:#8b3030;color:white}
+.status{margin-top:18px;font:10px 'Montserrat';letter-spacing:2px;opacity:0;transition:opacity .2s}
+.status.show{opacity:1}
+.category-manager{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}
+.category-card{padding:20px;display:flex;justify-content:space-between;align-items:center;gap:15px}
+.category-name{font:400 22px 'Cormorant Garamond'}
+.category-delete{padding:9px 12px;background:#151212;color:white}
+.add-box{background:#fff;border:1px solid #e1dbd2;padding:30px;margin-bottom:25px}
+.empty{padding:40px;background:#fff;border:1px solid #e1dbd2;font:11px 'Montserrat';opacity:.6;text-align:center}
+#login{position:fixed;inset:0;background:#151212;z-index:100;display:grid;place-items:center}
+.login-box{background:#f7f4ef;width:360px;padding:40px;text-align:center}
+.login-box h2{font:400 40px 'Bodoni Moda';margin-bottom:25px}
+.login-box input{margin-bottom:15px}
+.login-box button{width:100%;background:#17352b;color:white}
+#error{font:10px 'Montserrat';color:#8b3030;margin-top:12px;display:none}
+.upload-box{border:1px dashed #cfc6ba;background:#faf8f4;padding:22px;text-align:center}
+.upload-box input[type="file"]{display:none}
+.choose-image{display:inline-block;background:#151212;color:white;padding:14px 22px;cursor:pointer;font:9px 'Montserrat';letter-spacing:2px;text-transform:uppercase}
+.file-name{margin-top:12px;font:10px 'Montserrat';opacity:.55;word-break:break-word}
+.upload-preview{display:none;width:100%;height:300px;object-fit:cover;margin-top:18px;border:1px solid #e1dbd2}
+.upload-status{margin-top:14px;font:10px/1.5 'Montserrat';letter-spacing:1px;min-height:15px}
+.upload-status.success{color:#17352b}
+.upload-status.error{color:#8b3030}
+.upload-status.loading{color:#151212}
+.small-upload{margin-bottom:25px}
+.small-upload .upload-preview{height:220px}
+
+/* LUNÉRA responsive safeguards — preserves the existing palette, fonts and visual theme */
+img, video, iframe { max-width: 100%; }
+input, textarea, select, button { max-width: 100%; }
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-wrap: break-word; }
+table { max-width: 100%; }
+@media (max-width: 760px) {
+  header { gap: 14px; flex-wrap: wrap; }
+  main, .page, .container, .content, .checkout-container, .cart-container {
+    width: min(92%, 100%) !important;
+    max-width: 100%;
+  }
+  .products, .product-grid, .product-list, .form-grid, .checkout-grid,
+  .cart-layout, .order-layout, .hero-grid, .category-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .product-card, .hero-settings, .category-card, .order-box, .cart-item {
+    min-width: 0;
+  }
+  .product-card img, .product-image, .product-preview {
+    max-width: 100%;
+  }
+  .actions, .buttons, .header-right, nav {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  button, .button, input[type="submit"] {
+    min-height: 44px;
+  }
+}
+@media (max-width: 420px) {
+  .page { margin-top: 34px !important; }
+  h1 { overflow-wrap: anywhere; }
+  .logo-text { letter-spacing: 3px !important; }
+  .hero-preview { height: auto !important; max-height: 300px; }
+  .product-preview, .product-image { height: auto; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="login">
+<div class="login-box">
+<h2>LUNÉRA</h2>
+<input id="password" type="password" placeholder="Management Password">
+<button onclick="login()">ENTER MANAGEMENT</button>
+<div id="error">Incorrect password</div>
+</div>
+</div>
+
+<header>
+<a href="index.html" class="logo">
+<img src="lunera-logo.png" alt="LUNÉRA" onerror="this.style.display='none'">
+<span class="logo-text">LUNÉRA</span>
+</a>
+<a href="index.html" class="back">BACK TO WEBSITE</a>
+</header>
+
+<main class="page">
+
+<div class="eyebrow">The House of LUNÉRA</div>
+<h1>Management</h1>
+<p class="intro">Manage the visual identity, categories and product catalogue of LUNÉRA without editing the website code.</p>
+
+<section class="section">
+<div class="section-title">Home Page</div>
+
+<div class="hero-settings">
+<div class="product-number">Main Hero Image</div>
+
+<img id="heroPreview" class="hero-preview" alt="Hero Preview">
+
+<div class="upload-box">
+<input id="heroImageFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleHeroSelect(event)">
+<label for="heroImageFile" class="choose-image">CHOOSE HERO IMAGE</label>
+<div id="heroFileName" class="file-name">No image selected</div>
+<div id="heroUploadStatus" class="upload-status"></div>
+</div>
+
+<div class="actions">
+<button id="saveHeroButton" class="save" onclick="saveHero()">SAVE HERO</button>
+</div>
+</div>
+</section>
+
+<section class="section">
+<div class="section-title">Categories</div>
+
+<div class="add-box">
+<label>New Category Name</label>
+<input id="newCategory" placeholder="Example: Shapewear">
+
+<div class="actions">
+<button class="save" onclick="addCategory()">ADD CATEGORY</button>
+</div>
+</div>
+
+<div class="category-manager" id="categories"></div>
+</section>
+
+<section class="section">
+<div class="section-title">Add Catalogue</div>
+
+<div class="add-box">
+
+<label>Product Name</label>
+<input id="newName" placeholder="Example: The Silk Essential">
+
+<label>Price</label>
+<input id="newPrice" placeholder="₹1,499">
+
+<label>Category</label>
+<select id="newCategorySelect"></select>
+
+<label>Available Sizes</label>
+<input id="newSizes" placeholder="S, M, L, XL">
+
+<label>Product Image</label>
+
+<div class="upload-box">
+<input id="newImageFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleNewImageSelect(event)">
+<label for="newImageFile" class="choose-image">CHOOSE IMAGE</label>
+
+<div id="newFileName" class="file-name">No image selected</div>
+
+<img id="newImagePreview" class="upload-preview" alt="Product Preview">
+
+<div id="uploadStatus" class="upload-status"></div>
+</div>
+
+<label>Description</label>
+<textarea id="newDescription" placeholder="Product description"></textarea>
+
+<div class="actions">
+<button id="addProductButton" class="save" onclick="addProduct()">ADD PRODUCT TO CATALOGUE</button>
+<button class="secondary" onclick="clearProductForm()">CLEAR</button>
+</div>
+
+</div>
+</section>
+
+<section class="section">
+<div class="section-title">Product Catalogue</div>
+
+<div class="products" id="products"></div>
+
+<div class="actions">
+<button class="save" onclick="saveAll()">SAVE ALL CHANGES</button>
+<button class="reset" onclick="resetAll()">RESET EVERYTHING</button>
+</div>
+
+<div class="status" id="status">CHANGES SAVED</div>
+</section>
+
+</main>
+
+<script>
+
+const CLOUDINARY_CLOUD_NAME = "r5kxmdor";
+const CLOUDINARY_UPLOAD_PRESET = "lunera_products";
+
+const CLOUDINARY_UPLOAD_URL =
+"https://api.cloudinary.com/v1_1/" +
+CLOUDINARY_CLOUD_NAME +
+"/image/upload";
+
+const defaultHero =
+"https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=2400&q=95";
+
+const defaults = [
+{
+id:"signature-bra",
+name:"The Signature Bra",
+category:"Bras",
+price:"₹1,499",
+sizes:"32, 34, 36, 38, 40",
+image:"https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=1800&q=95",
+description:"A refined lace essential designed around everyday comfort, confident support and timeless LUNÉRA elegance."
+},
+{
+id:"everyday-brief",
+name:"The Everyday Brief",
+category:"Panties",
+price:"₹699",
+sizes:"S, M, L, XL",
+image:"https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1800&q=95",
+description:"A refined everyday essential designed for comfortable wear and an effortless finish."
+},
+{
+id:"signature-set",
+name:"The Signature Set",
+category:"Lingerie Sets",
+price:"₹2,499",
+sizes:"32, 34, 36, 38, 40",
+image:"https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=1800&q=95",
+description:"A coordinated LUNÉRA set bringing together refined design, comfort and timeless elegance."
+},
+{
+id:"soft-form",
+name:"The Soft Form",
+category:"Bras",
+price:"₹1,299",
+sizes:"32, 34, 36, 38, 40",
+image:"https://images.unsplash.com/photo-1583743814966-8936f37f384c?auto=format&fit=crop&w=1800&q=95",
+description:"A softly structured everyday bra created for easy movement and comfortable support."
+},
+{
+id:"seamless-essential",
+name:"The Seamless Essential",
+category:"Essentials",
+price:"₹899",
+sizes:"S, M, L, XL",
+image:"https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=1800&q=95",
+description:"A clean seamless essential designed to sit smoothly beneath everyday outfits."
+},
+{
+id:"evening-set",
+name:"The Evening Set",
+category:"Nightwear",
+price:"₹1,899",
+sizes:"S, M, L, XL",
+image:"https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=1800&q=95",
+description:"An elegant lounge set designed for relaxed evenings and effortless comfort."
+},
+{
+id:"lace-frame",
+name:"The Lace Frame",
+category:"Bras",
+price:"₹1,599",
+sizes:"32, 34, 36, 38, 40",
+image:"https://images.unsplash.com/photo-1506629905607-d9a0c1eecb3a?auto=format&fit=crop&w=1800&q=95",
+description:"A refined lace design combining delicate detailing with comfortable everyday wear."
+},
+{
+id:"pure-essential",
+name:"The Pure Essential",
+category:"Essentials",
+price:"₹799",
+sizes:"S, M, L, XL",
+image:"https://images.unsplash.com/photo-1581044777550-4cfa60707c03?auto=format&fit=crop&w=1800&q=95",
+description:"A clean cotton essential created for dependable everyday comfort."
+},
+{
+id:"bridal-collection",
+name:"The Bridal Collection",
+category:"Lingerie Sets",
+price:"₹2,799",
+sizes:"32, 34, 36, 38, 40",
+image:"https://images.unsplash.com/photo-1571513722275-4b41940f54b8?auto=format&fit=crop&w=1800&q=95",
+description:"A carefully designed coordinated collection for special occasions, combining refined details with comfort."
+}
+];
+
+let products = loadArray("luneraProducts", defaults);
+
+let categories = loadArray(
+"luneraCategories",
+["Bras","Panties","Lingerie Sets","Nightwear","Essentials"]
+);
+
+let selectedNewImageFile = null;
+let selectedHeroFile = null;
+let selectedExistingFiles = {};
+
+function loadArray(key,fallback){
+try{
+const value = JSON.parse(localStorage.getItem(key));
+return Array.isArray(value)
+? value
+: JSON.parse(JSON.stringify(fallback));
+}catch(error){
+return JSON.parse(JSON.stringify(fallback));
+}
+}
+
+function login(){
+  document.getElementById("error").textContent =
+    "Admin sign-in is not securely configured yet. Connect Firebase Authentication before publishing this management page.";
+  document.getElementById("error").style.display = "block";
+  document.getElementById("password").value = "";
+}
+
+// Client-side session flags are not trusted for admin authentication. Firebase Auth must be connected before enabling access.
+
+
+/* HERO */
+
+const hero =
+localStorage.getItem("luneraHero") ||
+defaultHero;
+
+document.getElementById("heroPreview").src = hero;
+
+function handleHeroSelect(event){
+
+const file =
+event.target.files &&
+event.target.files[0];
+
+const preview =
+document.getElementById("heroPreview");
+
+const name =
+document.getElementById("heroFileName");
+
+const status =
+document.getElementById("heroUploadStatus");
+
+selectedHeroFile = null;
+
+status.textContent="";
+status.className="upload-status";
+
+if(!file){
+
+name.textContent="No image selected";
+
+return;
+
+}
+
+const allowed =
+["image/jpeg","image/png","image/webp"];
+
+if(!allowed.includes(file.type)){
+
+alert("Please choose a JPG, PNG or WebP image.");
+
+event.target.value="";
+
+name.textContent="No image selected";
+
+return;
+
+}
+
+const maxSize =
+10 * 1024 * 1024;
+
+if(file.size > maxSize){
+
+alert("Please choose an image smaller than 10 MB.");
+
+event.target.value="";
+
+name.textContent="No image selected";
+
+return;
+
+}
+
+selectedHeroFile=file;
+
+name.textContent=file.name;
+
+const reader=new FileReader();
+
+reader.onload=function(){
+
+preview.src=reader.result;
+
+};
+
+reader.readAsDataURL(file);
+
+status.textContent="HERO IMAGE READY TO UPLOAD.";
+
+}
+
+async function uploadImage(file,statusElement){
+
+if(!file){
+throw new Error("Please choose an image first.");
+}
+
+statusElement.textContent =
+"UPLOADING IMAGE TO CLOUDINARY...";
+
+statusElement.className =
+"upload-status loading";
+
+const formData=new FormData();
+
+formData.append("file",file);
+
+formData.append(
+"upload_preset",
+CLOUDINARY_UPLOAD_PRESET
+);
+
+const response=await fetch(
+CLOUDINARY_UPLOAD_URL,
+{
+method:"POST",
+body:formData
+}
+);
+
+let result={};
+
+try{
+result=await response.json();
+}catch(error){
+throw new Error(
+"Cloudinary returned an unreadable response."
+);
+}
+
+if(!response.ok || !result.secure_url){
+
+throw new Error(
+result.error &&
+result.error.message
+? result.error.message
+: "Cloudinary image upload failed."
+);
+
+}
+
+statusElement.textContent =
+"IMAGE UPLOADED SUCCESSFULLY.";
+
+statusElement.className =
+"upload-status success";
+
+return result.secure_url;
+
+}
+
+async function saveHero(){
+
+const button =
+document.getElementById("saveHeroButton");
+
+const status =
+document.getElementById("heroUploadStatus");
+
+if(!selectedHeroFile){
+
+alert("Please choose a hero image first.");
+
+return;
+
+}
+
+button.disabled=true;
+button.textContent="UPLOADING...";
+
+try{
+
+const image =
+await uploadImage(
+selectedHeroFile,
+status
+);
+
+localStorage.setItem(
+"luneraHero",
+image
+);
+
+alert("Hero image updated successfully.");
+
+}catch(error){
+
+status.textContent =
+error.message ||
+"Hero image upload failed.";
+
+status.className =
+"upload-status error";
+
+alert(
+error.message ||
+"Hero image upload failed."
+);
+
+}finally{
+
+button.disabled=false;
+button.textContent="SAVE HERO";
+
+}
+
+}
+
+
+/* DATA */
+
+function saveData(){
+
+localStorage.setItem(
+"luneraProducts",
+JSON.stringify(products)
+);
+
+localStorage.setItem(
+"luneraCategories",
+JSON.stringify(categories)
+);
+
+}
+
+
+/* CATEGORY */
+
+function addCategory(){
+
+const input =
+document.getElementById("newCategory");
+
+const name=input.value.trim();
+
+if(!name){
+
+alert("Please enter a category name.");
+
+return;
+
+}
+
+if(
+categories.some(
+c => c.toLowerCase() === name.toLowerCase()
+)
+){
+
+alert("This category already exists.");
+
+return;
+
+}
+
+categories.push(name);
+
+saveData();
+
+input.value="";
+
+renderCategories();
+
+renderCategorySelect();
+
+render();
+
+showStatus();
+
+}
+
+function deleteCategory(index){
+
+const category=categories[index];
+
+const used=products.some(
+p =>
+String(p.category).toLowerCase() ===
+category.toLowerCase()
+);
+
+if(used){
+
+alert(
+"This category contains products. Move or delete those products first."
+);
+
+return;
+
+}
+
+if(
+!confirm(
+"Delete category '" +
+category +
+"'?"
+)
+)return;
+
+categories.splice(index,1);
+
+saveData();
+
+renderCategories();
+renderCategorySelect();
+render();
+
+showStatus();
+
+}
+
+function renderCategories(){
+
+const container =
+document.getElementById("categories");
+
+if(categories.length===0){
+
+container.innerHTML =
+'<div class="empty">No categories created yet.</div>';
+
+return;
+
+}
+
+container.innerHTML =
+categories.map(
+(c,i)=>`
+
+<div class="category-card">
+
+<div class="category-name">
+${escapeHTML(c)}
+</div>
+
+<button
+class="category-delete"
+onclick="deleteCategory(${i})"
+>
+DELETE
+</button>
+
+</div>
+
+`
+).join("");
+
+}
+
+function renderCategorySelect(){
+
+const select =
+document.getElementById("newCategorySelect");
+
+if(categories.length===0){
+
+select.innerHTML =
+'<option value="">Create a category first</option>';
+
+select.disabled=true;
+
+return;
+
+}
+
+select.disabled=false;
+
+select.innerHTML =
+categories.map(
+c =>
+`<option value="${escapeAttr(c)}">
+${escapeHTML(c)}
+</option>`
+).join("");
+
+}
+
+
+/* NEW PRODUCT IMAGE */
+
+function handleNewImageSelect(event){
+
+const file =
+event.target.files &&
+event.target.files[0];
+
+const preview =
+document.getElementById("newImagePreview");
+
+const fileName =
+document.getElementById("newFileName");
+
+const status =
+document.getElementById("uploadStatus");
+
+selectedNewImageFile=null;
+
+status.textContent="";
+status.className="upload-status";
+
+if(!file){
+
+fileName.textContent="No image selected";
+
+preview.style.display="none";
+
+preview.removeAttribute("src");
+
+return;
+
+}
+
+const allowed =
+["image/jpeg","image/png","image/webp"];
+
+if(!allowed.includes(file.type)){
+
+alert(
+"Please choose a JPG, PNG or WebP image."
+);
+
+event.target.value="";
+
+return;
+
+}
+
+if(file.size > 10 * 1024 * 1024){
+
+alert(
+"Please choose an image smaller than 10 MB."
+);
+
+event.target.value="";
+
+return;
+
+}
+
+selectedNewImageFile=file;
+
+fileName.textContent=file.name;
+
+const reader=new FileReader();
+
+reader.onload=function(){
+
+preview.src=reader.result;
+
+preview.style.display="block";
+
+};
+
+reader.readAsDataURL(file);
+
+status.textContent =
+"IMAGE READY TO UPLOAD.";
+
+}
+
+
+/* ADD PRODUCT */
+
+async function addProduct(){
+
+const button =
+document.getElementById("addProductButton");
+
+const name =
+document.getElementById("newName")
+.value.trim();
+
+const price =
+document.getElementById("newPrice")
+.value.trim();
+
+const category =
+document.getElementById("newCategorySelect")
+.value;
+
+const sizes =
+document.getElementById("newSizes")
+.value.trim();
+
+const description =
+document.getElementById("newDescription")
+.value.trim();
+
+if(!name || !price || !category){
+
+alert(
+"Please fill Product Name, Price and Category."
+);
+
+return;
+
+}
+
+if(!selectedNewImageFile){
+
+alert(
+"Please choose a product image."
+);
+
+return;
+
+}
+
+button.disabled=true;
+
+button.textContent="UPLOADING IMAGE...";
+
+try{
+
+const image =
+await uploadImage(
+selectedNewImageFile,
+document.getElementById("uploadStatus")
+);
+
+const id =
+name
+.toLowerCase()
+.replace(/[^a-z0-9]+/g,"-")
+.replace(/^-|-$/g,"")
++
+"-"
++
+Date.now();
+
+products.push({
+
+id:id,
+
+name:name,
+
+price:price,
+
+category:category,
+
+sizes:sizes || "S, M, L, XL",
+
+image:image,
+
+description:
+description ||
+"Refined LUNÉRA design created around comfort and timeless elegance."
+
+});
+
+saveData();
+
+clearProductForm();
+
+render();
+
+showStatus();
+
+alert(
+"Product added successfully."
+);
+
+}catch(error){
+
+document.getElementById(
+"uploadStatus"
+).textContent =
+error.message ||
+"Image upload failed.";
+
+document.getElementById(
+"uploadStatus"
+).className =
+"upload-status error";
+
+alert(
+error.message ||
+"Image upload failed. Product was not added."
+);
+
+}finally{
+
+button.disabled=false;
+
+button.textContent=
+"ADD PRODUCT TO CATALOGUE";
+
+}
+
+}
+
+function clearProductForm(){
+
+document.getElementById("newName").value="";
+document.getElementById("newPrice").value="";
+document.getElementById("newSizes").value="";
+document.getElementById("newDescription").value="";
+
+document.getElementById("newImageFile").value="";
+
+selectedNewImageFile=null;
+
+const preview =
+document.getElementById("newImagePreview");
+
+preview.src="";
+preview.style.display="none";
+
+document.getElementById(
+"newFileName"
+).textContent="No image selected";
+
+document.getElementById(
+"uploadStatus"
+).textContent="";
+
+document.getElementById(
+"uploadStatus"
+).className="upload-status";
+
+}
+
+
+/* EXISTING PRODUCTS */
+
+function render(){
+
+const container =
+document.getElementById("products");
+
+if(products.length===0){
+
+container.innerHTML =
+'<div class="empty">No products in the catalogue.</div>';
+
+return;
+
+}
+
+container.innerHTML =
+products.map(
+(p,i)=>`
+
+<div class="product-card">
+
+<div class="product-number">
+Product ${String(i+1).padStart(2,"0")}
+</div>
+
+<img
+id="preview-${i}"
+class="product-preview"
+src="${escapeAttr(p.image)}"
+onerror="this.style.opacity='.3'"
+alt="${escapeAttr(p.name)}"
+>
+
+<label>Product Name</label>
+
+<input
+id="name-${i}"
+value="${escapeAttr(p.name)}"
+>
+
+<label>Price</label>
+
+<input
+id="price-${i}"
+value="${escapeAttr(p.price)}"
+>
+
+<label>Category</label>
+
+<select id="category-${i}">
+
+${categories.map(
+c =>
+`<option
+value="${escapeAttr(c)}"
+${c===p.category?"selected":""}
+>
+${escapeHTML(c)}
+</option>`
+).join("")}
+
+</select>
+
+<label>Available Sizes</label>
+
+<input
+id="sizes-${i}"
+value="${escapeAttr(p.sizes)}"
+>
+
+<label>Replace Product Image</label>
+
+<div class="upload-box small-upload">
+
+<input
+id="existingImage-${i}"
+type="file"
+accept="image/jpeg,image/png,image/webp"
+onchange="handleExistingImageSelect(${i},event)"
+>
+
+<label
+for="existingImage-${i}"
+class="choose-image"
+>
+CHOOSE NEW IMAGE
+</label>
+
+<div
+id="existingFileName-${i}"
+class="file-name"
+>
+No new image selected
+</div>
+
+<div
+id="existingStatus-${i}"
+class="upload-status"
+></div>
+
+</div>
+
+<label>Description</label>
+
+<textarea
+id="description-${i}"
+>${escapeHTML(p.description)}</textarea>
+
+<div class="actions">
+
+<button
+class="save"
+onclick="saveProduct(${i})"
+>
+SAVE PRODUCT
+</button>
+
+<button
+class="danger"
+onclick="deleteProduct(${i})"
+>
+DELETE PRODUCT
+</button>
+
+</div>
+
+</div>
+
+`
+).join("");
+
+}
+
+function handleExistingImageSelect(i,event){
+
+const file =
+event.target.files &&
+event.target.files[0];
+
+const name =
+document.getElementById(
+"existingFileName-"+i
+);
+
+const status =
+document.getElementById(
+"existingStatus-"+i
+);
+
+if(!file){
+
+selectedExistingFiles[i]=null;
+
+name.textContent="No new image selected";
+
+status.textContent="";
+
+return;
+
+}
+
+const allowed =
+["image/jpeg","image/png","image/webp"];
+
+if(!allowed.includes(file.type)){
+
+alert(
+"Please choose a JPG, PNG or WebP image."
+);
+
+event.target.value="";
+
+return;
+
+}
+
+if(file.size > 10 * 1024 * 1024){
+
+alert(
+"Please choose an image smaller than 10 MB."
+);
+
+event.target.value="";
+
+return;
+
+}
+
+selectedExistingFiles[i]=file;
+
+name.textContent=file.name;
+
+status.textContent=
+"NEW IMAGE READY TO UPLOAD.";
+
+}
+
+async function saveProduct(i){
+
+const button =
+event && event.target
+? event.target
+: null;
+
+const newImage =
+selectedExistingFiles[i];
+
+try{
+
+let image=products[i].image;
+
+if(newImage){
+
+const status =
+document.getElementById(
+"existingStatus-"+i
+);
+
+if(button){
+button.disabled=true;
+button.textContent="UPLOADING...";
+}
+
+image =
+await uploadImage(
+newImage,
+status
+);
+
+}
+
+products[i]={
+
+id:products[i].id,
+
+name:
+document.getElementById(
+"name-"+i
+).value.trim(),
+
+price:
+document.getElementById(
+"price-"+i
+).value.trim(),
+
+category:
+document.getElementById(
+"category-"+i
+).value,
+
+sizes:
+document.getElementById(
+"sizes-"+i
+).value.trim(),
+
+image:image,
+
+description:
+document.getElementById(
+"description-"+i
+).value.trim()
+
+};
+
+selectedExistingFiles[i]=null;
+
+saveData();
+
+render();
+
+showStatus();
+
+}catch(error){
+
+alert(
+error.message ||
+"Could not save product."
+);
+
+}finally{
+
+if(button){
+
+button.disabled=false;
+
+button.textContent="SAVE PRODUCT";
+
+}
+
+}
+
+}
+
+function deleteProduct(i){
+
+if(
+!confirm(
+"Delete this product from the catalogue?"
+)
+)return;
+
+products.splice(i,1);
+
+delete selectedExistingFiles[i];
+
+saveData();
+
+render();
+
+showStatus();
+
+}
+
+function saveAll(){
+
+products =
+products.map(
+(p,i)=>({
+
+id:p.id,
+
+name:
+document.getElementById(
+"name-"+i
+).value.trim(),
+
+price:
+document.getElementById(
+"price-"+i
+).value.trim(),
+
+category:
+document.getElementById(
+"category-"+i
+).value,
+
+sizes:
+document.getElementById(
+"sizes-"+i
+).value.trim(),
+
+image:p.image,
+
+description:
+document.getElementById(
+"description-"+i
+).value.trim()
+
+})
+);
+
+saveData();
+
+showStatus();
+
+}
+
+
+/* RESET */
+
+function resetAll(){
+
+if(
+!confirm(
+"Reset all LUNÉRA catalogue changes?"
+)
+)return;
+
+localStorage.removeItem("luneraProducts");
+localStorage.removeItem("luneraCategories");
+localStorage.removeItem("luneraHero");
+
+products =
+JSON.parse(JSON.stringify(defaults));
+
+categories =
+[
+"Bras",
+"Panties",
+"Lingerie Sets",
+"Nightwear",
+"Essentials"
+];
+
+document.getElementById(
+"heroPreview"
+).src=defaultHero;
+
+selectedHeroFile=null;
+
+document.getElementById(
+"heroImageFile"
+).value="";
+
+document.getElementById(
+"heroFileName"
+).textContent="No image selected";
+
+clearProductForm();
+
+renderCategories();
+
+renderCategorySelect();
+
+render();
+
+showStatus();
+
+}
+
+
+/* STATUS */
+
+function showStatus(){
+
+const status =
+document.getElementById("status");
+
+status.classList.add("show");
+
+setTimeout(
+()=>status.classList.remove("show"),
+2500
+);
+
+}
+
+
+/* SECURITY / HTML */
+
+function escapeHTML(value){
+
+return String(value)
+
+.replace(/&/g,"&amp;")
+
+.replace(/</g,"&lt;")
+
+.replace(/>/g,"&gt;")
+
+.replace(/"/g,"&quot;")
+
+.replace(/'/g,"&#039;");
+
+}
+
+function escapeAttr(value){
+
+return escapeHTML(value);
+
+}
+
+
+/* START */
+
+renderCategories();
+
+renderCategorySelect();
+
+render();
+
+</script>
+
+</body>
+</html>
+```

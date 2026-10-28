@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>LUNÉRA — Your Bag</title>
+<meta name="description" content="Your LUNÉRA shopping bag.">
+
+<link rel="icon" type="image/png" href="lunera-logo.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  background:#f7f4ef;
+  color:#151212;
+  font-family:"Montserrat",sans-serif;
+}
+
+a{
+  color:inherit;
+  text-decoration:none;
+}
+
+button{
+  font-family:inherit;
+}
+
+/* HEADER */
+
+header{
+  height:86px;
+  padding:0 6%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  border-bottom:1px solid rgba(21,18,18,.12);
+  background:#f7f4ef;
+  position:sticky;
+  top:0;
+  z-index:50;
+}
+
+.logo{
+  font-family:"Bodoni Moda",serif;
+  font-size:31px;
+  letter-spacing:5px;
+  font-weight:500;
+}
+
+nav{
+  display:flex;
+  align-items:center;
+  gap:32px;
+  font-size:11px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+nav a{
+  transition:.25s ease;
+}
+
+nav a:hover{
+  opacity:.55;
+}
+
+.bag{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.bag-count{
+  min-width:20px;
+  height:20px;
+  border-radius:50%;
+  background:#17352b;
+  color:#fff;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-size:9px;
+  letter-spacing:0;
+}
+
+/* PAGE */
+
+.page{
+  max-width:1200px;
+  margin:auto;
+  padding:75px 6% 110px;
+}
+
+.page-heading{
+  text-align:center;
+  margin-bottom:60px;
+}
+
+.eyebrow{
+  font-size:10px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:#17352b;
+  margin-bottom:15px;
+}
+
+.page-heading h1{
+  font-family:"Bodoni Moda",serif;
+  font-weight:400;
+  font-size:clamp(45px,6vw,75px);
+  line-height:1;
+}
+
+/* EMPTY */
+
+.empty{
+  text-align:center;
+  padding:80px 20px;
+  border-top:1px solid rgba(21,18,18,.12);
+}
+
+.empty h2{
+  font-family:"Bodoni Moda",serif;
+  font-weight:400;
+  font-size:42px;
+  margin-bottom:15px;
+}
+
+.empty p{
+  font-family:"Cormorant Garamond",serif;
+  font-size:21px;
+  color:#57514b;
+  margin-bottom:30px;
+}
+
+.shop-btn{
+  display:inline-block;
+  padding:16px 28px;
+  background:#17352b;
+  color:white;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  transition:.25s ease;
+}
+
+.shop-btn:hover{
+  background:#10271f;
+}
+
+/* CART */
+
+.cart-layout{
+  display:grid;
+  grid-template-columns:minmax(0,1.5fr) minmax(300px,.7fr);
+  gap:70px;
+  align-items:start;
+}
+
+.cart-items{
+  border-top:1px solid rgba(21,18,18,.15);
+}
+
+.cart-item{
+  padding:25px 0;
+  border-bottom:1px solid rgba(21,18,18,.15);
+  display:grid;
+  grid-template-columns:125px 1fr auto;
+  gap:25px;
+  align-items:center;
+}
+
+.cart-image{
+  width:125px;
+  height:155px;
+  object-fit:cover;
+  display:block;
+  background:#ebe6de;
+}
+
+.item-category{
+  font-size:9px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:#17352b;
+  margin-bottom:8px;
+}
+
+.item-name{
+  font-family:"Bodoni Moda",serif;
+  font-size:25px;
+  font-weight:400;
+  margin-bottom:10px;
+}
+
+.item-meta{
+  font-size:10px;
+  letter-spacing:1px;
+  color:#706a64;
+  margin-bottom:15px;
+}
+
+.item-price{
+  font-family:"Cormorant Garamond",serif;
+  font-size:23px;
+}
+
+.item-actions{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-top:15px;
+}
+
+.quantity{
+  display:flex;
+  align-items:center;
+  border:1px solid rgba(21,18,18,.25);
+}
+
+.quantity button{
+  width:35px;
+  height:35px;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  font-size:17px;
+}
+
+.quantity button:hover{
+  background:rgba(21,18,18,.06);
+}
+
+.quantity span{
+  width:35px;
+  text-align:center;
+  font-size:11px;
+}
+
+.remove{
+  border:0;
+  background:transparent;
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  text-decoration:underline;
+  cursor:pointer;
+}
+
+.remove:hover{
+  opacity:.55;
+}
+
+.item-total{
+  font-family:"Cormorant Garamond",serif;
+  font-size:23px;
+  white-space:nowrap;
+}
+
+/* SUMMARY */
+
+.summary{
+  border:1px solid rgba(21,18,18,.15);
+  padding:32px;
+  position:sticky;
+  top:120px;
+}
+
+.summary-title{
+  font-family:"Bodoni Moda",serif;
+  font-size:32px;
+  font-weight:400;
+  margin-bottom:28px;
+}
+
+.summary-row{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:14px 0;
+  border-bottom:1px solid rgba(21,18,18,.1);
+  font-size:11px;
+  letter-spacing:.5px;
+}
+
+.summary-row.total{
+  border-bottom:0;
+  padding-top:22px;
+  font-size:13px;
+  letter-spacing:1px;
+}
+
+.summary-total{
+  font-family:"Cormorant Garamond",serif;
+  font-size:27px;
+}
+
+.shipping-note{
+  margin:20px 0;
+  font-size:9px;
+  line-height:1.6;
+  letter-spacing:1px;
+  color:#6b655f;
+}
+
+.checkout-btn{
+  width:100%;
+  min-height:55px;
+  border:0;
+  background:#17352b;
+  color:white;
+  cursor:pointer;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  transition:.25s ease;
+}
+
+.checkout-btn:hover{
+  background:#10271f;
+}
+
+.checkout-btn:disabled{
+  opacity:.4;
+  cursor:not-allowed;
+}
+
+.continue{
+  display:block;
+  margin-top:18px;
+  text-align:center;
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  text-decoration:underline;
+}
+
+.continue:hover{
+  opacity:.55;
+}
+
+.clear-btn{
+  margin-top:20px;
+  width:100%;
+  padding:12px;
+  background:transparent;
+  border:1px solid rgba(21,18,18,.25);
+  cursor:pointer;
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  transition:.25s ease;
+}
+
+.clear-btn:hover{
+  background:#151212;
+  color:#fff;
+}
+
+/* FOOTER */
+
+footer{
+  background:#151212;
+  color:#f7f4ef;
+  padding:70px 6% 35px;
+}
+
+.footer-grid{
+  max-width:1380px;
+  margin:auto;
+  display:grid;
+  grid-template-columns:2fr 1fr 1fr 1fr;
+  gap:50px;
+}
+
+.footer-brand{
+  font-family:"Bodoni Moda",serif;
+  font-size:32px;
+  letter-spacing:5px;
+  margin-bottom:15px;
+}
+
+.footer-tagline{
+  font-family:"Cormorant Garamond",serif;
+  font-size:19px;
+  color:#cfc8bf;
+}
+
+.footer-heading{
+  font-size:10px;
+  letter-spacing:2px;
+  margin-bottom:20px;
+  color:#cfc8bf;
+}
+
+.footer-links{
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+}
+
+.footer-links a{
+  font-size:11px;
+  transition:.2s;
+}
+
+.footer-links a:hover{
+  opacity:.55;
+}
+
+.footer-bottom{
+  max-width:1380px;
+  margin:60px auto 0;
+  padding-top:22px;
+  border-top:1px solid rgba(247,244,239,.16);
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  font-size:9px;
+  letter-spacing:1.5px;
+  color:#aaa39b;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:850px){
+
+  header{
+    height:auto;
+    min-height:76px;
+    padding:18px 5%;
+    gap:20px;
+  }
+
+  nav{
+    gap:16px;
+    font-size:9px;
+  }
+
+  .cart-layout{
+    grid-template-columns:1fr;
+    gap:45px;
+  }
+
+  .summary{
+    position:static;
+  }
+}
+
+@media(max-width:600px){
+
+  header{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+
+  nav{
+    width:100%;
+    justify-content:space-between;
+    flex-wrap:wrap;
+  }
+
+  .page{
+    padding:50px 5% 80px;
+  }
+
+  .cart-item{
+    grid-template-columns:85px 1fr;
+    gap:18px;
+  }
+
+  .cart-image{
+    width:85px;
+    height:115px;
+  }
+
+  .item-total{
+    grid-column:2;
+  }
+
+  .item-name{
+    font-size:21px;
+  }
+
+  .footer-grid{
+    grid-template-columns:1fr;
+  }
+
+  .footer-bottom{
+    flex-direction:column;
+  }
+}
+
+/* LUNÉRA responsive safeguards — preserves the existing palette, fonts and visual theme */
+img, video, iframe { max-width: 100%; }
+input, textarea, select, button { max-width: 100%; }
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-wrap: break-word; }
+table { max-width: 100%; }
+@media (max-width: 760px) {
+  header { gap: 14px; flex-wrap: wrap; }
+  main, .page, .container, .content, .checkout-container, .cart-container {
+    width: min(92%, 100%) !important;
+    max-width: 100%;
+  }
+  .products, .product-grid, .product-list, .form-grid, .checkout-grid,
+  .cart-layout, .order-layout, .hero-grid, .category-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .product-card, .hero-settings, .category-card, .order-box, .cart-item {
+    min-width: 0;
+  }
+  .product-card img, .product-image, .product-preview {
+    max-width: 100%;
+  }
+  .actions, .buttons, .header-right, nav {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  button, .button, input[type="submit"] {
+    min-height: 44px;
+  }
+}
+@media (max-width: 420px) {
+  .page { margin-top: 34px !important; }
+  h1 { overflow-wrap: anywhere; }
+  .logo-text { letter-spacing: 3px !important; }
+  .hero-preview { height: auto !important; max-height: 300px; }
+  .product-preview, .product-image { height: auto; }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+  <a href="index.html" class="logo">LUNÉRA</a>
+
+  <nav>
+    <a href="index.html">Home</a>
+    <a href="product.html">Collection</a>
+
+    <a href="cart.html" class="bag">
+      Bag <span class="bag-count" id="bagCount">0</span>
+    </a>
+  </nav>
+
+</header>
+
+
+<main class="page">
+
+  <div class="page-heading">
+
+    <div class="eyebrow">
+      Your Selection
+    </div>
+
+    <h1>
+      Your Bag
+    </h1>
+
+  </div>
+
+  <div id="cartContent"></div>
+
+</main>
+
+
+<footer>
+
+  <div class="footer-grid">
+
+    <div>
+
+      <div class="footer-brand">
+        LUNÉRA
+      </div>
+
+      <div class="footer-tagline">
+        Elegance in Every Layer.
+      </div>
+
+    </div>
+
+
+    <div>
+
+      <div class="footer-heading">
+        SHOP
+      </div>
+
+      <div
+        class="footer-links"
+        id="footerCategories"
+      ></div>
+
+    </div>
+
+
+    <div>
+
+      <div class="footer-heading">
+        HELP
+      </div>
+
+      <div class="footer-links">
+
+        <a href="#">
+          Shipping
+        </a>
+
+        <a href="#">
+          Returns
+        </a>
+
+        <a href="#">
+          Contact
+        </a>
+
+      </div>
+
+    </div>
+
+
+    <div>
+
+      <div class="footer-heading">
+        LUNÉRA
+      </div>
+
+      <div class="footer-links">
+
+        <a href="index.html#about">
+          About
+        </a>
+
+        <a href="index.html#contact">
+          Contact
+        </a>
+
+        <a
+          href="manage.html"
+          id="manageLink"
+          style="display:none;"
+        >
+          Manage
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="footer-bottom">
+
+    <span>
+      © 2026 LUNÉRA. ALL RIGHTS RESERVED.
+    </span>
+
+    <span>
+      ELEGANCE IN EVERY LAYER.
+    </span>
+
+  </div>
+
+</footer>
+
+
+<script>
+
+/* =========================
+   BASIC HELPERS
+========================= */
+
+function parsePrice(value){
+  const parsed=Number(String(value ?? "0").replace(/[^0-9.-]/g,""));
+  return Number.isFinite(parsed) && parsed>=0 ? parsed : 0;
+}
+function formatPrice(value){return "₹" + parsePrice(value).toLocaleString("en-IN",{maximumFractionDigits:2});}
+
+function escapeHTML(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================
+   CART STORAGE
+========================= */
+
+function getCart(){
+
+  try{
+
+    const saved =
+      localStorage.getItem("luneraCart");
+
+    const cart =
+      saved ? JSON.parse(saved) : [];
+
+    return Array.isArray(cart)
+      ? cart
+      : [];
+
+  }catch(error){
+
+    console.warn("Could not read cart.");
+
+    return [];
+
+  }
+
+}
+
+
+function saveCart(cart){
+
+  localStorage.setItem(
+    "luneraCart",
+    JSON.stringify(cart)
+  );
+
+}
+
+
+/* =========================
+   BAG COUNT
+========================= */
+
+function updateBagCount(){
+
+  const cart=getCart();
+
+  const count=cart.reduce(
+    (total,item)=>{
+
+      const quantity=
+        Number(item.quantity || 1);
+
+      return total + quantity;
+
+    },
+    0
+  );
+
+  const bagCount=
+    document.getElementById("bagCount");
+
+  if(bagCount){
+
+    bagCount.textContent=count;
+
+  }
+
+}
+
+
+/* =========================
+   CATEGORIES
+========================= */
+
+function getCategories(){
+
+  const defaults=[
+    "Bras",
+    "Panties",
+    "Lingerie Sets",
+    "Nightwear",
+    "Essentials"
+  ];
+
+  try{
+
+    const saved=
+      localStorage.getItem("luneraCategories");
+
+    if(saved){
+
+      const categories=
+        JSON.parse(saved);
+
+      if(Array.isArray(categories)){
+
+        return categories;
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.warn(
+      "Could not read categories."
+    );
+
+  }
+
+  return defaults;
+
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+function renderFooter(){
+
+  const footer=
+    document.getElementById(
+      "footerCategories"
+    );
+
+  if(!footer){
+    return;
+  }
+
+  const categories=
+    getCategories();
+
+  footer.innerHTML=
+    categories
+      .map(category=>`
+
+        <a
+          href="product.html?category=${encodeURIComponent(category)}"
+        >
+          ${escapeHTML(category)}
+        </a>
+
+      `)
+      .join("");
+
+
+  const manageLink=
+    document.getElementById(
+      "manageLink"
+    );
+
+  if(
+    manageLink &&
+    sessionStorage.getItem(
+      "luneraAdmin"
+    ) === "yes"
+  ){
+
+    manageLink.style.display="block";
+
+  }
+
+}
+
+
+/* =========================
+   CHANGE QUANTITY
+========================= */
+
+function changeQuantity(index,change){
+
+  const cart=getCart();
+
+  if(!cart[index]){
+    return;
+  }
+
+  let quantity=
+    Number(cart[index].quantity || 1);
+
+  quantity+=change;
+
+
+  if(quantity<1){
+    quantity=1;
+  }
+
+
+  if(quantity>20){
+    quantity=20;
+  }
+
+
+  cart[index].quantity=
+    quantity;
+
+  saveCart(cart);
+
+  renderCart();
+
+}
+
+
+/* =========================
+   REMOVE ITEM
+========================= */
+
+function removeItem(index){
+
+  const cart=getCart();
+
+  if(!cart[index]){
+    return;
+  }
+
+  cart.splice(index,1);
+
+  saveCart(cart);
+
+  renderCart();
+
+}
+
+
+/* =========================
+   CLEAR BAG
+========================= */
+
+function clearBag(){
+
+  const cart=getCart();
+
+  if(!cart.length){
+    return;
+  }
+
+
+  const confirmed=
+    confirm(
+      "Are you sure you want to clear your bag?"
+    );
+
+
+  if(!confirmed){
+    return;
+  }
+
+
+  localStorage.removeItem(
+    "luneraCart"
+  );
+
+  renderCart();
+
+}
+
+
+/* =========================
+   IMAGE FALLBACK
+========================= */
+
+function imageFallback(image){
+
+  image.onerror=null;
+
+  image.src=
+    "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=600&q=85";
+
+}
+
+
+/* =========================
+   RENDER CART
+========================= */
+
+function renderCart(){
+
+  const cart=getCart();
+
+  updateBagCount();
+
+  const container=
+    document.getElementById(
+      "cartContent"
+    );
+
+
+  if(!container){
+    return;
+  }
+
+
+  /* EMPTY BAG */
+
+  if(!cart.length){
+
+    container.innerHTML=`
+
+      <div class="empty">
+
+        <h2>
+          Your bag is empty.
+        </h2>
+
+        <p>
+          Discover the LUNÉRA collection
+          and find your next essential.
+        </p>
+
+        <a
+          href="product.html"
+          class="shop-btn"
+        >
+          Explore Collection
+        </a>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  /* SUBTOTAL */
+
+  let subtotal=0;
+
+
+  cart.forEach(item=>{
+
+    const price=
+      parsePrice(item.price);
+
+    const quantity=
+      Number(item.quantity || 1);
+
+    subtotal +=
+      price * quantity;
+
+  });
+
+
+  /*
+    Current LUNÉRA shipping setup:
+    complimentary shipping.
+  */
+
+  const shipping=0;
+
+  const total=
+    subtotal + shipping;
+
+
+  container.innerHTML=`
+
+    <div class="cart-layout">
+
+
+      <div>
+
+        <div class="cart-items">
+
+
+          ${cart.map((item,index)=>{
+
+            const price=
+              parsePrice(item.price);
+
+            const quantity=
+              Number(item.quantity || 1);
+
+            const itemTotal=
+              price * quantity;
+
+
+            return `
+
+              <article
+                class="cart-item"
+              >
+
+
+                <img
+
+                  class="cart-image"
+
+                  src="${escapeHTML(
+                    item.image || ""
+                  )}"
+
+                  alt="${escapeHTML(
+                    item.name || "LUNÉRA product"
+                  )}"
+
+                  onerror="imageFallback(this)"
+
+                >
+
+
+                <div>
+
+
+                  <div class="item-category">
+
+                    ${escapeHTML(
+                      item.category ||
+                      "LUNÉRA"
+                    )}
+
+                  </div>
+
+
+                  <div class="item-name">
+
+                    ${escapeHTML(
+                      item.name ||
+                      "LUNÉRA Product"
+                    )}
+
+                  </div>
+
+
+                  <div class="item-meta">
+
+                    Size:
+                    ${escapeHTML(
+                      item.size ||
+                      "Standard"
+                    )}
+
+                  </div>
+
+
+                  <div class="item-price">
+
+                    ${formatPrice(price)}
+
+                  </div>
+
+
+                  <div class="item-actions">
+
+
+                    <div class="quantity">
+
+
+                      <button
+                        type="button"
+                        aria-label="Decrease quantity"
+                        onclick="changeQuantity(${index},-1)"
+                      >
+                        −
+                      </button>
+
+
+                      <span>
+
+                        ${quantity}
+
+                      </span>
+
+
+                      <button
+                        type="button"
+                        aria-label="Increase quantity"
+                        onclick="changeQuantity(${index},1)"
+                      >
+                        +
+                      </button>
+
+
+                    </div>
+
+
+                    <button
+                      type="button"
+                      class="remove"
+                      onclick="removeItem(${index})"
+                    >
+                      Remove
+                    </button>
+
+
+                  </div>
+
+
+                </div>
+
+
+                <div class="item-total">
+
+                  ${formatPrice(itemTotal)}
+
+                </div>
+
+
+              </article>
+
+            `;
+
+          }).join("")}
+
+
+        </div>
+
+
+        <button
+          type="button"
+          class="clear-btn"
+          onclick="clearBag()"
+        >
+          Clear Bag
+        </button>
+
+
+      </div>
+
+
+      <aside class="summary">
+
+
+        <div class="summary-title">
+
+          Order Summary
+
+        </div>
+
+
+        <div class="summary-row">
+
+          <span>
+            Subtotal
+          </span>
+
+          <span>
+            ${formatPrice(subtotal)}
+          </span>
+
+        </div>
+
+
+        <div class="summary-row">
+
+          <span>
+            Shipping
+          </span>
+
+          <span>
+            Complimentary
+          </span>
+
+        </div>
+
+
+        <div class="summary-row total">
+
+          <span>
+            Total
+          </span>
+
+          <span class="summary-total">
+
+            ${formatPrice(total)}
+
+          </span>
+
+        </div>
+
+
+        <div class="shipping-note">
+
+          Complimentary shipping is currently
+          available on LUNÉRA orders.
+          Final shipping details are shown
+          during checkout.
+
+        </div>
+
+
+        <button
+          type="button"
+          class="checkout-btn"
+          onclick="goToCheckout()"
+        >
+          Proceed to Checkout
+        </button>
+
+
+        <a
+          href="product.html"
+          class="continue"
+        >
+          Continue Shopping
+        </a>
+
+
+      </aside>
+
+
+    </div>
+
+  `;
+
+}
+
+
+/* =========================
+   CHECKOUT
+========================= */
+
+function goToCheckout(){
+
+  const cart=getCart();
+
+  if(!cart.length){
+    return;
+  }
+
+  window.location.href=
+    "checkout.html";
+
+}
+
+
+/* =========================
+   STORAGE SYNC
+========================= */
+
+window.addEventListener(
+  "storage",
+  function(){
+
+    renderCart();
+
+    renderFooter();
+
+  }
+);
+
+
+/* =========================
+   INITIAL LOAD
+========================= */
+
+renderCart();
+
+renderFooter();
+
+updateBagCount();
+
+</script>
+
+</body>
+</html>
