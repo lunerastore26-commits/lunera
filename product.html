@@ -165,5 +165,11 @@ window.addEventListener("popstate",()=>startPage());
 function startPage(){const params=new URLSearchParams(location.search);if(params.has("product"))renderProduct();else renderCollection(params.get("category")||"");renderFooter();updateBagCount();}
 renderFooter();updateBagCount();startPage();
 </script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="lunera-cloud.js"></script>
+
 </body>
 </html>

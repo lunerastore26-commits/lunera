@@ -46,10 +46,10 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .category-delete{padding:9px 12px;background:#151212;color:white}
 .add-box{background:#fff;border:1px solid #e1dbd2;padding:30px;margin-bottom:25px}
 .empty{padding:40px;background:#fff;border:1px solid #e1dbd2;font:11px 'Montserrat';opacity:.6;text-align:center}
-#login{position:fixed;inset:0;background:#151212;z-index:100;display:grid;place-items:center}
-.login-box{background:#f7f4ef;width:360px;padding:40px;text-align:center}
+#login{position:fixed;inset:0;background:radial-gradient(ellipse at 50% 15%,#263c32 0%,#151212 55%);z-index:100;display:grid;place-items:center;padding:20px}
+.login-box{background:#f7f4ef;width:min(420px,100%);padding:clamp(28px,6vw,52px);text-align:center;border:1px solid #b49a6b;box-shadow:0 30px 100px #0008}
 .login-box h2{font:400 40px 'Bodoni Moda';margin-bottom:25px}
-.login-box input{margin-bottom:15px}
+.login-box input{margin-bottom:15px}.login-box button{width:100%;background:#17352b;color:white}.login-box button:hover{background:#294b3e}
 .login-box button{width:100%;background:#17352b;color:white}
 #error{font:10px 'Montserrat';color:#8b3030;margin-top:12px;display:none}
 .upload-box{border:1px dashed #cfc6ba;background:#faf8f4;padding:22px;text-align:center}
@@ -109,10 +109,14 @@ table { max-width: 100%; }
 
 <div id="login">
 <div class="login-box">
+<div style="font:9px Montserrat;letter-spacing:4px;color:#9a8157;margin-bottom:12px">THE HOUSE OF</div>
 <h2>LUNÉRA</h2>
-<input id="password" type="password" placeholder="Management Password">
+<p style="font:10px/1.8 Montserrat;color:#6d665d;margin:-12px 0 22px">PRIVATE MANAGEMENT · AUTHORISED ACCESS ONLY</p>
+<input id="adminEmail" type="email" autocomplete="username" placeholder="Admin email" value="lunerastore26@gmail.com">
+<input id="password" type="password" autocomplete="current-password" placeholder="Management password">
 <button onclick="login()">ENTER MANAGEMENT</button>
-<div id="error">Incorrect password</div>
+<button type="button" style="margin-top:10px;background:transparent;color:#17352b;border:1px solid #17352b" onclick="resetAdminPassword()">EMAIL ME A PASSWORD RESET LINK</button>
+<div id="error">Unable to sign in. Check your credentials.</div>
 </div>
 </div>
 
@@ -121,7 +125,7 @@ table { max-width: 100%; }
 <img src="lunera-logo.png" alt="LUNÉRA" onerror="this.style.display='none'">
 <span class="logo-text">LUNÉRA</span>
 </a>
-<a href="index.html" class="back">BACK TO WEBSITE</a>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="secondary" onclick="window.LuneraCloud && window.LuneraCloud.signOutAdmin()">SIGN OUT</button><a href="index.html" class="back">BACK TO WEBSITE</a></div>
 </header>
 
 <main class="page">
@@ -206,6 +210,8 @@ table { max-width: 100%; }
 
 </div>
 </section>
+
+<section class="section"><div class="section-title">Recent Orders</div><p class="intro" style="margin:0 0 20px">Orders saved in the shared store database appear here. Email notification is attempted separately.</p><div id="cloudOrders" class="empty">Sign in to load orders.</div><div class="actions"><button class="secondary" onclick="loadCloudOrders()">REFRESH ORDERS</button></div></section>
 
 <section class="section">
 <div class="section-title">Product Catalogue</div>
@@ -341,14 +347,29 @@ return JSON.parse(JSON.stringify(fallback));
 }
 }
 
-function login(){
-  document.getElementById("error").textContent =
-    "Admin sign-in is not securely configured yet. Connect Firebase Authentication before publishing this management page.";
-  document.getElementById("error").style.display = "block";
-  document.getElementById("password").value = "";
+async function login(){
+  const email = document.getElementById("adminEmail").value.trim();
+  const password = document.getElementById("password").value;
+  const error = document.getElementById("error");
+  error.style.display = "block";
+  error.textContent = "Signing in securely…";
+  try {
+    if (!window.LuneraCloud) throw new Error("Secure sign-in is still loading. Please try again.");
+    await window.LuneraCloud.signInAdmin(email, password);
+    error.style.display = "none";
+    document.getElementById("login").style.display = "none";
+  } catch (e) {
+    error.textContent = e.message || "Sign-in failed. Check the admin email and password.";
+    document.getElementById("password").value = "";
+  }
 }
 
-// Client-side session flags are not trusted for admin authentication. Firebase Auth must be connected before enabling access.
+async function resetAdminPassword(){
+ const email=document.getElementById("adminEmail").value.trim();
+ const error=document.getElementById("error"); error.style.display="block"; error.textContent="Sending password reset email…";
+ try { if(!window.LuneraCloud) throw new Error("Secure sign-in is still loading. Please try again."); await window.LuneraCloud.resetAdminPassword(email); error.textContent="Password reset email requested. Check the inbox and spam folder for " + email + "."; }
+ catch(e){error.textContent=e.message||"Could not send reset email. Check the email and Firebase Authentication settings.";}
+}
 
 
 /* HERO */
@@ -1352,6 +1373,9 @@ categories =
 "Essentials"
 ];
 
+saveData();
+localStorage.setItem("luneraHero", defaultHero);
+
 document.getElementById(
 "heroPreview"
 ).src=defaultHero;
@@ -1429,7 +1453,22 @@ renderCategorySelect();
 
 render();
 
+
+async function loadCloudOrders(){
+ const box=document.getElementById("cloudOrders"); if(!box||!window.LuneraCloud)return;
+ box.className="empty"; box.textContent="Loading orders…";
+ try { const orders=await window.LuneraCloud.getOrders(); if(!orders.length){box.textContent="No orders have been placed yet.";return;}
+ box.className=""; box.innerHTML=orders.slice(0,30).map(o=>`<article style="background:#fff;border:1px solid #e1dbd2;padding:20px;margin:0 0 12px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><strong style="font:20px 'Cormorant Garamond'">${escapeText(o.id||o.idKey||"Order")}</strong><span style="font:10px Montserrat;letter-spacing:1px">${escapeText(o.status||"New")} · ${escapeText(o.paymentStatus||"Pending")}</span></div><p style="font:11px/1.8 Montserrat;margin-top:10px">${escapeText(o.customer?.name||"Customer")} · ${escapeText(o.customer?.phone||"")}<br>${escapeText(o.customer?.email||"No email supplied")}<br>${(o.items||[]).map(i=>escapeText(i.name)+" × "+Number(i.quantity||1)).join("; ")}<br><strong>Total: ₹${Number(o.total||0).toLocaleString("en-IN")}</strong></p></article>`).join("");
+ } catch(e){box.textContent=e.message||"Could not load orders. Check Firestore rules and admin sign-in.";}
+}
+function escapeText(v){return String(v??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 </script>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="lunera-cloud.js"></script>
 
 </body>
 </html>

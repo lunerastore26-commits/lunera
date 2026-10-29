@@ -565,13 +565,15 @@ form.addEventListener("submit", async function(event) {
     total, status: "New", paymentStatus: "Pending", paymentMethod: "Cash on delivery / payment to be arranged", emailStatus: "Pending"
   };
   try {
+    if (!window.LuneraCloud) throw new Error("Store database is not ready. Please refresh and try again.");
+    await window.LuneraCloud.saveOrder(newOrder);
     const orders = readOrders();
     orders.push(newOrder);
     localStorage.setItem("luneraOrders", JSON.stringify(orders));
     localStorage.removeItem("luneraCart");
   } catch (storageError) {
     button.disabled = false; button.textContent = oldLabel;
-    showError("The browser could not save this order. Please free some browser storage and try again. Your bag has not been cleared.");
+    showError("We could not securely save your order. Your bag has not been cleared. Please try again in a moment. If this continues, the store database setup needs checking.");
     return;
   }
   document.getElementById("checkoutContent").style.display = "none";
@@ -585,15 +587,21 @@ form.addEventListener("submit", async function(event) {
     await sendOrderEmail(newOrder);
     const orders = readOrders(); const index = orders.findIndex(item => item.id === orderId);
     if (index >= 0) { orders[index].emailStatus = "Sent"; localStorage.setItem("luneraOrders", JSON.stringify(orders)); }
-    emailNote.textContent = "Store email notification sent.";
+    emailNote.textContent = "Store email notification sent to LUNÉRA.";
   } catch (emailError) {
     const orders = readOrders(); const index = orders.findIndex(item => item.id === orderId);
     if (index >= 0) { orders[index].emailStatus = "Failed"; try { localStorage.setItem("luneraOrders", JSON.stringify(orders)); } catch (_) {} }
-    emailNote.textContent = "Your order is saved in this browser, but the store email notification did not send. Please contact LUNÉRA to confirm receipt.";
+    emailNote.textContent = "Your order is saved in the store database, but the email notification did not send. Please contact LUNÉRA to confirm receipt.";
   }
   button.disabled = false; button.textContent = oldLabel;
 });
 </script>
+
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="lunera-cloud.js"></script>
 
 </body>
 </html>

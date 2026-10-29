@@ -1,0 +1,32 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'lunerastore26@gmail.com';
+    }
+
+    // Public can read the current catalogue; only the store owner can change it.
+    match /site/catalogue {
+      allow read: if true;
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Customers can submit an order but cannot read other customers' orders.
+    // Admin can view and update orders in the management panel.
+    match /orders/{orderId} {
+      allow create: if request.resource.data.keys().hasAll([
+        'id', 'date', 'customer', 'items', 'total', 'status', 'paymentStatus'
+      ])
+      && request.resource.data.id == orderId
+      && request.resource.data.customer is map
+      && request.resource.data.items is list
+      && request.resource.data.items.size() > 0
+      && request.resource.data.items.size() <= 50
+      && request.resource.data.total is number
+      && request.resource.data.total >= 0
+      && request.resource.data.total <= 10000000;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

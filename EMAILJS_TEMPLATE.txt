@@ -1,20 +1,18 @@
-Paste this body into the EmailJS template connected to service_26ob5sw / template e00x0gi.
-Set the template's recipient to lunerastore26@gmail.com in the EmailJS dashboard.
+EmailJS service: service_26ob5sw
+EmailJS template: e00x0gi
+Public key configured in checkout.html: rRuwYFo_icpYCBj6H
 
-New order received on LUNÉRA!
+Set recipient email to: {{to_email}}
+Suggested subject: New LUNÉRA order {{order_id}}
 
-Order ID: {{order_id}}
-Customer Name: {{customer_name}}
+New LUNÉRA order: {{order_id}}
+Customer: {{customer_name}}
 Phone: {{customer_phone}}
-Customer Email: {{customer_email}}
-
-Delivery Address:
-{{delivery_address}}
-
-Order Details:
+Customer email: {{customer_email}}
+Delivery address: {{delivery_address}}
+Items:
 {{order_details}}
+Order total: {{order_total}}
+Customer notes: {{customer_notes}}
 
-Total Amount: {{order_total}}
-
-Customer Notes:
-{{customer_notes}}
+Make sure the EmailJS account/service and template are active. Send a test email in EmailJS, then test through checkout. Do not rely on a successful on-page order message alone to prove email delivery.
