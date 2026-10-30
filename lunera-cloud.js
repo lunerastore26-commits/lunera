@@ -27,7 +27,6 @@
         login.style.display = adminUser ? "none" : "grid";
         if (adminUser && typeof window.loadCloudOrders === "function") window.loadCloudOrders();
       }
-      if (user && !adminUser) auth.signOut().catch(() => {});
     });
     await syncCatalogueFromCloud();
   })();
@@ -70,7 +69,7 @@
 
   window.LuneraCloud = {
     ready,
-    async signInAdmin(email, password) {
+    
       await ready;
       if (String(email || "").trim().toLowerCase() !== ADMIN_EMAIL) throw new Error("This email is not authorised for LUNÉRA management.");
       if (!password) throw new Error("Please enter your password.");
