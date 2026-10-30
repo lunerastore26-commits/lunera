@@ -69,7 +69,22 @@
 
   window.LuneraCloud = {
     ready,
-    
+    async createCustomerAccount(email, password, name) {
+      await ready;
+      const credential = await auth.createUserWithEmailAndPassword(String(email || "").trim(), password);
+      if (credential.user && name) await credential.user.updateProfile({ displayName: String(name).trim() });
+      return credential.user;
+    },
+    async signInCustomer(email, password) {
+      await ready;
+      const credential = await auth.signInWithEmailAndPassword(String(email || "").trim(), password);
+      return credential.user;
+    },
+    async resetCustomerPassword(email) {
+      await ready;
+      await auth.sendPasswordResetEmail(String(email || "").trim());
+    },
+    async signInAdmin(email, password) {
       await ready;
       if (String(email || "").trim().toLowerCase() !== ADMIN_EMAIL) throw new Error("This email is not authorised for LUNÉRA management.");
       if (!password) throw new Error("Please enter your password.");
