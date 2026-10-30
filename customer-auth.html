@@ -1,0 +1,435 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account | LUNÉRA</title>
+  <meta name="description" content="Sign in or create your LUNÉRA account.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #f7f4ef;
+      color: #151212;
+      font-family: Montserrat, sans-serif;
+      min-height: 100vh;
+    }
+    header {
+      min-height: 82px;
+      padding: 20px 6%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e4ded5;
+    }
+    .logo {
+      font-family: "Bodoni Moda", serif;
+      letter-spacing: 5px;
+      font-size: 27px;
+      color: #17352b;
+      text-decoration: none;
+    }
+    header a.back {
+      color: #17352b;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-decoration: none;
+    }
+    main {
+      width: min(460px, calc(100% - 32px));
+      margin: 54px auto;
+      padding: 36px;
+      background: #fffdfa;
+      border: 1px solid #e9e2d9;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-family: "Bodoni Moda", serif;
+      font-size: 34px;
+      font-weight: 400;
+      text-align: center;
+    }
+    .intro {
+      text-align: center;
+      color: #716a62;
+      font-size: 12px;
+      line-height: 1.8;
+      margin-bottom: 25px;
+    }
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      margin-bottom: 24px;
+      border-bottom: 1px solid #d9d1c7;
+    }
+    .tab {
+      border: 0;
+      background: transparent;
+      padding: 13px 4px;
+      color: #716a62;
+      cursor: pointer;
+      font: 500 11px Montserrat, sans-serif;
+      letter-spacing: 1px;
+    }
+    .tab.active {
+      color: #17352b;
+      border-bottom: 2px solid #17352b;
+    }
+    .field { margin-bottom: 17px; }
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    input {
+      display: block;
+      width: 100%;
+      min-height: 46px;
+      padding: 12px;
+      border: 1px solid #d9d1c7;
+      background: #fff;
+      border-radius: 0;
+      font: 13px Montserrat, sans-serif;
+      outline-color: #17352b;
+    }
+    button.primary {
+      width: 100%;
+      min-height: 47px;
+      padding: 14px;
+      border: 1px solid #17352b;
+      background: #17352b;
+      color: white;
+      font: 500 11px Montserrat, sans-serif;
+      letter-spacing: 1.5px;
+      cursor: pointer;
+    }
+    button.primary:disabled { opacity: .6; cursor: wait; }
+    .secondary {
+      width: 100%;
+      border: 0;
+      background: transparent;
+      padding: 15px 0 0;
+      color: #17352b;
+      font: 11px Montserrat, sans-serif;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .notice {
+      display: none;
+      margin: 0 0 18px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+    .notice.error { display: block; background: #f8e9e6; color: #8b2e23; }
+    .notice.success { display: block; background: #e8f0e8; color: #17352b; }
+    .switch {
+      margin-top: 22px;
+      text-align: center;
+      color: #716a62;
+      font-size: 11px;
+      line-height: 1.8;
+    }
+    .switch button {
+      border: 0;
+      background: none;
+      color: #17352b;
+      text-decoration: underline;
+      cursor: pointer;
+      font: inherit;
+    }
+    .small {
+      margin-top: 18px;
+      font-size: 10px;
+      line-height: 1.7;
+      color: #716a62;
+      text-align: center;
+    }
+    #recaptcha-container { margin: 12px 0; }
+    @media(max-width: 500px) {
+      main { margin: 28px auto; padding: 25px 20px; }
+      h1 { font-size: 30px; }
+      header { min-height: 70px; }
+      .logo { font-size: 23px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <a class="logo" href="index.html">LUNÉRA</a>
+    <a class="back" href="index.html">BACK TO STORE</a>
+  </header>
+
+  <main>
+    <h1>Your Account</h1>
+    <p class="intro">A considered experience, from the very first step.</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" id="email-tab" type="button">EMAIL</button>
+      <button class="tab" id="phone-tab" type="button">MOBILE OTP</button>
+    </div>
+
+    <div id="notice" class="notice" role="status" aria-live="polite"></div>
+
+    <section id="email-panel">
+      <div class="field" id="name-field" hidden>
+        <label for="name">Full name</label>
+        <input id="name" type="text" autocomplete="name" maxlength="100">
+      </div>
+      <div class="field">
+        <label for="email">Email address</label>
+        <input id="email" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" minlength="6" required>
+      </div>
+      <button class="primary" id="email-submit" type="button">SIGN IN</button>
+      <button class="secondary" id="reset-password" type="button">Forgot password?</button>
+      <div class="switch" id="signup-switch">
+        New to LUNÉRA? <button id="show-signup" type="button">Create account</button>
+      </div>
+      <div class="switch" id="login-switch" hidden>
+        Already have an account? <button id="show-login" type="button">Sign in</button>
+      </div>
+    </section>
+
+    <section id="phone-panel" hidden>
+      <div class="field" id="phone-field">
+        <label for="phone">Mobile number</label>
+        <input id="phone" type="tel" inputmode="tel" autocomplete="tel"
+               placeholder="+91 98765 43210">
+      </div>
+      <div id="recaptcha-container"></div>
+      <button class="primary" id="send-otp" type="button">SEND OTP</button>
+      <div id="otp-field" class="field" hidden style="margin-top:18px">
+        <label for="otp">Verification code</label>
+        <input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code"
+               maxlength="6" placeholder="Enter OTP">
+      </div>
+      <button class="primary" id="verify-otp" type="button" hidden style="margin-top:12px">
+        VERIFY OTP & SIGN IN
+      </button>
+      <p class="small">Use your full number with country code, for example +91.</p>
+    </section>
+
+    <p class="small">
+      By continuing, you agree to use your account responsibly.
+    </p>
+  </main>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="lunera-cloud.js"></script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const $ = id => document.getElementById(id);
+      let mode = "login";
+      let confirmation = null;
+      let recaptcha = null;
+      let recaptchaReady = false;
+      let busy = false;
+
+      function message(text, kind) {
+        const box = $("notice");
+        box.textContent = text;
+        box.className = "notice " + kind;
+      }
+
+      function clearMessage() {
+        $("notice").textContent = "";
+        $("notice").className = "notice";
+      }
+
+      function setBusy(value, button) {
+        busy = value;
+        if (button) button.disabled = value;
+      }
+
+      function firebaseError(error) {
+        const code = error && error.code;
+        const messages = {
+          "auth/invalid-email": "Please enter a valid email address.",
+          "auth/user-not-found": "No account found with this email. Please create an account first.",
+          "auth/wrong-password": "Incorrect password. Please try again or reset your password.",
+          "auth/invalid-credential": "Email or password is incorrect.",
+          "auth/email-already-in-use": "This email already has an account. Please sign in.",
+          "auth/weak-password": "Please choose a password with at least 6 characters.",
+          "auth/too-many-requests": "Too many attempts. Please wait and try again later.",
+          "auth/invalid-phone-number": "Enter a valid phone number with country code, such as +91.",
+          "auth/operation-not-allowed": "This login method is not enabled in Firebase Authentication.",
+          "auth/captcha-check-failed": "The security check failed. Refresh the page and try again.",
+          "auth/invalid-verification-code": "That OTP is incorrect. Please check it and try again.",
+          "auth/code-expired": "This OTP has expired. Please request a new one.",
+          "auth/network-request-failed": "Network issue. Please check your internet and try again."
+        };
+        return messages[code] || (error && error.message) || "Something went wrong. Please try again.";
+      }
+
+      function setMode(next) {
+        mode = next;
+        $("name-field").hidden = next !== "signup";
+        $("email-submit").textContent = next === "signup" ? "CREATE ACCOUNT" : "SIGN IN";
+        $("password").autocomplete = next === "signup" ? "new-password" : "current-password";
+        $("signup-switch").hidden = next === "signup";
+        $("login-switch").hidden = next !== "signup";
+        clearMessage();
+      }
+
+      $("show-signup").addEventListener("click", () => setMode("signup"));
+      $("show-login").addEventListener("click", () => setMode("login"));
+
+      $("email-tab").addEventListener("click", () => {
+        $("email-tab").classList.add("active");
+        $("phone-tab").classList.remove("active");
+        $("email-panel").hidden = false;
+        $("phone-panel").hidden = true;
+        clearMessage();
+      });
+
+      $("phone-tab").addEventListener("click", () => {
+        $("phone-tab").classList.add("active");
+        $("email-tab").classList.remove("active");
+        $("phone-panel").hidden = false;
+        $("email-panel").hidden = true;
+        clearMessage();
+      });
+
+      $("email-submit").addEventListener("click", async () => {
+        if (busy) return;
+        const email = $("email").value.trim();
+        const password = $("password").value;
+        const name = $("name").value.trim();
+
+        if (!email || !password) {
+          message("Please enter your email address and password.", "error");
+          return;
+        }
+        if (mode === "signup" && !name) {
+          message("Please enter your name.", "error");
+          return;
+        }
+
+        setBusy(true, $("email-submit"));
+        try {
+          await window.LuneraCloud.ready;
+          if (mode === "signup") {
+            await window.LuneraCloud.createCustomerAccount(email, password, name);
+            message("Your account has been created. You are signed in.", "success");
+          } else {
+            await window.LuneraCloud.signInCustomer(email, password);
+            message("Welcome back. You are signed in.", "success");
+          }
+          setTimeout(() => {
+            location.href = new URLSearchParams(location.search).get("return") || "index.html";
+          }, 900);
+        } catch (error) {
+          message(firebaseError(error), "error");
+        } finally {
+          setBusy(false, $("email-submit"));
+        }
+      });
+
+      $("reset-password").addEventListener("click", async () => {
+        const email = $("email").value.trim();
+        if (!email) {
+          message("Enter your email address first, then select Forgot password.", "error");
+          return;
+        }
+        try {
+          await window.LuneraCloud.resetCustomerPassword(email);
+          message("If an account exists for this email, a password reset email will be sent.", "success");
+        } catch (error) {
+          message(firebaseError(error), "error");
+        }
+      });
+
+      async function setupRecaptcha() {
+        if (recaptchaReady) return;
+        if (!window.firebase || !window.LuneraCloud) throw new Error("Firebase did not load. Please refresh and try again.");
+        await window.LuneraCloud.ready;
+        recaptcha = new firebase.auth.RecaptchaVerifier("recaptcha-container", {
+          size: "normal",
+          callback: () => {},
+          "expired-callback": () => {
+            recaptchaReady = false;
+            message("Security check expired. Please verify it again.", "error");
+          }
+        });
+        await recaptcha.render();
+        recaptchaReady = true;
+      }
+
+      $("send-otp").addEventListener("click", async () => {
+        if (busy) return;
+        const phone = $("phone").value.trim();
+        if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
+          message("Enter a valid phone number including country code, such as +919876543210.", "error");
+          return;
+        }
+        setBusy(true, $("send-otp"));
+        try {
+          await setupRecaptcha();
+          confirmation = await firebase.auth().signInWithPhoneNumber(phone, recaptcha);
+          $("otp-field").hidden = false;
+          $("verify-otp").hidden = false;
+          $("send-otp").textContent = "RESEND OTP";
+          message("OTP sent if the number is eligible. Check your SMS.", "success");
+        } catch (error) {
+          message(firebaseError(error), "error");
+          if (recaptcha) {
+            try { recaptcha.clear(); } catch (_) {}
+            recaptcha = null;
+            recaptchaReady = false;
+            $("recaptcha-container").innerHTML = "";
+          }
+        } finally {
+          setBusy(false, $("send-otp"));
+        }
+      });
+
+      $("verify-otp").addEventListener("click", async () => {
+        if (busy) return;
+        const code = $("otp").value.trim();
+        if (!confirmation || !/^\d{6}$/.test(code)) {
+          message("Enter the 6-digit OTP sent to your mobile.", "error");
+          return;
+        }
+        setBusy(true, $("verify-otp"));
+        try {
+          await confirmation.confirm(code);
+          message("Mobile number verified. You are signed in.", "success");
+          setTimeout(() => {
+            location.href = new URLSearchParams(location.search).get("return") || "index.html";
+          }, 900);
+        } catch (error) {
+          message(firebaseError(error), "error");
+        } finally {
+          setBusy(false, $("verify-otp"));
+        }
+      });
+
+      window.addEventListener("load", () => {
+        if (!window.LuneraCloud) {
+          message("Account services are not ready. Please refresh the page.", "error");
+          return;
+        }
+        window.LuneraCloud.ready.catch(error => message(firebaseError(error), "error"));
+      });
+    })();
+  </script>
+</body>
+</html>
+```
