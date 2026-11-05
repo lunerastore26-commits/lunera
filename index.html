@@ -747,6 +747,8 @@ table { max-width: 100%; }
 
 <a href="#contact">Contact</a>
 
+<a href="customer-auth.html" id="profileLink">Profile</a>
+
 <a href="cart.html" class="bag">
 Bag <span class="bag-count" id="bagCount">0</span>
 </a>
@@ -1222,18 +1224,9 @@ ADMIN LINK
 ========================= */
 
 function checkAdminAccess(){
-
-const manageLink =
-document.getElementById("manageLink");
-
-if(!manageLink) return;
-
-manageLink.style.display = "inline-block";
-
-
+const manageLink=document.getElementById("manageLink");
+if(manageLink) manageLink.style.display="none";
 }
-
-
 /* =========================
 SCROLL TOP BUTTON
 ========================= */
