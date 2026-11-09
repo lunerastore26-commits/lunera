@@ -464,9 +464,9 @@ status.textContent="HERO IMAGE READY TO UPLOAD.";
 
 async function uploadImage(file,statusElement){
 
-if(!file){
-throw new Error("Please choose an image first.");
-}
+if(!file)throw new Error("Please choose an image first.");
+if(!["image/jpeg","image/png","image/webp"].includes(file.type))throw new Error("Only JPG, PNG or WebP images are allowed.");
+if(file.size>10*1024*1024)throw new Error("Please choose an image smaller than 10 MB.");
 
 statusElement.textContent =
 "UPLOADING IMAGE TO CLOUDINARY...";
@@ -502,15 +502,11 @@ throw new Error(
 }
 
 if(!response.ok || !result.secure_url){
-
-throw new Error(
-result.error &&
-result.error.message
-? result.error.message
-: "Cloudinary image upload failed."
-);
-
+ throw new Error(result.error&&result.error.message?result.error.message:"Cloudinary image upload failed.");
 }
+let uploaded;
+try{uploaded=new URL(result.secure_url)}catch(_){throw new Error("Cloudinary returned an invalid image URL.")}
+if(uploaded.protocol!=="https:" || uploaded.hostname!=="res.cloudinary.com")throw new Error("Cloudinary returned an untrusted image URL.");
 
 statusElement.textContent =
 "IMAGE UPLOADED SUCCESSFULLY.";
@@ -518,7 +514,7 @@ statusElement.textContent =
 statusElement.className =
 "upload-status success";
 
-return result.secure_url;
+return uploaded.href;
 
 }
 
