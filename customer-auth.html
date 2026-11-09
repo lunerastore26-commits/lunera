@@ -370,6 +370,9 @@
           callback: () => {},
           "expired-callback": () => {
             recaptchaReady = false;
+            try { if (recaptcha) recaptcha.clear(); } catch (_) {}
+            recaptcha = null;
+            $("recaptcha-container").innerHTML = "";
             message("Security check expired. Please verify it again.", "error");
           }
         });
