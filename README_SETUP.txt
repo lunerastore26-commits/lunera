@@ -1,47 +1,60 @@
-LUNÉRA — STORE PACKAGE (Firebase-connected edition)
+LUNÉRA — LIVE STORE SETUP GUIDE
 
-WHAT'S INCLUDED
-- index.html: luxury editorial home page
-- product.html / detail.html: collection and product detail
+PROJECT
+Firebase project: lunera-store
+GitHub Pages: https://lunerastore26-commits.github.io/lunera/
+Admin account: lunerastore26@gmail.com
+
+WHAT IS IN THE REPOSITORY
+- index.html: luxury storefront homepage
+- product.html / detail.html: collection and product details
 - cart.html: shopping bag
-- checkout.html: checkout, cloud order save, EmailJS notification attempt
-- manage.html: private management login, hero/cover image, categories, products, recent cloud orders
-- lunera-cloud.js: Firebase Auth + Firestore connection
-- firestore.rules: restrictive rules to publish in Firebase Console
+- checkout.html: signed-in customer checkout; COD only
+- customer-auth.html: email/password and phone OTP
+- profile.html: customer profile and private order history
+- manage.html: verified-admin product, category, hero and order management
+- lunera-cloud.js: Firebase Authentication and Firestore client
+- firestore.rules: database access controls
 - lunera-logo.png: brand logo
-- EMAILJS_TEMPLATE.txt: EmailJS template variables
 
-IMPORTANT SECURITY NOTES
-- The admin password is NOT embedded in website code. Anyone can inspect a static website's JavaScript, so a hardcoded password would not be private.
-- Management sign-in uses Firebase Authentication and only accepts lunerastore26@gmail.com. The management link is hidden from signed-out visitors, and Firestore rules protect the data even if someone knows the page URL.
-- A password was shared in chat. For safety, use a new private password rather than reusing a password that has been posted in a conversation.
-- Firebase web config is public by design; Firestore Security Rules are what protect the database. Never upload service-account private keys.
+ONE-TIME FIREBASE SETUP
+1. Firebase Console > Authentication > Sign-in method: enable Email/Password and Phone.
+2. Authentication > Settings > Authorized domains: add lunerastore26-commits.github.io.
+3. Authentication > Users: ensure lunerastore26@gmail.com exists. The admin must verify this email before Manage access is granted. Use the password-reset link on manage.html if needed.
+4. Firestore Database > Rules: publish the exact rules from this repository's firestore.rules file.
+5. Open manage.html and sign in with the verified admin account once. If site/catalogue does not exist, this first admin sign-in initialises it from the starter catalogue. Existing cloud catalogue data is never overwritten just by logging in.
 
-REQUIRED ONE-TIME FIREBASE SETUP
-1. Open Firebase Console > project lunera-store > Authentication > Sign-in method. Enable Email/Password.
-2. In Authentication > Settings > Authorized domains, add `lunerastore26-commits.github.io` if it is not already listed. In Authentication > Users, make sure lunerastore26@gmail.com exists. If you do not know its password, open manage.html after deployment and click “EMAIL ME A PASSWORD RESET LINK”; check inbox/spam and set a private password.
-3. Open Firestore Database > Rules. Replace the current deny-all rules with the exact contents of firestore.rules in this package and click Publish. These rules allow public catalogue reads, admin-only catalogue edits, customer order creation, and admin-only order reads/updates.
-4. EmailJS: confirm service ID service_26ob5sw, template ID e00x0gi and public key in checkout.html are still active. In the template, set recipient to the `to_email` template variable or fixed recipient lunerastore26@gmail.com, and include these variables: order_id, customer_name, customer_phone, customer_email, delivery_address, order_details, order_total, customer_notes, to_email. EmailJS delivery must be tested with a real test order; code cannot guarantee that a third-party template/service is configured correctly.
-5. Cloudinary image upload: the package uses cloud name r5kxmdor and unsigned upload preset lunera_products. Confirm that preset exists and allows unsigned image uploads. Uploaded image URLs are saved in Firestore only when an authorised admin is signed in.
+CLOUDINARY IMAGE UPLOAD
+The management panel uses cloud name r5kxmdor and unsigned preset lunera_products. In Cloudinary, restrict the preset to image files (JPG, PNG, WebP) and set a 10 MB maximum upload size. The browser also validates file type and size, and only stores secure Cloudinary image URLs.
 
-DEPLOY TO GITHUB PAGES
-1. Download and extract this ZIP.
-2. Upload the files in this folder directly into the root of the GitHub repository (not inside another folder). Keep the filenames exactly as supplied.
-3. Commit the changes and wait for GitHub Pages to publish.
-4. Open the live website, test product > Add to Bag > Bag > Checkout. Do not announce the shop as production-ready until a test order appears in Firestore and the notification email arrives.
+EMAIL NOTIFICATIONS
+Checkout attempts an EmailJS notification using:
+- Service: service_26ob5sw
+- Template: e00x0gi
+- Public key: configured in checkout.html
+Set the template recipient to {{to_email}} or fixed recipient lunerastore26@gmail.com. Include: order_id, customer_name, customer_phone, customer_email, delivery_address, order_details, order_total, customer_notes, to_email.
+EmailJS is best-effort browser-side notification. Confirm the service/template are active and test delivery.
 
-HOW THE DATA WORKS
-- Catalogue document: Firestore `site/catalogue` with fields luneraProducts, luneraCategories, luneraHero.
-- Orders collection: Firestore `orders`. Customers can create orders but cannot read other customers' orders. Only the admin account can view orders in the management panel.
-- Email notification: EmailJS is called from the browser as a best-effort notification. This is not a trusted server-side mail service; for stronger anti-abuse protection, later move notification delivery to a server-side function.
-- Payment: this package does not collect or verify online payment. Orders remain payment-pending.
-- Static GitHub Pages does not run server code. Firebase provides shared database/authentication; EmailJS is separate and must be configured/tested.
+ORDER AND CUSTOMER DATA
+- Catalogue: Firestore document site/catalogue (luneraProducts, luneraCategories, luneraHero).
+- Orders: Firestore collection orders.
+- Each order is attached to the signed-in Firebase UID. Customers can read only their own orders; the verified admin can read and update order status.
+- Checkout rechecks products, prices, sizes and quantities against the shared catalogue before saving.
+- Historical orders created before userId was added may not appear in customer profile history.
 
-TEST CHECKLIST
-[ ] Admin can sign in with the Firebase admin email/password.
-[ ] Signed-out homepage does not show the Manage link.
-[ ] Admin can upload a product image and hero/cover image.
-[ ] Product/category/hero changes are visible in a fresh browser session.
-[ ] A test order appears in Firestore `orders`.
-[ ] The order notification arrives at lunerastore26@gmail.com.
-[ ] Mobile layout, bag quantity, and checkout validation are tested.
+PRE-LAUNCH TEST
+[ ] Admin sign-in succeeds only for the verified admin account.
+[ ] Signed-out users cannot see the Manage link or read admin orders.
+[ ] Product/category/hero edits save and appear in a fresh browser session.
+[ ] Product image and hero uploads work.
+[ ] Email/password account creation and sign-in work.
+[ ] Phone OTP sends and verifies successfully.
+[ ] A test COD order appears in Firestore and Manage.
+[ ] Customer Profile shows only that customer's order.
+[ ] Admin can update order status and customer sees the new status on refresh.
+[ ] Test navigation, bag quantity, checkout validation and layout on desktop and mobile.
+
+IMPORTANT
+GitHub Pages is static hosting; it does not run a private server. EmailJS sends browser-side notifications and is not a trusted server-side mail service. Do not announce the store as production-ready until Firebase rules are published and a complete test order succeeds.
+
+Online payment is intentionally disabled. A real payment gateway requires a server-side order/payment endpoint and verified gateway signatures. Never mark an order paid from a browser redirect or customer screenshot.
