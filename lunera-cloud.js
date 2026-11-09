@@ -86,8 +86,8 @@ window.LuneraCloud={
   const total=items.reduce((sum,item)=>sum+item.price*item.quantity,0);
   if(!Number.isFinite(Number(order.total))||Math.abs(total-Number(order.total))>0.001)throw Error("A product price has changed. Please refresh your bag and try again.");
   const customer=order.customer||{};
-  const phone=String(customer.phone||"").replace(/\\D/g,"");
-  const pin=String(customer.pin||"").replace(/\\D/g,"");
+  const phone=String(customer.phone||"").replace(/\D/g,"");
+  const pin=String(customer.pin||"").replace(/\D/g,"");
   if(!String(customer.name||"").trim()||!/^[0-9]{10}$/.test(phone)||!String(customer.address||"").trim()||!String(customer.city||"").trim()||!String(customer.state||"").trim()||!/^[0-9]{6}$/.test(pin))throw Error("Please check your delivery name, 10-digit phone number and complete address.");
   const safe={
    id:String(order.id),
