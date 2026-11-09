@@ -509,6 +509,11 @@ button.textContent="SAVE HERO";
 
 /* DATA */
 
+function parseManagePrice(value){
+ const amount=Number(String(value??"").replace(/[^0-9.-]/g,""));
+ return Number.isFinite(amount)?amount:NaN;
+}
+
 function saveData(){
  localStorage.setItem("luneraProducts",JSON.stringify(products));
  localStorage.setItem("luneraCategories",JSON.stringify(categories));
@@ -782,7 +787,7 @@ const description =
 document.getElementById("newDescription")
 .value.trim();
 
-if(!name || !Number.isFinite(Number(price)) || Number(price)<=0 || Number(price)>10000000 || !category){
+if(!name || !Number.isFinite(parseManagePrice(price)) || parseManagePrice(price)<=0 || parseManagePrice(price)>10000000 || !category){
 
 alert(
 "Enter a product name, a valid price greater than zero, and a category."
@@ -1125,7 +1130,7 @@ const name=document.getElementById("name-"+i).value.trim();
 const price=document.getElementById("price-"+i).value.trim();
 const category=document.getElementById("category-"+i).value;
 const sizes=document.getElementById("sizes-"+i).value.trim();
-if(!name || !Number.isFinite(Number(price)) || Number(price)<=0 || Number(price)>10000000 || !category || !sizes){
+if(!name || !Number.isFinite(parseManagePrice(price)) || parseManagePrice(price)<=0 || parseManagePrice(price)>10000000 || !category || !sizes){
  alert("Enter a product name, valid positive price, category and available sizes.");
  return;
 }
@@ -1256,7 +1261,7 @@ document.getElementById(
 })
 );
 
-if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(Number(p.price)) || Number(p.price)<=0 || Number(p.price)>10000000 || !String(p.category||"").trim() || !String(p.sizes||"").trim())){
+if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(parseManagePrice(p.price)) || parseManagePrice(p.price)<=0 || parseManagePrice(p.price)>10000000 || !String(p.category||"").trim() || !String(p.sizes||"").trim())){
  alert("One or more products have invalid details. Check name, positive price, category and sizes.");
  return;
 }
