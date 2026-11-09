@@ -347,7 +347,7 @@ return JSON.parse(JSON.stringify(fallback));
 }
 }
 
-async async function login(){
+async function login(){
   const email = document.getElementById("adminEmail").value.trim();
   const password = document.getElementById("password").value;
   const error = document.getElementById("error");
@@ -1454,7 +1454,7 @@ renderCategorySelect();
 render();
 
 
-async async function loadCloudOrders(){
+async function loadCloudOrders(){
  const box=document.getElementById("cloudOrders"); if(!box||!window.LuneraCloud)return;
  box.className="empty"; box.textContent="Loading orders…";
  try { const orders=await window.LuneraCloud.getOrders(); if(!orders.length){box.textContent="No orders have been placed yet.";return;}
