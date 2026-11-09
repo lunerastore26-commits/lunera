@@ -62,7 +62,49 @@ window.LuneraCloud={
  async resetAdminPassword(email){await ready;if(String(email||"").trim().toLowerCase()!==ADMIN_EMAIL)throw Error("Use the authorised admin email.");return auth.sendPasswordResetEmail(ADMIN_EMAIL)},
  async signOutCustomer(){await ready;await auth.signOut();location.href="index.html"},
  async signOutAdmin(){await ready;await auth.signOut();location.href="index.html"},
- async saveOrder(order){await ready;const u=await this.currentUser();if(!u)throw Error("Please sign in before placing an order.");if(!order||!order.id||!Array.isArray(order.items)||!order.items.length)throw Error("Order details are incomplete.");const safe={...order,userId:u.uid,customer:{...(order.customer||{}),email:u.email||order.customer?.email||""},createdAt:firebase.firestore.FieldValue.serverTimestamp()};await db.collection("orders").doc(String(order.id)).set(safe);return safe},
+ async saveOrder(order){
+  await ready;
+  const u=await this.currentUser();
+  if(!u)throw Error("Please sign in before placing an order.");
+  if(!order||!/^LUN[0-9]{8}$/.test(String(order.id||""))||!Array.isArray(order.items)||!order.items.length||order.items.length>50)throw Error("Order details are incomplete or invalid.");
+  const catalogue=await db.collection("site").doc("catalogue").get();
+  if(!catalogue.exists)throw Error("The LUNÉRA catalogue is not published yet. Please try again shortly.");
+  const products=Array.isArray(catalogue.data().luneraProducts)?catalogue.data().luneraProducts:[];
+  if(!products.length)throw Error("The LUNÉRA catalogue is empty. Please contact the store.");
+  const items=order.items.map(item=>{
+   const product=products.find(p=>p&&String(p.id)===String(item.id));
+   if(!product)throw Error("A selected product is no longer available. Please refresh your bag.");
+   const price=Number(String(product.price??"0").replace(/[^0-9.-]/g,""));
+   const quantity=Number(item.quantity);
+   const sizes=Array.isArray(product.sizes)?product.sizes.map(String):String(product.sizes||"Standard").split(",").map(s=>s.trim()).filter(Boolean);
+   const size=String(item.size||"");
+   if(!Number.isFinite(price)||price<=0||price>10000000)throw Error("A product has an invalid price. Please contact the store.");
+   if(!Number.isInteger(quantity)||quantity<1||quantity>20)throw Error("Product quantity must be between 1 and 20.");
+   if(!sizes.includes(size))throw Error("A selected size is no longer available. Please refresh your bag.");
+   return {id:product.id,name:String(product.name||""),price,category:String(product.category||""),image:String(product.image||""),size,quantity};
+  });
+  const total=items.reduce((sum,item)=>sum+item.price*item.quantity,0);
+  if(!Number.isFinite(Number(order.total))||Math.abs(total-Number(order.total))>0.001)throw Error("A product price has changed. Please refresh your bag and try again.");
+  const customer=order.customer||{};
+  const phone=String(customer.phone||"").replace(/\\D/g,"");
+  const pin=String(customer.pin||"").replace(/\\D/g,"");
+  if(!String(customer.name||"").trim()||!/^[0-9]{10}$/.test(phone)||!String(customer.address||"").trim()||!String(customer.city||"").trim()||!String(customer.state||"").trim()||!/^[0-9]{6}$/.test(pin))throw Error("Please check your delivery name, 10-digit phone number and complete address.");
+  const safe={
+   id:String(order.id),
+   userId:u.uid,
+   date:new Date().toISOString(),
+   customer:{name:String(customer.name).trim(),phone,email:String(u.email||customer.email||""),address:String(customer.address).trim(),city:String(customer.city).trim(),state:String(customer.state).trim(),pin,notes:String(customer.notes||"")},
+   items,
+   total,
+   status:"New",
+   paymentStatus:"Pending",
+   paymentMethod:"Cash on Delivery (COD)",
+   emailStatus:"Pending",
+   createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  await db.collection("orders").doc(safe.id).set(safe);
+  return safe;
+ },
  async getMyOrders(){await ready;const u=await this.currentUser();if(!u)throw Error("Please sign in to view your orders.");const s=await db.collection("orders").where("userId","==",u.uid).get();return s.docs.map(d=>({...d.data(),idKey:d.id})).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))},
  async getOrders(){await ready;await authReady;if(!adminUser)throw Error("Verified admin sign-in required.");const s=await db.collection("orders").get();return s.docs.map(d=>({...d.data(),idKey:d.id})).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))},
  async updateOrderStatus(id,status){await ready;await authReady;if(!adminUser)throw Error("Verified admin sign-in required.");return db.collection("orders").doc(String(id)).update({status:String(status),updatedAt:firebase.firestore.FieldValue.serverTimestamp()})}
