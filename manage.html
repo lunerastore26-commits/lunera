@@ -515,20 +515,25 @@ function parseManagePrice(value){
  return Number.isFinite(amount)?amount:NaN;
 }
 
-function saveData(){
+async function saveData(){
  localStorage.setItem("luneraProducts",JSON.stringify(products));
  localStorage.setItem("luneraCategories",JSON.stringify(categories));
- if(window.LuneraCloud){
-  window.LuneraCloud.saveCatalogue({luneraProducts:products,luneraCategories:categories})
-   .then(()=>showStatus())
-   .catch(error=>{const s=document.getElementById("status");if(s){s.textContent="CLOUD SAVE FAILED: "+(error.message||"Please try again.");s.classList.add("show");}});
+ try{
+  if(!window.LuneraCloud)throw Error("Cloud services are not ready. Please refresh and try again.");
+  await window.LuneraCloud.saveCatalogue({luneraProducts:products,luneraCategories:categories});
+  showStatus();
+  return true;
+ }catch(error){
+  const s=document.getElementById("status");
+  if(s){s.textContent="CLOUD SAVE FAILED: "+(error.message||"Please try again.");s.classList.add("show");}
+  throw error;
  }
 }
 
 
 /* CATEGORY */
 
-function addCategory(){
+async function addCategory(){
 
 const input =
 document.getElementById("newCategory");
@@ -557,7 +562,7 @@ return;
 
 categories.push(name);
 
-saveData();
+try{await saveData();}catch(error){alert(error.message||"Category could not be saved to the shared store.");return;}
 
 input.value="";
 
@@ -571,7 +576,7 @@ showStatus();
 
 }
 
-function deleteCategory(index){
+async function deleteCategory(index){
 
 const category=categories[index];
 
@@ -601,7 +606,7 @@ category +
 
 categories.splice(index,1);
 
-saveData();
+try{await saveData();}catch(error){alert(error.message||"Category could not be saved to the shared store.");return;}
 
 renderCategories();
 renderCategorySelect();
@@ -850,7 +855,7 @@ description ||
 
 });
 
-saveData();
+await saveData();
 
 clearProductForm();
 
@@ -1177,7 +1182,7 @@ document.getElementById(
 
 selectedExistingFiles[i]=null;
 
-saveData();
+await saveData();
 
 render();
 
@@ -1204,7 +1209,7 @@ button.textContent="SAVE PRODUCT";
 
 }
 
-function deleteProduct(i){
+async function deleteProduct(i){
 
 if(
 !confirm(
@@ -1216,7 +1221,7 @@ products.splice(i,1);
 
 delete selectedExistingFiles[i];
 
-saveData();
+try{await saveData();}catch(error){alert(error.message||"Product could not be saved to the shared store.");return;}
 
 render();
 
@@ -1224,7 +1229,7 @@ showStatus();
 
 }
 
-function saveAll(){
+async function saveAll(){
 
 products =
 products.map(
@@ -1266,14 +1271,13 @@ if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(parseManagePr
  alert("One or more products have invalid details. Check name, positive price, category and sizes.");
  return;
 }
-saveData();
-showStatus();
+try{await saveData();showStatus();}catch(error){alert(error.message||"Catalogue could not be saved to the shared store.");}
 }
 
 
 /* RESET */
 
-function resetAll(){
+async function resetAll(){
 
 if(
 !confirm(
@@ -1297,13 +1301,13 @@ categories =
 "Essentials"
 ];
 
-saveData();
-localStorage.setItem("luneraHero", defaultHero);
-if(window.LuneraCloud){
- window.LuneraCloud.saveCatalogue({luneraHero:defaultHero}).catch(error=>{
-  const s=document.getElementById("status");
-  if(s){s.textContent="CLOUD SAVE FAILED: "+(error.message||"Please try again.");s.classList.add("show");}
- });
+try{
+ await saveData();
+ localStorage.setItem("luneraHero", defaultHero);
+ await window.LuneraCloud.saveCatalogue({luneraHero:defaultHero});
+}catch(error){
+ alert(error.message||"Catalogue reset could not be saved to the shared store.");
+ return;
 }
 
 document.getElementById(
