@@ -1301,10 +1301,11 @@ categories =
 "Essentials"
 ];
 
+localStorage.setItem("luneraHero", defaultHero);
 try{
- await saveData();
- localStorage.setItem("luneraHero", defaultHero);
- await window.LuneraCloud.saveCatalogue({luneraHero:defaultHero});
+ if(!window.LuneraCloud)throw Error("Cloud services are not ready. Please refresh and try again.");
+ await window.LuneraCloud.saveCatalogue({luneraProducts:products,luneraCategories:categories,luneraHero:defaultHero});
+ showStatus();
 }catch(error){
  alert(error.message||"Catalogue reset could not be saved to the shared store.");
  return;
