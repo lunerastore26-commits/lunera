@@ -23,7 +23,7 @@
 <h2 style="font-size:25px;margin:15px 0">Payment Method</h2>
 <div class="payment-options">
 <label class="payment-option"><input type="radio" name="paymentMethod" value="COD" checked><span><strong>Cash on Delivery (COD)</strong><small>Pay when your order is delivered.</small></span></label>
-<label class="payment-option"><input type="radio" name="paymentMethod" value="UPI"><span><strong>UPI / Online Payment</strong><small>Razorpay setup is pending. Online payment will be enabled after secure server integration and account activation.</small></span></label>
+
 </div>
 <div id="error" class="error" role="alert"></div><button type="submit">PLACE COD ORDER</button>
 </form></div></section>
@@ -49,7 +49,7 @@ async function sendEmail(o){if(!window.emailjs)throw Error("EmailJS did not load
 render();
 window.addEventListener("load",async()=>{try{await window.LuneraCloud.ready;const user=await window.LuneraCloud.currentUser();if(user){document.getElementById("checkoutContent").style.display="block";document.getElementById("authRequired").style.display="none";}else{document.getElementById("checkoutContent").style.display="none";document.getElementById("authRequired").style.display="block";}}catch(e){showError("Account services are unavailable. Please refresh and try again.");}});
 form.addEventListener("submit",async e=>{e.preventDefault();clearError();const signedIn=await window.LuneraCloud.currentUser().catch(()=>null);if(!signedIn){location.href="customer-auth.html?return=checkout.html";return}if(!cart.length){showError("Your bag is empty.");return}if(!form.reportValidity())return;
-if(payment()==="UPI"){showError("Razorpay UPI is not enabled yet. Secure backend order creation, payment-signature verification, and Razorpay account activation must be completed first. Please choose COD for now.");return}
+if(payment()!=="COD"){showError("Only Cash on Delivery is currently available.");return}
 const name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\D/g,""),email=document.getElementById("email").value.trim(),address=document.getElementById("address").value.trim(),city=document.getElementById("city").value.trim(),state=document.getElementById("state").value.trim(),pin=document.getElementById("pin").value.replace(/\D/g,""),notes=document.getElementById("notes").value.trim();
 if(!/^[0-9]{10}$/.test(phone)){showError("Please enter a valid 10-digit phone number.");return}if(!/^[0-9]{6}$/.test(pin)){showError("Please enter a valid 6-digit PIN code.");return}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showError("Please enter a valid email or leave it blank.");return}
 const btn=form.querySelector('button[type="submit"]'),old=btn.textContent;btn.disabled=true;btn.textContent="PLACING ORDER…";const id="LUN"+Date.now().toString().slice(-8);
