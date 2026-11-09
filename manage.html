@@ -295,6 +295,7 @@ async function login(){
   } catch (e) {
     error.textContent = e.message || "Sign-in failed. Check the admin email and password.";
     document.getElementById("password").value = "";
+    alert(error.textContent);
   }
 }
 
