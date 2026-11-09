@@ -555,6 +555,7 @@ table { max-width: 100%; }
   <nav>
     <a href="index.html">Home</a>
     <a href="product.html">Collection</a>
+    <a href="profile.html" id="profileLink">Profile</a>
 
     <a href="cart.html" class="bag">
       Bag <span class="bag-count" id="bagCount">0</span>
@@ -857,21 +858,7 @@ function renderFooter(){
       .join("");
 
 
-  const manageLink=
-    document.getElementById(
-      "manageLink"
-    );
-
-  if(
-    manageLink &&
-    sessionStorage.getItem(
-      "luneraAdmin"
-    ) === "yes"
-  ){
-
-    manageLink.style.display="block";
-
-  }
+  // The Firebase auth listener in lunera-cloud.js controls the admin link.
 
 }
 
