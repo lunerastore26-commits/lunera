@@ -25,14 +25,20 @@ async function syncCatalogue(){
  if(changed)location.reload();
  }catch(e){console.warn("LUNÉRA cloud catalogue unavailable:",e.message||e)}
 }
-const originalSet=Storage.prototype.setItem;
-Storage.prototype.setItem=function(k,v){originalSet.call(this,k,v);if(this!==localStorage||!KEYS.includes(String(k))||!db)return;
- ready.then(async()=>{if(!adminUser)return;let value;try{value=JSON.parse(v)}catch(_){return}
- await db.collection("site").doc("catalogue").set({[k]:value,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})
- }).catch(e=>console.warn("Catalogue save failed:",e.message||e));
-};
+async function saveCatalogue(values){
+ await ready;
+ await authReady;
+ if(!adminUser)throw Error("Verified admin sign-in required to save the catalogue.");
+ if(!values||typeof values!=="object"||Array.isArray(values))throw Error("Catalogue data is invalid.");
+ const payload={updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+ for(const k of KEYS)if(Object.prototype.hasOwnProperty.call(values,k))payload[k]=values[k];
+ if(Object.keys(payload).length===1)throw Error("No catalogue changes were supplied.");
+ await db.collection("site").doc("catalogue").set(payload,{merge:true});
+ return true;
+}
 window.LuneraCloud={
  ready,
+ saveCatalogue,
  async currentUser(){await ready;await authReady;return auth.currentUser||null},
  async createCustomerAccount(email,password,name){await ready;const c=await auth.createUserWithEmailAndPassword(String(email).trim(),password);if(c.user&&name)await c.user.updateProfile({displayName:String(name).trim()});return c.user},
  async signInCustomer(email,password){await ready;return (await auth.signInWithEmailAndPassword(String(email).trim(),password)).user},
