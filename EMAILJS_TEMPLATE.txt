@@ -2,7 +2,7 @@ EmailJS service: service_26ob5sw
 EmailJS template: e00x0gi
 Public key configured in checkout.html: rRuwYFo_icpYCBj6H
 
-Set recipient email to: {{to_email}}
+Set the template recipient (To Email) to the fixed address: lunerastore26@gmail.com. Do not use a browser-supplied recipient variable.
 Suggested subject: New LUNÉRA order {{order_id}}
 
 New LUNÉRA order: {{order_id}}
