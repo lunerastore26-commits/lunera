@@ -1377,6 +1377,12 @@ categories =
 
 saveData();
 localStorage.setItem("luneraHero", defaultHero);
+if(window.LuneraCloud){
+ window.LuneraCloud.saveCatalogue({luneraHero:defaultHero}).catch(error=>{
+  const s=document.getElementById("status");
+  if(s){s.textContent="CLOUD SAVE FAILED: "+(error.message||"Please try again.");s.classList.add("show");}
+ });
+}
 
 document.getElementById(
 "heroPreview"
