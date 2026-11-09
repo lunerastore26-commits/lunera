@@ -858,10 +858,10 @@ const description =
 document.getElementById("newDescription")
 .value.trim();
 
-if(!name || !price || !category){
+if(!name || !Number.isFinite(Number(price)) || Number(price)<=0 || Number(price)>10000000 || !category){
 
 alert(
-"Please fill Product Name, Price and Category."
+"Enter a product name, a valid price greater than zero, and a category."
 );
 
 return;
@@ -1194,12 +1194,17 @@ status.textContent=
 async function saveProduct(i){
 
 const button = document.activeElement && document.activeElement.tagName === "BUTTON" ? document.activeElement : null;
-
-const newImage =
-selectedExistingFiles[i];
+const newImage = selectedExistingFiles[i];
 
 try{
-
+const name=document.getElementById("name-"+i).value.trim();
+const price=document.getElementById("price-"+i).value.trim();
+const category=document.getElementById("category-"+i).value;
+const sizes=document.getElementById("sizes-"+i).value.trim();
+if(!name || !Number.isFinite(Number(price)) || Number(price)<=0 || Number(price)>10000000 || !category || !sizes){
+ alert("Enter a product name, valid positive price, category and available sizes.");
+ return;
+}
 let image=products[i].image;
 
 if(newImage){
@@ -1226,25 +1231,10 @@ products[i]={
 
 id:products[i].id,
 
-name:
-document.getElementById(
-"name-"+i
-).value.trim(),
-
-price:
-document.getElementById(
-"price-"+i
-).value.trim(),
-
-category:
-document.getElementById(
-"category-"+i
-).value,
-
-sizes:
-document.getElementById(
-"sizes-"+i
-).value.trim(),
+name,
+price,
+category,
+sizes,
 
 image:image,
 
@@ -1342,10 +1332,12 @@ document.getElementById(
 })
 );
 
+if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(Number(p.price)) || Number(p.price)<=0 || Number(p.price)>10000000 || !String(p.category||"").trim() || !String(p.sizes||"").trim())){
+ alert("One or more products have invalid details. Check name, positive price, category and sizes.");
+ return;
+}
 saveData();
-
 showStatus();
-
 }
 
 
