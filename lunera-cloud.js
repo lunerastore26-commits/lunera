@@ -25,6 +25,20 @@ async function syncCatalogue(){
  if(changed)location.reload();
  }catch(e){console.warn("LUNÉRA cloud catalogue unavailable:",e.message||e)}
 }
+async function ensureCatalogue(values){
+ await ready;
+ await authReady;
+ if(!adminUser)throw Error("Verified admin sign-in required to initialise the catalogue.");
+ const ref=db.collection("site").doc("catalogue");
+ const snap=await ref.get();
+ if(snap.exists)return false;
+ if(!values||typeof values!=="object"||Array.isArray(values))throw Error("Catalogue data is invalid.");
+ const payload={updatedAt:firebase.firestore.FieldValue.serverTimestamp()};
+ for(const k of KEYS)if(Object.prototype.hasOwnProperty.call(values,k))payload[k]=values[k];
+ if(Object.keys(payload).length===1)throw Error("No catalogue data was supplied.");
+ await ref.set(payload);
+ return true;
+}
 async function saveCatalogue(values){
  await ready;
  await authReady;
@@ -39,6 +53,7 @@ async function saveCatalogue(values){
 window.LuneraCloud={
  ready,
  saveCatalogue,
+ ensureCatalogue,
  async currentUser(){await ready;await authReady;return auth.currentUser||null},
  async createCustomerAccount(email,password,name){await ready;const c=await auth.createUserWithEmailAndPassword(String(email).trim(),password);if(c.user&&name)await c.user.updateProfile({displayName:String(name).trim()});return c.user},
  async signInCustomer(email,password){await ready;return (await auth.signInWithEmailAndPassword(String(email).trim(),password)).user},
@@ -47,7 +62,7 @@ window.LuneraCloud={
  async resetAdminPassword(email){await ready;if(String(email||"").trim().toLowerCase()!==ADMIN_EMAIL)throw Error("Use the authorised admin email.");return auth.sendPasswordResetEmail(ADMIN_EMAIL)},
  async signOutCustomer(){await ready;await auth.signOut();location.href="index.html"},
  async signOutAdmin(){await ready;await auth.signOut();location.href="index.html"},
- async saveOrder(order){await ready;const u=await this.currentUser();if(!u)throw Error("Please sign in before placing an order.");if(!order||!order.id||!Array.isArray(order.items)||!order.items.length)throw Error("Order details are incomplete.");const safe={...order,userId:u.uid,customer:{...(order.customer||{}),email:u.email||""},createdAt:firebase.firestore.FieldValue.serverTimestamp()};await db.collection("orders").doc(String(order.id)).set(safe);return safe},
+ async saveOrder(order){await ready;const u=await this.currentUser();if(!u)throw Error("Please sign in before placing an order.");if(!order||!order.id||!Array.isArray(order.items)||!order.items.length)throw Error("Order details are incomplete.");const safe={...order,userId:u.uid,customer:{...(order.customer||{}),email:u.email||order.customer?.email||""},createdAt:firebase.firestore.FieldValue.serverTimestamp()};await db.collection("orders").doc(String(order.id)).set(safe);return safe},
  async getMyOrders(){await ready;const u=await this.currentUser();if(!u)throw Error("Please sign in to view your orders.");const s=await db.collection("orders").where("userId","==",u.uid).get();return s.docs.map(d=>({...d.data(),idKey:d.id})).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))},
  async getOrders(){await ready;await authReady;if(!adminUser)throw Error("Verified admin sign-in required.");const s=await db.collection("orders").get();return s.docs.map(d=>({...d.data(),idKey:d.id})).sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))},
  async updateOrderStatus(id,status){await ready;await authReady;if(!adminUser)throw Error("Verified admin sign-in required.");return db.collection("orders").doc(String(id)).update({status:String(status),updatedAt:firebase.firestore.FieldValue.serverTimestamp()})}
