@@ -356,8 +356,14 @@ async function login(){
   try {
     if (!window.LuneraCloud) throw new Error("Secure sign-in is still loading. Please try again.");
     await window.LuneraCloud.signInAdmin(email, password);
+    await window.LuneraCloud.saveCatalogue({
+      luneraProducts: products,
+      luneraCategories: categories,
+      luneraHero: localStorage.getItem("luneraHero") || defaultHero
+    });
     error.style.display = "none";
     document.getElementById("login").style.display = "none";
+    loadCloudOrders();
   } catch (e) {
     error.textContent = e.message || "Sign-in failed. Check the admin email and password.";
     document.getElementById("password").value = "";
@@ -543,11 +549,14 @@ selectedHeroFile,
 status
 );
 
-localStorage.setItem(
-"luneraHero",
-image
-);
-
+localStorage.setItem("luneraHero", image);
+await window.LuneraCloud.saveCatalogue({luneraHero:image});
+document.getElementById("heroPreview").src=image;
+selectedHeroFile=null;
+document.getElementById("heroImageFile").value="";
+document.getElementById("heroFileName").textContent="No image selected";
+status.textContent="HERO IMAGE SAVED TO THE SHARED STORE.";
+status.className="upload-status success";
 alert("Hero image updated successfully.");
 
 }catch(error){
@@ -577,17 +586,13 @@ button.textContent="SAVE HERO";
 /* DATA */
 
 function saveData(){
-
-localStorage.setItem(
-"luneraProducts",
-JSON.stringify(products)
-);
-
-localStorage.setItem(
-"luneraCategories",
-JSON.stringify(categories)
-);
-
+ localStorage.setItem("luneraProducts",JSON.stringify(products));
+ localStorage.setItem("luneraCategories",JSON.stringify(categories));
+ if(window.LuneraCloud){
+  window.LuneraCloud.saveCatalogue({luneraProducts:products,luneraCategories:categories})
+   .then(()=>showStatus())
+   .catch(error=>{const s=document.getElementById("status");if(s){s.textContent="CLOUD SAVE FAILED: "+(error.message||"Please try again.");s.classList.add("show");}});
+ }
 }
 
 
@@ -1188,10 +1193,7 @@ status.textContent=
 
 async function saveProduct(i){
 
-const button =
-event && event.target
-? event.target
-: null;
+const button = document.activeElement && document.activeElement.tagName === "BUTTON" ? document.activeElement : null;
 
 const newImage =
 selectedExistingFiles[i];
