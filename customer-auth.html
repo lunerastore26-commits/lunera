@@ -257,6 +257,12 @@
         if (button) button.disabled = value;
       }
 
+      function safeReturnPath() {
+        const requested = new URLSearchParams(location.search).get("return") || "index.html";
+        const allowed = new Set(["index.html","checkout.html","profile.html","cart.html","product.html"]);
+        return allowed.has(requested) ? requested : "index.html";
+      }
+
       function firebaseError(error) {
         const code = error && error.code;
         const messages = {
@@ -332,7 +338,7 @@
             message("Welcome back. You are signed in.", "success");
           }
           setTimeout(() => {
-            location.href = new URLSearchParams(location.search).get("return") || "index.html";
+            location.href = safeReturnPath();
           }, 900);
         } catch (error) {
           message(firebaseError(error), "error");
