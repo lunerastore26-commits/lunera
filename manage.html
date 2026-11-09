@@ -1465,9 +1465,36 @@ render();
 async function loadCloudOrders(){
  const box=document.getElementById("cloudOrders"); if(!box||!window.LuneraCloud)return;
  box.className="empty"; box.textContent="Loading orders…";
- try { const orders=await window.LuneraCloud.getOrders(); if(!orders.length){box.textContent="No orders have been placed yet.";return;}
- box.className=""; box.innerHTML=orders.slice(0,30).map(o=>`<article style="background:#fff;border:1px solid #e1dbd2;padding:20px;margin:0 0 12px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><strong style="font:20px 'Cormorant Garamond'">${escapeText(o.id||o.idKey||"Order")}</strong><span style="font:10px Montserrat;letter-spacing:1px">${escapeText(o.status||"New")} · ${escapeText(o.paymentStatus||"Pending")}</span></div><p style="font:11px/1.8 Montserrat;margin-top:10px">${escapeText(o.customer?.name||"Customer")} · ${escapeText(o.customer?.phone||"")}<br>${escapeText(o.customer?.email||"No email supplied")}<br>${(o.items||[]).map(i=>escapeText(i.name)+" × "+Number(i.quantity||1)).join("; ")}<br><strong>Total: ₹${Number(o.total||0).toLocaleString("en-IN")}</strong></p></article>`).join("");
+ try {
+  const orders=await window.LuneraCloud.getOrders();
+  if(!orders.length){box.textContent="No orders have been placed yet.";return;}
+  box.className="";
+  box.innerHTML=orders.slice(0,50).map(o=>{
+   const id=String(o.id||o.idKey||"");
+   const current=["New","Confirmed","Processing","Shipped","Delivered","Cancelled"].includes(o.status)?o.status:"New";
+   return `<article style="background:#fff;border:1px solid #e1dbd2;padding:20px;margin:0 0 12px">
+    <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap">
+     <strong style="font:20px 'Cormorant Garamond'">${escapeText(id||"Order")}</strong>
+     <span style="font:10px Montserrat;letter-spacing:1px">${escapeText(current)} · ${escapeText(o.paymentStatus||"Pending")}</span>
+    </div>
+    <p style="font:11px/1.8 Montserrat;margin-top:10px">${escapeText(o.customer?.name||"Customer")} · ${escapeText(o.customer?.phone||"")}<br>${escapeText(o.customer?.email||"No email supplied")}<br>${escapeText([o.customer?.address,o.customer?.city,o.customer?.state,o.customer?.pin].filter(Boolean).join(", "))}<br>${(o.items||[]).map(i=>escapeText(i.name)+" × "+Number(i.quantity||1)+(i.size?" · "+escapeText(i.size):"")).join("; ")}<br><strong>Total: ₹${Number(o.total||0).toLocaleString("en-IN")}</strong></p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px">
+     <select id="order-status-${escapeAttr(id)}" aria-label="Order status" style="max-width:220px">
+      ${["New","Confirmed","Processing","Shipped","Delivered","Cancelled"].map(s=>`<option value="${s}" ${s===current?"selected":""}>${s}</option>`).join("")}
+     </select>
+     <button class="save" type="button" onclick="updateCloudOrderStatus('${escapeAttr(id)}')">UPDATE STATUS</button>
+    </div>
+   </article>`;
+  }).join("");
  } catch(e){box.textContent=e.message||"Could not load orders. Check Firestore rules and admin sign-in.";}
+}
+async function updateCloudOrderStatus(id){
+ const select=document.getElementById("order-status-"+id);
+ if(!select)return;
+ try{
+  await window.LuneraCloud.updateOrderStatus(id,select.value);
+  await loadCloudOrders();
+ }catch(e){alert(e.message||"Could not update this order.");}
 }
 function escapeText(v){return String(v??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 </script>
