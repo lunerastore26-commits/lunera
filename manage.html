@@ -356,7 +356,7 @@ async function login(){
   try {
     if (!window.LuneraCloud) throw new Error("Secure sign-in is still loading. Please try again.");
     await window.LuneraCloud.signInAdmin(email, password);
-    await window.LuneraCloud.saveCatalogue({
+    await window.LuneraCloud.ensureCatalogue({
       luneraProducts: products,
       luneraCategories: categories,
       luneraHero: localStorage.getItem("luneraHero") || defaultHero
