@@ -734,7 +734,7 @@ Bag <span class="bag-count" id="bagCount">0</span>
 
 
 <section class="hero">
-<img class="hero-image-layer" id="heroImageLayer" alt="" aria-hidden="true" fetchpriority="high">
+<img class="hero-image-layer" id="heroImageLayer" src="hero-banner.jpg" alt="" aria-hidden="true" fetchpriority="high">
 
 <div class="hero-content">
 
@@ -1031,45 +1031,7 @@ ADEEB QURESHI
 
 <script>
 
-/* =========================
-HERO IMAGE — reliable image element + authoritative cloud value
-========================= */
-function cleanHeroURL(value){
- let url=String(value||"").trim();
- if(url.startsWith('"')&&url.endsWith('"')){try{url=JSON.parse(url)}catch(_){}}
- return url.replace(/[\\r\\n]/g,"");
-}
-function applyLuneraHero(value){
- const img=document.getElementById("heroImageLayer");
- if(!img)return;
- const url=cleanHeroURL(value===undefined?localStorage.getItem("luneraHero"):value);
- if(!url)return;
- if(img.dataset.currentUrl===url&&img.complete&&img.naturalWidth>0)return;
- img.dataset.currentUrl=url;
- img.onload=()=>{img.style.visibility="visible";};
- img.onerror=()=>{img.style.visibility="hidden";console.error("LUNÉRA hero image failed to load:",url);};
- img.style.visibility="hidden";
- img.src=url;
-}
-applyLuneraHero();
-window.addEventListener("lunera:catalogue-updated",event=>{
- const value=event.detail&&event.detail.luneraHero;
- if(value){localStorage.setItem("luneraHero",cleanHeroURL(value));applyLuneraHero(value);}
-});
-window.addEventListener("storage",event=>{if(event.key==="luneraHero")applyLuneraHero(event.newValue);});
-window.addEventListener("load",async()=>{
- try{
-  if(window.LuneraCloud&&typeof window.LuneraCloud.refreshCatalogue==="function"){
-   const catalogue=await window.LuneraCloud.refreshCatalogue();
-   if(catalogue&&catalogue.luneraHero){
-    const url=cleanHeroURL(catalogue.luneraHero);
-    localStorage.setItem("luneraHero",url);
-    applyLuneraHero(url);
-   }
-  }
- }catch(error){console.error("LUNÉRA hero cloud refresh failed:",error);}
-});
- 
+/* Homepage hero is a repository asset, not a Firestore URL. */
 /* Editable founders' story synced through the shared Firestore catalogue */
 const defaultLuneraStory={"eyebrow":"THE PEOPLE BEHIND LUNÉRA","title":"Built on experience. Driven by a new vision.","intro":"LUNÉRA brings together deep knowledge of intimate-apparel manufacturing and a fresh ambition to build a thoughtful, enduring brand.","sonuTitle":"Experience that shapes every layer.","sonuBody":"With 30 years of experience in manufacturing bras, panties and lingerie, Sonu Qureshi understands the craft behind intimate apparel—from product construction to the details that matter in everyday wear. That experience became the foundation for a new idea: to take that knowledge beyond manufacturing and build a brand of our own.","adeebTitle":"A new perspective. A shared ambition.","adeebBody":"As a new entrepreneur, Adeeb Qureshi brings fresh ideas, curiosity and the drive to grow LUNÉRA into a distinctive brand. Working alongside Sonu, he is focused on shaping the brand’s identity, reaching customers and building its future—one thoughtful step at a time.","closing":"Different journeys, one shared belief: create intimate essentials with care, confidence and timeless refinement."};
 function renderLuneraStory(){
