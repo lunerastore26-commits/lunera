@@ -152,7 +152,6 @@
       color: #716a62;
       text-align: center;
     }
-    #recaptcha-container { margin: 12px 0; }
     @media(max-width: 500px) {
       main { margin: 28px auto; padding: 25px 20px; }
       h1 { font-size: 30px; }
@@ -170,11 +169,6 @@
   <main>
     <h1>Your Account</h1>
     <p class="intro">A considered experience, from the very first step.</p>
-
-    <div class="tabs" role="tablist">
-      <button class="tab active" id="email-tab" type="button">EMAIL</button>
-      <button class="tab" id="phone-tab" type="button">MOBILE OTP</button>
-    </div>
 
     <div id="notice" class="notice" role="status" aria-live="polite"></div>
 
@@ -201,25 +195,6 @@
       </div>
     </section>
 
-    <section id="phone-panel" hidden>
-      <div class="field" id="phone-field">
-        <label for="phone">Mobile number</label>
-        <input id="phone" type="tel" inputmode="tel" autocomplete="tel"
-               placeholder="+91 98765 43210">
-      </div>
-      <div id="recaptcha-container"></div>
-      <button class="primary" id="send-otp" type="button">SEND OTP</button>
-      <div id="otp-field" class="field" hidden style="margin-top:18px">
-        <label for="otp">Verification code</label>
-        <input id="otp" type="text" inputmode="numeric" autocomplete="one-time-code"
-               maxlength="6" placeholder="Enter OTP">
-      </div>
-      <button class="primary" id="verify-otp" type="button" hidden style="margin-top:12px">
-        VERIFY OTP & SIGN IN
-      </button>
-      <p class="small">Use your full number with country code, for example +91.</p>
-    </section>
-
     <p class="small">
       By continuing, you agree to use your account responsibly.
     </p>
@@ -236,9 +211,6 @@
 
       const $ = id => document.getElementById(id);
       let mode = "login";
-      let confirmation = null;
-      let recaptcha = null;
-      let recaptchaReady = false;
       let busy = false;
 
       function message(text, kind) {
@@ -273,16 +245,12 @@
           "auth/email-already-in-use": "This email already has an account. Please sign in.",
           "auth/weak-password": "Please choose a password with at least 6 characters.",
           "auth/too-many-requests": "Too many attempts. Please wait and try again later.",
-          "auth/invalid-phone-number": "Enter a valid phone number with country code, such as +91.",
           "auth/operation-not-allowed": "Email/password sign-up is disabled in Firebase. Enable Email/Password in Firebase Console → Authentication → Sign-in method.",
           "auth/admin-restricted-operation": "Firebase is blocking public account creation. Enable Email/Password in Firebase Console → Authentication → Sign-in method.",
           "auth/unauthorized-domain": "This website domain is not authorised in Firebase Authentication. Add the current domain under Firebase Console → Authentication → Settings → Authorised domains.",
           "auth/invalid-api-key": "Firebase rejected the project API key. Check the Firebase web app configuration.",
           "auth/app-not-authorized": "This website is not authorised to use the Firebase project. Check Firebase authorised domains and API key restrictions.",
           "auth/internal-error": "Firebase had an internal error. Please try again; if it continues, check Firebase Authentication settings.",
-          "auth/captcha-check-failed": "The security check failed. Refresh the page and try again.",
-          "auth/invalid-verification-code": "That OTP is incorrect. Please check it and try again.",
-          "auth/code-expired": "This OTP has expired. Please request a new one.",
           "auth/network-request-failed": "Network issue. Please check your internet and try again."
         };
         return messages[code] || ((error && error.message) ? error.message + (code ? " (Firebase code: " + code + ")" : "") : "Something went wrong. Please try again.");
@@ -300,22 +268,6 @@
 
       $("show-signup").addEventListener("click", () => setMode("signup"));
       $("show-login").addEventListener("click", () => setMode("login"));
-
-      $("email-tab").addEventListener("click", () => {
-        $("email-tab").classList.add("active");
-        $("phone-tab").classList.remove("active");
-        $("email-panel").hidden = false;
-        $("phone-panel").hidden = true;
-        clearMessage();
-      });
-
-      $("phone-tab").addEventListener("click", () => {
-        $("phone-tab").classList.add("active");
-        $("email-tab").classList.remove("active");
-        $("phone-panel").hidden = false;
-        $("email-panel").hidden = true;
-        clearMessage();
-      });
 
       $("email-submit").addEventListener("click", async () => {
         if (busy) return;
@@ -363,74 +315,6 @@
           message("If an account exists for this email, a password reset email will be sent.", "success");
         } catch (error) {
           message(firebaseError(error), "error");
-        }
-      });
-
-      async function setupRecaptcha() {
-        if (recaptchaReady) return;
-        if (!window.firebase || !window.LuneraCloud) throw new Error("Firebase did not load. Please refresh and try again.");
-        await window.LuneraCloud.ready;
-        recaptcha = new firebase.auth.RecaptchaVerifier("recaptcha-container", {
-          size: "normal",
-          callback: () => {},
-          "expired-callback": () => {
-            recaptchaReady = false;
-            try { if (recaptcha) recaptcha.clear(); } catch (_) {}
-            recaptcha = null;
-            $("recaptcha-container").innerHTML = "";
-            message("Security check expired. Please verify it again.", "error");
-          }
-        });
-        await recaptcha.render();
-        recaptchaReady = true;
-      }
-
-      $("send-otp").addEventListener("click", async () => {
-        if (busy) return;
-        const phone = $("phone").value.trim();
-        if (!/^\+[1-9]\d{7,14}$/.test(phone)) {
-          message("Enter a valid phone number including country code, such as +919876543210.", "error");
-          return;
-        }
-        setBusy(true, $("send-otp"));
-        try {
-          await setupRecaptcha();
-          confirmation = await firebase.auth().signInWithPhoneNumber(phone, recaptcha);
-          $("otp-field").hidden = false;
-          $("verify-otp").hidden = false;
-          $("send-otp").textContent = "RESEND OTP";
-          message("OTP sent if the number is eligible. Check your SMS.", "success");
-        } catch (error) {
-          message(firebaseError(error), "error");
-          if (recaptcha) {
-            try { recaptcha.clear(); } catch (_) {}
-            recaptcha = null;
-            recaptchaReady = false;
-            $("recaptcha-container").innerHTML = "";
-          }
-        } finally {
-          setBusy(false, $("send-otp"));
-        }
-      });
-
-      $("verify-otp").addEventListener("click", async () => {
-        if (busy) return;
-        const code = $("otp").value.trim();
-        if (!confirmation || !/^\d{6}$/.test(code)) {
-          message("Enter the 6-digit OTP sent to your mobile.", "error");
-          return;
-        }
-        setBusy(true, $("verify-otp"));
-        try {
-          await confirmation.confirm(code);
-          message("Mobile number verified. You are signed in.", "success");
-          setTimeout(() => {
-            location.href = new URLSearchParams(location.search).get("return") || "index.html";
-          }, 900);
-        } catch (error) {
-          message(firebaseError(error), "error");
-        } finally {
-          setBusy(false, $("verify-otp"));
         }
       });
 
