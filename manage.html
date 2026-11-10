@@ -283,17 +283,6 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 </section>
 
 
-<div class="crop-modal" id="storyCropModal" role="dialog" aria-modal="true" aria-labelledby="storyCropTitle">
- <div class="crop-dialog">
-  <div class="crop-title" id="storyCropTitle">Adjust founder portrait</div>
-  <p class="crop-help">Your full photo is visible here. Drag the 4:5 frame to choose the position, then adjust its size before saving.</p>
-  <div class="crop-stage-wrap"><div class="crop-stage" id="storyCropStage"><img id="storyCropSource" alt="Full original photo"><div class="crop-frame" id="storyCropFrame"></div></div></div>
-  <div class="crop-controls"><label for="storyCropZoom">CROP SIZE</label><input id="storyCropZoom" type="range" min="50" max="100" value="82"></div>
-  <div class="crop-actions"><button type="button" class="save" id="storyCropSave">CROP &amp; SAVE PHOTO</button><button type="button" class="secondary crop-cancel" id="storyCropCancel">CANCEL</button></div>
-  <div class="upload-status" id="storyCropStatus" aria-live="polite"></div>
- </div>
-</div>
-
 </main>
 
 <script>
@@ -401,93 +390,27 @@ const defaultLuneraStory={"eyebrow":"THE PEOPLE BEHIND LUNÉRA","title":"Built o
 function currentStory(){try{const v=JSON.parse(localStorage.getItem("luneraStory")||"null");return v&&typeof v==="object"?{...defaultLuneraStory,...v}:{...defaultLuneraStory}}catch(_){return {...defaultLuneraStory}}}
 function fillStoryFields(){const s=currentStory();["sonu","adeeb"].forEach(k=>{const p=document.getElementById(k+"StoryPhotoPreview");if(p&&s[k+"Photo"]){p.src=s[k+"Photo"];p.style.display="block"}});const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};Object.entries(map).forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.value=s[k]||""})}
 async function saveStory(){const b=document.getElementById("saveStoryButton"),st=document.getElementById("storySaveStatus");const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};const next={...currentStory()};Object.entries(map).forEach(([id,k])=>next[k]=document.getElementById(id).value.trim());if(Object.values(map).some(k=>!next[k])){alert("Please complete all Our Story fields before saving.");return}b.disabled=true;b.textContent="SAVING...";st.textContent="Saving text and founder photos to shared catalogue…";st.className="upload-status loading";try{if(!window.LuneraCloud)throw Error("Cloud services are not ready. Refresh and try again.");await window.LuneraCloud.saveCatalogue({luneraStory:next});localStorage.setItem("luneraStory",JSON.stringify(next));st.textContent="OUR STORY AND BOTH FOUNDER PHOTO SETTINGS SAVED TO THE SHARED STORE.";st.className="upload-status success";showStatus()}catch(e){st.textContent=e.message||"Could not save the story.";st.className="upload-status error";alert(st.textContent)}finally{b.disabled=false;b.textContent="SAVE OUR STORY"}}
-let cropPhotoKind="",cropPhotoFile=null,cropPhotoObjectUrl="",cropRect={x:0,y:0,w:0,h:0},cropDrag=null;
-function selectStoryPortrait(kind,event){
- const file=event.target.files&&event.target.files[0];if(!file)return;
+async function selectStoryPortrait(kind,event){
+ const input=event.target,file=input.files&&input.files[0];if(!file)return;
  const status=document.getElementById(kind+"StoryPhotoStatus");
- if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="Please choose a JPG, PNG or WebP image.";status.className="upload-status error";event.target.value="";return;}
- if(file.size>15*1024*1024){status.textContent="Please choose a photo smaller than 15 MB.";status.className="upload-status error";event.target.value="";return;}
- cropPhotoKind=kind;cropPhotoFile=file;event.target.value="";
- if(cropPhotoObjectUrl)URL.revokeObjectURL(cropPhotoObjectUrl);
- cropPhotoObjectUrl=URL.createObjectURL(file);
- const img=document.getElementById("storyCropSource"),stage=document.getElementById("storyCropStage");
- img.onload=()=>{
-  const maxW=Math.min(520,window.innerWidth-60),maxH=Math.min(window.innerHeight*.44,560);
-  const scale=Math.min(maxW/img.naturalWidth,maxH/img.naturalHeight,1);
-  const w=Math.max(120,Math.round(img.naturalWidth*scale)),h=Math.max(150,Math.round(img.naturalHeight*scale));
-  stage.style.width=w+"px";stage.style.height=h+"px";
-  const maxCropW=Math.min(w*.9,h*.8*.8);
-  cropRect.w=maxCropW*.82;cropRect.h=cropRect.w/0.8;
-  cropRect.x=(w-cropRect.w)/2;cropRect.y=(h-cropRect.h)/2;
-  drawStoryCropFrame();
-  document.getElementById("storyCropZoom").value="82";
-  document.getElementById("storyCropStatus").textContent="Move the frame over the part of the photo you want to keep.";
-  document.getElementById("storyCropModal").classList.add("open");
- };
- img.onerror=()=>{status.textContent="This photo could not be opened. Please choose another image.";status.className="upload-status error";};
- img.src=cropPhotoObjectUrl;
-}
-function drawStoryCropFrame(){
- const f=document.getElementById("storyCropFrame");
- f.style.width=cropRect.w+"px";f.style.height=cropRect.h+"px";
- f.style.left=cropRect.x+"px";f.style.top=cropRect.y+"px";
-}
-function resizeStoryCrop(value){
- const stage=document.getElementById("storyCropStage"),w=stage.clientWidth,h=stage.clientHeight;
- const maxW=Math.min(w*.9,h*.8*.8),centerX=cropRect.x+cropRect.w/2,centerY=cropRect.y+cropRect.h/2;
- cropRect.w=maxW*(Number(value)/100);cropRect.h=cropRect.w/0.8;
- cropRect.x=Math.max(0,Math.min(w-cropRect.w,centerX-cropRect.w/2));
- cropRect.y=Math.max(0,Math.min(h-cropRect.h,centerY-cropRect.h/2));
- drawStoryCropFrame();
-}
-function closeStoryCrop(){
- document.getElementById("storyCropModal").classList.remove("open");
- if(cropPhotoObjectUrl)URL.revokeObjectURL(cropPhotoObjectUrl);
- cropPhotoObjectUrl="";cropPhotoFile=null;cropDrag=null;const input=document.getElementById(cropPhotoKind+"StoryPhotoFile");if(input)input.value="";
-}
-const storyCropFrame=document.getElementById("storyCropFrame");
-storyCropFrame.addEventListener("pointerdown",event=>{
- event.preventDefault();cropDrag={x:event.clientX,y:event.clientY,left:cropRect.x,top:cropRect.y};
- storyCropFrame.setPointerCapture(event.pointerId);
-});
-storyCropFrame.addEventListener("pointermove",event=>{
- if(!cropDrag)return;
- const stage=document.getElementById("storyCropStage");
- cropRect.x=Math.max(0,Math.min(stage.clientWidth-cropRect.w,cropDrag.left+event.clientX-cropDrag.x));
- cropRect.y=Math.max(0,Math.min(stage.clientHeight-cropRect.h,cropDrag.top+event.clientY-cropDrag.y));
- drawStoryCropFrame();
-});
-storyCropFrame.addEventListener("pointerup",()=>cropDrag=null);
-storyCropFrame.addEventListener("pointercancel",()=>cropDrag=null);
-document.getElementById("storyCropZoom").addEventListener("input",event=>resizeStoryCrop(event.target.value));
-document.getElementById("storyCropCancel").addEventListener("click",closeStoryCrop);
-document.getElementById("storyCropSave").addEventListener("click",async()=>{
- const button=document.getElementById("storyCropSave"),status=document.getElementById("storyCropStatus");
- const stage=document.getElementById("storyCropStage"),img=document.getElementById("storyCropSource");
- if(!cropPhotoFile||!img.naturalWidth)return;
- button.disabled=true;button.textContent="UPLOADING...";
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="Please choose a JPG, PNG or WebP image.";status.className="upload-status error";input.value="";return;}
+ if(file.size>10*1024*1024){status.textContent="Please choose a photo smaller than 10 MB.";status.className="upload-status error";input.value="";return;}
  try{
-  const canvas=document.createElement("canvas");canvas.width=1200;canvas.height=1500;
-  const ctx=canvas.getContext("2d");
-  const sx=cropRect.x/stage.clientWidth*img.naturalWidth,sy=cropRect.y/stage.clientHeight*img.naturalHeight;
-  const sw=cropRect.w/stage.clientWidth*img.naturalWidth,sh=cropRect.h/stage.clientHeight*img.naturalHeight;
-  ctx.drawImage(img,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
-  const cropped=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.92));
-  if(!cropped)throw Error("Could not prepare the cropped photo. Please try again.");
-  const uploadFile=new File([cropped],cropPhotoKind+"-portrait-4x5.jpg",{type:"image/jpeg"});
-  const url=await uploadImage(uploadFile,status);
-  const story={...currentStory(),[cropPhotoKind+"Photo"]:url};
+  status.textContent="UPLOADING ORIGINAL PHOTO...";
+  status.className="upload-status loading";
+  const url=await uploadImage(file,status);
+  const story={...currentStory(),[kind+"Photo"]:url};
   await window.LuneraCloud.saveCatalogue({luneraStory:story});
   localStorage.setItem("luneraStory",JSON.stringify(story));
-  const preview=document.getElementById(cropPhotoKind+"StoryPhotoPreview");
+  const preview=document.getElementById(kind+"StoryPhotoPreview");
   preview.src=url;preview.style.display="block";
-  document.getElementById(cropPhotoKind+"StoryPhotoStatus").textContent="PHOTO SAVED IN 4:5 FORMAT.";
-  document.getElementById(cropPhotoKind+"StoryPhotoStatus").className="upload-status success";
-  closeStoryCrop();
- }catch(error){status.textContent=error.message||"Photo crop or upload failed.";status.className="upload-status error";}
- finally{button.disabled=false;button.textContent="CROP & SAVE PHOTO";}
-});
-document.getElementById("storyCropModal").addEventListener("click",event=>{if(event.target.id==="storyCropModal")closeStoryCrop();});
+  status.textContent="ORIGINAL PHOTO SAVED — NO CROP APPLIED.";
+  status.className="upload-status success";
+ }catch(error){
+  status.textContent=error.message||"Photo upload failed.";
+  status.className="upload-status error";
+ }finally{input.value="";}
+}
 
 function resetStoryFields(){if(!confirm("Restore the default founders’ story text?"))return;Object.assign(document,{});const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};Object.entries(map).forEach(([id,k])=>document.getElementById(id).value=defaultLuneraStory[k])}
 
