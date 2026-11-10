@@ -119,14 +119,15 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 #sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:4/5;object-fit:contain;object-position:center;display:none;background:#e8e0d4}
 
 
-/* Manage image previews mirror the homepage cover frame (1005:563). */
-.hero-preview,.product-preview,.upload-preview{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:1005 / 563;max-height:none;object-fit:cover;object-position:center;background:#e8e0d4}
+/* Match each editor preview to the image frame used on its storefront section. */
+.hero-preview,.category-cover-preview{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:1005 / 563;max-height:none;object-fit:cover;object-position:center;background:#e8e0d4}
+.product-preview,.upload-preview{display:block;width:min(100%,420px);max-width:100%;height:auto;aspect-ratio:4 / 5;max-height:none;object-fit:contain;object-position:center;background:#e8e0d4}
 .product-preview{margin:0 auto 20px}
+.small-upload .upload-preview{height:auto}
 #sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:4/5;object-fit:contain;object-position:center;display:none;background:#e8e0d4}
 .gallery-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-.gallery-preview figure{position:relative;width:clamp(110px,22%,180px);aspect-ratio:1005 / 563;background:#e8e0d4;border:1px solid #e1dbd2}
-.gallery-preview img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
-.gallery-preview button{position:absolute;right:4px;top:4px;padding:5px 7px;background:#151212;color:white;font-size:8px}.gallery-preview button:first-of-type{top:4px;right:4px}.gallery-preview button:last-of-type{top:auto;bottom:4px;right:4px}
+.gallery-preview figure{position:relative;width:clamp(78px,18%,120px);aspect-ratio:4 / 5;background:#e8e0d4;border:1px solid #e1dbd2}
+.gallery-preview img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
 .image-editor-modal{position:fixed;inset:0;z-index:9999;background:#151212ee;display:none;place-items:center;padding:12px}
 .image-editor-panel{width:min(900px,100%);max-height:94vh;overflow:auto;background:#f7f4ef;padding:clamp(16px,3vw,30px);border:1px solid #b49a6b}
 .image-editor-title{font:400 30px 'Bodoni Moda';margin-bottom:8px}
@@ -276,7 +277,7 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 <section class="section">
 <div class="section-title">Collection Cover Images</div>
-<p class="intro">Set homepage cover images for all five collections. Every upload opens the 4:5 editor: fit the full photo or crop and reposition it yourself, then save. Product galleries support multiple photos; use MAKE MAIN to choose the first photo customers see.</p>
+<p class="intro">Set homepage cover images for all five collections. Every upload opens the 1005:563 editor to match the homepage covers. Product galleries support multiple 4:5 photos; use MAKE MAIN to choose the first photo customers see.</p>
 <div id="categoryCoverManager" class="products"></div>
 <div class="actions"><button class="save" id="saveCategoryCoversButton" type="button" onclick="saveCategoryCovers()">SAVE COLLECTION COVERS</button></div>
 <div id="categoryCoverStatus" class="upload-status"></div>
@@ -394,35 +395,37 @@ let categoryCovers = {};
 try { categoryCovers = JSON.parse(localStorage.getItem("luneraCategoryCovers") || "{}") || {}; } catch (_) { categoryCovers = {}; }
 
 let cropperInstance=null,cropResolve=null,cropObjectUrl="",currentEditFile=null;
-function makeFitFourFive(file){
+let currentEditAspectRatio=4/5;
+function makeFitImage(file,aspectRatio=4/5){
  return new Promise((resolve,reject)=>{
   const url=URL.createObjectURL(file),img=new Image();
   img.onload=()=>{
-   const canvas=document.createElement("canvas");canvas.width=1000;canvas.height=1250;
-   const ctx=canvas.getContext("2d");ctx.fillStyle="#f7f4ef";ctx.fillRect(0,0,1000,1250);
-   const scale=Math.min(1000/img.naturalWidth,1250/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale;
-   ctx.drawImage(img,(1000-w)/2,(1250-h)/2,w,h);URL.revokeObjectURL(url);
+   const width=1000,height=Math.round(width/aspectRatio),canvas=document.createElement("canvas");canvas.width=width;canvas.height=height;
+   const ctx=canvas.getContext("2d");ctx.fillStyle="#f7f4ef";ctx.fillRect(0,0,width,height);
+   const scale=Math.min(width/img.naturalWidth,height/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale;
+   ctx.drawImage(img,(width-w)/2,(height-h)/2,w,h);URL.revokeObjectURL(url);
    canvas.toBlob(blob=>blob?resolve(new File([blob],(file.name||"lunera").replace(/\.[^.]+$/,"")+".jpg",{type:"image/jpeg",lastModified:Date.now()})):reject(Error("Could not prepare image.")),"image/jpeg",.92);
   };
   img.onerror=()=>{URL.revokeObjectURL(url);reject(Error("Image could not be opened."))};img.src=url;
  });
 }
-function openImageEditor(file){
+function openImageEditor(file,aspectRatio=4/5){
  return new Promise((resolve,reject)=>{
   if(!window.Cropper){reject(Error("Image editor is loading. Please refresh."));return;}
-  currentEditFile=file;cropResolve=resolve;cropObjectUrl=URL.createObjectURL(file);
+  currentEditFile=file;currentEditAspectRatio=aspectRatio;cropResolve=resolve;cropObjectUrl=URL.createObjectURL(file);
   const modal=document.getElementById("imageEditorModal"),img=document.getElementById("imageEditorImage");
   modal.style.display="grid";
-  img.onload=()=>{if(cropperInstance)cropperInstance.destroy();cropperInstance=new Cropper(img,{aspectRatio:4/5,viewMode:0,dragMode:"move",autoCropArea:.95,background:false,responsive:true,guides:true,center:true,movable:true,zoomable:true,cropBoxMovable:true,cropBoxResizable:true,toggleDragModeOnDblclick:false});};
+  img.onload=()=>{if(cropperInstance)cropperInstance.destroy();cropperInstance=new Cropper(img,{aspectRatio:currentEditAspectRatio,viewMode:0,dragMode:"move",autoCropArea:.95,background:false,responsive:true,guides:true,center:true,movable:true,zoomable:true,cropBoxMovable:true,cropBoxResizable:true,toggleDragModeOnDblclick:false});};
   img.onerror=()=>{finishImageEdit("cancel");reject(Error("Image could not be opened."));};img.src=cropObjectUrl;
  });
 }
 async function finishImageEdit(mode){
  if(!cropResolve)return;const resolve=cropResolve;cropResolve=null;let result=null;
  try{
-  if(mode==="fit")result=await makeFitFourFive(currentEditFile);
+  if(mode==="fit")result=await makeFitImage(currentEditFile,currentEditAspectRatio);
   if(mode==="crop"){
-   const canvas=cropperInstance&&cropperInstance.getCroppedCanvas({width:1000,height:1250,fillColor:"#f7f4ef",imageSmoothingEnabled:true,imageSmoothingQuality:"high"});
+   const width=1000,height=Math.round(width/currentEditAspectRatio);
+   const canvas=cropperInstance&&cropperInstance.getCroppedCanvas({width,height,fillColor:"#f7f4ef",imageSmoothingEnabled:true,imageSmoothingQuality:"high"});
    if(!canvas)throw Error("Could not crop this image.");
    const blob=await new Promise(ok=>canvas.toBlob(ok,"image/jpeg",.92));if(!blob)throw Error("Could not crop this image.");
    result=new File([blob],"lunera-photo.jpg",{type:"image/jpeg",lastModified:Date.now()});
@@ -430,7 +433,7 @@ async function finishImageEdit(mode){
  }catch(e){alert(e.message||"Image editing failed.");}
  document.getElementById("imageEditorModal").style.display="none";
  if(cropperInstance){cropperInstance.destroy();cropperInstance=null;}
- if(cropObjectUrl)URL.revokeObjectURL(cropObjectUrl);cropObjectUrl="";currentEditFile=null;resolve(result);
+ if(cropObjectUrl)URL.revokeObjectURL(cropObjectUrl);cropObjectUrl="";currentEditFile=null;currentEditAspectRatio=4/5;resolve(result);
 }
 
 
@@ -512,7 +515,7 @@ async function selectStoryPortrait(kind,event){
  try{
   status.textContent="OPENING 4:5 IMAGE EDITOR...";
   status.className="upload-status loading";
-  const edited=await openImageEditor(file);if(!edited)return;
+  const edited=await openImageEditor(file,1005/563);if(!edited)return;
   const url=await uploadImage(edited,status);
   const story={...currentStory(),[kind+"Photo"]:url};
   await window.LuneraCloud.saveCatalogue({luneraStory:story});
@@ -598,7 +601,7 @@ return;
 }
 
 try{
- selectedHeroFile=await openImageEditor(file);if(!selectedHeroFile){event.target.value="";return;}
+ selectedHeroFile=await openImageEditor(file,1005/563);if(!selectedHeroFile){event.target.value="";return;}
  name.textContent=file.name+" · 4:5 edited";preview.src=URL.createObjectURL(selectedHeroFile);
  status.textContent="4:5 HERO IMAGE READY TO UPLOAD.";
 }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
@@ -911,7 +914,7 @@ function renderCategoryCovers(){
  const keys=["Panties","Bras","Lingerie Sets","Nightwear","Essentials"];
  root.innerHTML=keys.map((name,index)=>{
   const src=categoryCovers[name]||defaultCategoryCovers[name];
-  return '<div class="product-card"><div class="product-number">0'+(index+1)+' — '+escapeHTML(name)+'</div><img class="product-preview" id="category-cover-preview-'+index+'" src="'+escapeAttr(src)+'" alt="'+escapeAttr(name)+' homepage cover"><label for="category-cover-file-'+index+'">'+escapeHTML(name)+' COVER IMAGE</label><input id="category-cover-file-'+index+'" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleCategoryCoverSelect(\''+name+'\','+index+',event)"><div class="file-name" id="category-cover-file-name-'+index+'">Choose a new image to replace this cover</div></div>';
+  return '<div class="product-card"><div class="product-number">0'+(index+1)+' — '+escapeHTML(name)+'</div><img class="category-cover-preview" id="category-cover-preview-'+index+'" src="'+escapeAttr(src)+'" alt="'+escapeAttr(name)+' homepage cover"><label for="category-cover-file-'+index+'">'+escapeHTML(name)+' COVER IMAGE</label><input id="category-cover-file-'+index+'" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleCategoryCoverSelect(\''+name+'\','+index+',event)"><div class="file-name" id="category-cover-file-name-'+index+'">Choose a new image to replace this cover</div></div>';
  }).join("");
 }
 async function handleCategoryCoverSelect(name,index,event){
