@@ -16,6 +16,12 @@ const ready=(async()=>{
   adminUser=user&&user.emailVerified&&String(user.email||"").toLowerCase()===ADMIN_EMAIL?user:null;
   const preview=sessionStorage.getItem("luneraCustomerPreview")==="yes";
   const m=document.getElementById("manageLink");if(m)m.style.display=adminUser&&!preview?"inline-block":"none";
+  const connection=document.getElementById("adminConnectionStatus");
+  if(connection){
+   if(adminUser){connection.textContent="SECURE ADMIN CONNECTED · SHARED CATALOGUE READY";connection.className="admin-connection connected";}
+   else if(user){connection.textContent="ADMIN ACCESS NOT VERIFIED";connection.className="admin-connection error";}
+   else{connection.textContent="WAITING FOR SECURE ADMIN SIGN-IN";connection.className="admin-connection";}
+  }
   const toggle=document.getElementById("customerViewToggle");
   if(toggle){
    toggle.style.display=adminUser?"inline-block":"none";
