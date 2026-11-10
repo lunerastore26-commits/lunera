@@ -867,7 +867,7 @@ async function handleCategoryCoverSelect(name,index,event){
 }
 async function saveCategoryCovers(){
  const button=document.getElementById("saveCategoryCoversButton"),status=document.getElementById("categoryCoverStatus");
- const keys=["Bras","Lingerie Sets","Essentials"];
+ const keys=["Panties","Bras","Lingerie Sets","Nightwear","Essentials"];
  if(!keys.some(k=>selectedCategoryCoverFiles[k])){status.textContent="Choose at least one cover image before saving.";status.className="upload-status error";return;}
  button.disabled=true;button.textContent="UPLOADING...";
  try{
