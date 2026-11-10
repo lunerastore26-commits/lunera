@@ -23,12 +23,12 @@
 <h2 style="font-size:25px;margin:15px 0">Payment Method</h2>
 <div class="payment-options">
 <label class="payment-option"><input type="radio" name="paymentMethod" value="COD" checked><span><strong>Cash on Delivery (COD)</strong><small>Pay when your order is delivered.</small></span></label>
-
+<label class="payment-option"><input type="radio" name="paymentMethod" value="RAZORPAY"><span><strong>Pay Online — Razorpay</strong><small>Secure payment by UPI, cards, net banking and supported wallets.</small></span></label>
 </div>
 <div id="error" class="error" role="alert"></div><button type="submit">PLACE COD ORDER</button>
 <p style="font-size:10px;line-height:1.8;color:#71695f;margin:14px 0">By placing your order, you acknowledge our <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a> and <a href="returns.html" target="_blank" rel="noopener">7-Day Returns Policy</a>.</p>
 </form></div></section>
-<section><h2>Order Summary</h2><div class="order-box"><div id="order" class="order"></div><p class="note">Complimentary shipping. Payment is due on delivery.</p></div></section></div></div>
+<section><h2>Order Summary</h2><div class="order-box"><div id="order" class="order"></div><p class="note" id="paymentNote">Complimentary shipping. Payment is due on delivery for COD orders. Online payments are securely processed by Razorpay.</p></div></section></div></div>
 <div id="success" class="success"><h2>Order Received</h2><p id="successText"></p><a class="return" href="profile.html" style="margin:6px">VIEW MY ORDERS</a><a class="return" href="index.html" style="margin:6px">RETURN TO LUNÉRA</a></div>
 </main>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
@@ -47,21 +47,73 @@ total=0;orderEl.innerHTML=cart.map(i=>{const q=Math.max(1,Math.min(20,Math.floor
 async function sendEmail(o){if(!window.emailjs)throw Error("EmailJS did not load");const addr=[o.customer.address,o.customer.city,o.customer.state,o.customer.pin].filter(Boolean).join(", "),details=o.items.map(i=>`${i.name||"LUNÉRA item"}${i.size?" / Size: "+i.size:""} × ${i.quantity} — ${money(parsePrice(i.price)*i.quantity)}`).join("\n");await emailjs.send(EMAILJS_SERVICE_ID,EMAILJS_TEMPLATE_ID,{order_id:o.id,customer_name:o.customer.name,customer_phone:o.customer.phone,customer_email:o.customer.email||"Not provided",delivery_address:addr,order_details:details,order_total:money(o.total),customer_notes:o.customer.notes||"None"},{publicKey:EMAILJS_PUBLIC_KEY})}
 render();
 window.addEventListener("load",async()=>{try{await window.LuneraCloud.ready;const user=await window.LuneraCloud.currentUser();if(user){if(user.displayName&&!document.getElementById("name").value)document.getElementById("name").value=user.displayName;if(user.email&&!document.getElementById("email").value)document.getElementById("email").value=user.email;document.getElementById("checkoutContent").style.display="block";document.getElementById("authRequired").style.display="none";}else{document.getElementById("checkoutContent").style.display="none";document.getElementById("authRequired").style.display="block";}}catch(e){showError("Account services are unavailable. Please refresh and try again.");}});
-form.addEventListener("submit",async e=>{e.preventDefault();clearError();const signedIn=await window.LuneraCloud.currentUser().catch(()=>null);if(!signedIn){location.href="customer-auth.html?return=checkout.html";return}if(!cart.length){showError("Your bag is empty.");return}if(!form.reportValidity())return;
-if(payment()!=="COD"){showError("Only Cash on Delivery is currently available.");return}
-const name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\D/g,""),email=document.getElementById("email").value.trim(),address=document.getElementById("address").value.trim(),city=document.getElementById("city").value.trim(),state=document.getElementById("state").value.trim(),pin=document.getElementById("pin").value.replace(/\D/g,""),notes=document.getElementById("notes").value.trim();
-if(!/^[0-9]{10}$/.test(phone)){showError("Please enter a valid 10-digit phone number.");return}if(!/^[0-9]{6}$/.test(pin)){showError("Please enter a valid 6-digit PIN code.");return}if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showError("Please enter a valid email or leave it blank.");return}
-const btn=form.querySelector('button[type="submit"]'),old=btn.textContent;btn.disabled=true;btn.textContent="PLACING ORDER…";const id="LUN"+Date.now().toString().slice(-8);
-const o={id,date:new Date().toISOString(),customer:{name,phone,email,address,city,state,pin,notes},items:cart.map(i=>({...i,price:parsePrice(i.price),quantity:Math.max(1,Math.min(20,Math.floor(Number(i.quantity)||1)))})),total,status:"New",paymentStatus:"Pending",paymentMethod:"Cash on Delivery (COD)",emailStatus:"Pending"};
-try{if(!window.LuneraCloud)throw Error("Store database is not ready");await window.LuneraCloud.saveOrder(o);localStorage.removeItem("luneraCart")}catch(err){btn.disabled=false;btn.textContent=old;showError(err.message||"Order could not be saved. Your bag has not been cleared. Please check your account and connection.");return}
-document.getElementById("checkoutContent").style.display="none";document.getElementById("success").style.display="block";document.getElementById("successText").textContent=`Thank you, ${name}. COD order ${id} has been received. Total: ${money(total)}. Payment is due on delivery; the store will confirm the order separately.`;
-const note=document.createElement("p");note.id="emailStatusNote";note.textContent="Sending store notification…";document.getElementById("success").appendChild(note);
-try{await sendEmail(o);note.textContent="Store email notification sent to LUNÉRA."}catch(err){note.textContent="Your order was saved, but the email notification did not send. Please contact LUNÉRA to confirm receipt."}
-btn.disabled=false;btn.textContent=old;
-});
+async function completeSuccess(o, successMessage){
+ localStorage.removeItem("luneraCart");
+ document.getElementById("checkoutContent").style.display="none";
+ document.getElementById("success").style.display="block";
+ document.getElementById("successText").textContent=successMessage;
+ const note=document.createElement("p");note.id="emailStatusNote";note.textContent="Sending store notification…";document.getElementById("success").appendChild(note);
+ try{await sendEmail(o);note.textContent="Store email notification sent to LUNÉRA."}
+ catch(err){note.textContent="Your order was saved, but the email notification did not send. Please contact LUNÉRA to confirm receipt."}
+}
+async function startRazorpayPayment(customer, btn, oldText){
+ if(!window.firebase||!firebase.functions||!window.Razorpay)throw Error("Secure online payment is not available yet. Please try COD or contact LUNÉRA.");
+ const functions=firebase.app().functions("asia-south1");
+ const createOrder=functions.httpsCallable("createRazorpayOrder");
+ const verifyPayment=functions.httpsCallable("verifyRazorpayPayment");
+ const payload={customer,items:cart.map(i=>({id:i.id,size:String(i.size||""),quantity:Math.max(1,Math.min(20,Math.floor(Number(i.quantity)||1)))}))};
+ const created=(await createOrder(payload)).data;
+ if(!created||!created.orderId||!created.razorpayOrderId||!created.keyId||!created.amount)throw Error("Payment session could not be created. Please try again.");
+ const options={
+  key:created.keyId,amount:created.amount,currency:"INR",name:"LUNÉRA",description:"LUNÉRA order "+created.orderId,
+  order_id:created.razorpayOrderId,
+  prefill:{name:customer.name,email:customer.email||"",contact:customer.phone},
+  notes:{lunera_order_id:created.orderId},
+  theme:{color:"#17352b"},
+  modal:{ondismiss:()=>{btn.disabled=false;btn.textContent=oldText;showError("Payment window closed. Your bag is safe; you can retry or choose COD.")}},
+  handler:async response=>{
+   try{
+    btn.disabled=true;btn.textContent="VERIFYING PAYMENT…";
+    const verified=(await verifyPayment({orderId:created.orderId,razorpayOrderId:response.razorpay_order_id,paymentId:response.razorpay_payment_id,signature:response.razorpay_signature})).data;
+    if(!verified||verified.paymentStatus!=="Paid")throw Error("Payment verification is still pending. Please contact LUNÉRA before retrying.");
+    const o={id:created.orderId,date:new Date().toISOString(),customer,items:verified.items,total:verified.total,status:"Confirmed",paymentStatus:"Paid",paymentMethod:"Razorpay",emailStatus:"Pending"};
+    await completeSuccess(o,`Thank you, ${customer.name}. Your online payment for order ${created.orderId} has been verified. Total: ${money(verified.total)}.`);
+   }catch(err){btn.disabled=false;btn.textContent=oldText;showError(err.message||"Payment verification failed. Please contact LUNÉRA with your payment reference; do not pay again until checked.");}
+  }
+ };
+ const razorpay=new Razorpay(options);
+ razorpay.on("payment.failed",response=>{btn.disabled=false;btn.textContent=oldText;showError(response.error&&response.error.description?response.error.description:"Payment failed. Your bag is safe; please retry or choose COD.")});
+ razorpay.open();
+}
+form.querySelectorAll('input[name="paymentMethod"]').forEach(r=>r.addEventListener("change",()=>{form.querySelector('button[type="submit"]').textContent=payment()==="COD"?"PLACE COD ORDER":"PAY SECURELY WITH RAZORPAY"}));
+form.addEventListener("submit",async e=>{
+ e.preventDefault();clearError();
+ const signedIn=await window.LuneraCloud.currentUser().catch(()=>null);
+ if(!signedIn){location.href="customer-auth.html?return=checkout.html";return}
+ if(!cart.length){showError("Your bag is empty.");return}
+ if(!form.reportValidity())return;
+ const name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\\D/g,""),email=document.getElementById("email").value.trim(),address=document.getElementById("address").value.trim(),city=document.getElementById("city").value.trim(),state=document.getElementById("state").value.trim(),pin=document.getElementById("pin").value.replace(/\\D/g,""),notes=document.getElementById("notes").value.trim();
+ if(!/^[0-9]{10}$/.test(phone)){showError("Please enter a valid 10-digit phone number.");return}
+ if(!/^[0-9]{6}$/.test(pin)){showError("Please enter a valid 6-digit PIN code.");return}
+ if(email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){showError("Please enter a valid email or leave it blank.");return}
+ const customer={name,phone,email,address,city,state,pin,notes};
+ const btn=form.querySelector('button[type="submit"]'),old=btn.textContent;btn.disabled=true;btn.textContent=payment()==="COD"?"PLACING ORDER…":"CREATING SECURE PAYMENT…";
+ if(payment()==="RAZORPAY"){
+  try{await startRazorpayPayment(customer,btn,old)}catch(err){btn.disabled=false;btn.textContent=old;showError(err.message||"Could not start secure payment. Please try again or choose COD.");}
+  return;
+ }
+ const id="LUN"+Date.now().toString().slice(-8);
+ const o={id,date:new Date().toISOString(),customer,items:cart.map(i=>({...i,price:parsePrice(i.price),quantity:Math.max(1,Math.min(20,Math.floor(Number(i.quantity)||1)))})),total,status:"New",paymentStatus:"Pending",paymentMethod:"Cash on Delivery (COD)",emailStatus:"Pending"};
+ try{if(!window.LuneraCloud)throw Error("Store database is not ready");await window.LuneraCloud.saveOrder(o)}
+ catch(err){btn.disabled=false;btn.textContent=old;showError(err.message||"Order could not be saved. Your bag has not been cleared. Please check your account and connection.");return}
+ await completeSuccess(o,`Thank you, ${name}. COD order ${id} has been received. Total: ${money(total)}. Payment is due on delivery; the store will confirm the order separately.`);
+ btn.disabled=false;btn.textContent=old;
+});;
 </script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-functions-compat.js"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script src="lunera-cloud.js"></script>
 </body></html>
