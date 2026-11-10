@@ -355,11 +355,28 @@ async function login(){
   try {
     if (!window.LuneraCloud) throw new Error("Secure sign-in is still loading. Please try again.");
     await window.LuneraCloud.signInAdmin(email, password);
+    const cloudCatalogue=await window.LuneraCloud.refreshCatalogue();
+    if(cloudCatalogue){
+      if(Array.isArray(cloudCatalogue.luneraProducts))products=cloudCatalogue.luneraProducts;
+      if(Array.isArray(cloudCatalogue.luneraCategories))categories=cloudCatalogue.luneraCategories;
+      if(cloudCatalogue.luneraHero)localStorage.setItem("luneraHero",String(cloudCatalogue.luneraHero));
+      if(cloudCatalogue.luneraStory&&typeof cloudCatalogue.luneraStory==="object")localStorage.setItem("luneraStory",JSON.stringify(cloudCatalogue.luneraStory));
+      if(cloudCatalogue.luneraCategoryCovers&&typeof cloudCatalogue.luneraCategoryCovers==="object"){
+        categoryCovers=cloudCatalogue.luneraCategoryCovers;
+        localStorage.setItem("luneraCategoryCovers",JSON.stringify(categoryCovers));
+      }
+      if(Array.isArray(cloudCatalogue.luneraProducts))localStorage.setItem("luneraProducts",JSON.stringify(products));
+      if(Array.isArray(cloudCatalogue.luneraCategories))localStorage.setItem("luneraCategories",JSON.stringify(categories));
+      fillStoryFields();renderCategories();renderCategoryCovers();renderCategorySelect();render();
+      const heroPreview=document.getElementById("heroPreview");
+      if(heroPreview&&cloudCatalogue.luneraHero)heroPreview.src=String(cloudCatalogue.luneraHero);
+    }
     await window.LuneraCloud.ensureCatalogue({
       luneraProducts: products,
       luneraCategories: categories,
       luneraHero: localStorage.getItem("luneraHero") || defaultHero,
-      luneraStory: currentStory()
+      luneraStory: currentStory(),
+      luneraCategoryCovers: categoryCovers
     });
     error.style.display = "none";
     document.getElementById("login").style.display = "none";
