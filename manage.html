@@ -395,7 +395,7 @@ function selectStoryPortrait(kind,event){
  cropPhotoObjectUrl=URL.createObjectURL(file);
  const img=document.getElementById("storyCropSource"),stage=document.getElementById("storyCropStage");
  img.onload=()=>{
-  const maxW=Math.min(520,window.innerWidth-60),maxH=Math.min(window.innerHeight*.52,560);
+  const maxW=Math.min(520,window.innerWidth-60),maxH=Math.min(window.innerHeight*.44,560);
   const scale=Math.min(maxW/img.naturalWidth,maxH/img.naturalHeight,1);
   const w=Math.max(120,Math.round(img.naturalWidth*scale)),h=Math.max(150,Math.round(img.naturalHeight*scale));
   stage.style.width=w+"px";stage.style.height=h+"px";
@@ -470,7 +470,6 @@ document.getElementById("storyCropSave").addEventListener("click",async()=>{
  }catch(error){status.textContent=error.message||"Photo crop or upload failed.";status.className="upload-status error";}
  finally{button.disabled=false;button.textContent="CROP & SAVE PHOTO";}
 });
-document.getElementById("storyCropCancel").addEventListener("click",closeStoryCrop);
 document.getElementById("storyCropModal").addEventListener("click",event=>{if(event.target.id==="storyCropModal")closeStoryCrop();});
 
 function resetStoryFields(){if(!confirm("Restore the default founders’ story text?"))return;Object.assign(document,{});const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};Object.entries(map).forEach(([id,k])=>document.getElementById(id).value=defaultLuneraStory[k])}
