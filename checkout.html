@@ -6,6 +6,67 @@
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}body{background:#f7f4ef;color:#151212;font-family:Montserrat,sans-serif}header{background:#151212;padding:25px 8%;display:flex;justify-content:space-between;align-items:center}.logo{color:white;text-decoration:none;font:500 29px 'Bodoni Moda',serif;letter-spacing:2px}.back{color:white;text-decoration:none;font-size:9px;letter-spacing:2px}.container{width:84%;max-width:1100px;margin:60px auto 90px}h1{font:400 60px 'Bodoni Moda',serif;margin-bottom:40px}h2{font:400 30px 'Cormorant Garamond',serif;margin-bottom:22px}.grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:55px}.form-box,.order-box{background:white;padding:30px}input,textarea{width:100%;padding:15px;margin-bottom:14px;border:1px solid #ddd;font:11px Montserrat,sans-serif}textarea{height:100px}button{width:100%;padding:18px;background:#17352b;color:white;border:0;font:500 10px Montserrat,sans-serif;letter-spacing:2px;cursor:pointer}button:disabled{opacity:.6}.order{border-top:1px solid #151212}.order-row{display:flex;justify-content:space-between;gap:18px;padding:14px 0;font-size:10px;line-height:1.6}.total{border-top:1px solid #ddd;margin-top:8px;padding-top:20px}.note{font-size:10px;line-height:1.8;opacity:.7;margin-top:18px}.error{display:none;color:#8a1c1c;font-size:11px;line-height:1.7;margin:12px 0}.success{display:none;text-align:center;padding:80px 15px}.success h2{font:400 46px 'Bodoni Moda',serif}.success p{font-size:11px;line-height:1.9;margin:18px 0}a.return{display:inline-block;background:#17352b;color:white;padding:16px 25px;text-decoration:none;font-size:10px;letter-spacing:2px}.payment-options{display:grid;gap:12px;margin:8px 0 18px}.payment-option{display:flex;align-items:flex-start;gap:12px;padding:15px;border:1px solid #ddd;cursor:pointer}.payment-option input{width:auto;margin:2px 0 0}.payment-option strong{display:block;font-size:11px;margin-bottom:6px}.payment-option small{display:block;font-size:10px;line-height:1.7;opacity:.75}#emailStatusNote{margin-top:15px;font-size:12px}@media(max-width:850px){.container{width:90%;margin-top:40px}h1{font-size:46px}.grid{grid-template-columns:1fr;gap:35px}}@media(max-width:500px){header{padding:20px 6%}.container{width:90%}h1{font-size:40px}.form-box,.order-box{padding:20px}}
+
+/* LUNÉRA cross-device mobile layout repair */
+@media (max-width: 760px) {
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { width: 100%; max-width: 100%; overflow-x: clip; }
+  body { -webkit-text-size-adjust: 100%; }
+  img, video, iframe { max-width: 100%; }
+  main, section, article, .page, .container, .content, .wrap,
+  .product-layout, .product-info, .product-gallery, .cart-layout,
+  .checkout-layout, .checkout-container, .cart-container,
+  .form-container, .story-main, .story-inner {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .product-layout, .cart-layout, .checkout-layout, .checkout-grid,
+  .form-grid, .order-layout, .story-columns, .founders {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .actions, .buttons, .card-actions, .tile-buttons, .form-actions,
+  .image-editor-actions, .header-actions, .nav-actions {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+  }
+  button, input[type="button"], input[type="submit"], input[type="reset"],
+  .button, .btn, .card-btn, .tile-button {
+    box-sizing: border-box;
+    min-width: 0;
+    max-width: 100%;
+    min-height: 44px;
+    line-height: 1.35;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    touch-action: manipulation;
+  }
+  .card-actions { flex-direction: row !important; }
+  .card-actions .card-btn { flex: 1 1 120px; width: auto !important; }
+  input, select, textarea { min-width: 0; max-width: 100%; font-size: 16px; }
+  .collection-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .product-card, .cart-item, .order, .account, .field,
+  .form-group, .form-row, .summary, .product-info { min-width: 0; }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .footer-column, .footer-brand-block { min-width: 0; }
+}
+@media (max-width: 520px) {
+  header { min-width: 0; max-width: 100%; }
+  nav { min-width: 0; max-width: 100%; flex-wrap: wrap; }
+  .page, .wrap, main { max-width: 100%; }
+  .collection-grid { gap: 22px 10px; }
+  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px 16px; }
+  .footer-bottom { align-items: flex-start; }
+  .card-actions .card-btn { flex-basis: 100%; }
+}
+@media (max-width: 360px) {
+  .collection-grid, .footer-grid { grid-template-columns: minmax(0, 1fr); }
+  .card-actions .card-btn { flex-basis: 100%; }
+  h1, h2, h3 { overflow-wrap: anywhere; }
+}
+
 </style>
 <link rel="icon" type="image/png" href="lunera-logo.png">
 </head>
