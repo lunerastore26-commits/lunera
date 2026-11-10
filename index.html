@@ -71,13 +71,17 @@ align-items:center
 }
 
 nav a,
-.collection-menu span{
+.collection-menu span,.collection-menu button{
 color:white;
 text-decoration:none;
 font:10px 'Montserrat',sans-serif;
 letter-spacing:2px;
 text-transform:uppercase;
-cursor:pointer
+cursor:pointer;
+background:transparent;
+border:0;
+padding:0;
+white-space:nowrap
 }
 
 nav a{
@@ -494,13 +498,34 @@ nav>a:not(.bag){
 display:none
 }
 
-.collection-menu span{
+.collection-menu span,.collection-menu button{
 font-size:9px
 }
 
 .collection-dropdown{
-right:-45px;
-width:210px
+position:fixed;
+top:76px;
+left:6%;
+right:auto;
+width:min(88vw,320px);
+max-height:60vh;
+overflow-y:auto;
+overscroll-behavior:contain;
+-webkit-overflow-scrolling:touch;
+z-index:150;
+padding:10px 0;
+border:1px solid rgba(23,53,43,.12);
+box-shadow:0 18px 42px rgba(0,0,0,.18)
+}
+.collection-dropdown a{
+padding:15px 20px;
+font-size:10px;
+line-height:1.4
+}
+.collection-menu.is-open .collection-dropdown{
+opacity:1;
+visibility:visible;
+transform:none
 }
 
 .bag{
@@ -714,7 +739,7 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 <div class="collection-menu">
 
-<span>The Collection</span>
+<button type="button" id="collectionToggle" aria-expanded="false" aria-controls="collectionDropdown">The Collection</button>
 
 <div class="collection-dropdown" id="collectionDropdown"></div>
 
@@ -1204,6 +1229,27 @@ INITIALIZE
 
 renderCategories();
 renderLuneraStory();
+
+const collectionMenu=document.querySelector(".collection-menu");
+const collectionToggle=document.getElementById("collectionToggle");
+if(collectionMenu&&collectionToggle){
+ collectionToggle.addEventListener("click",()=>{
+  const open=collectionMenu.classList.toggle("is-open");
+  collectionToggle.setAttribute("aria-expanded",open?"true":"false");
+ });
+ document.addEventListener("click",event=>{
+  if(!collectionMenu.contains(event.target)){
+   collectionMenu.classList.remove("is-open");
+   collectionToggle.setAttribute("aria-expanded","false");
+  }
+ });
+ document.addEventListener("keydown",event=>{
+  if(event.key==="Escape"){
+   collectionMenu.classList.remove("is-open");
+   collectionToggle.setAttribute("aria-expanded","false");
+  }
+ });
+}
 
 updateBagCount();
 window.addEventListener("lunera:catalogue-updated",function(){renderCategories();renderLuneraStory();updateBagCount();checkAdminAccess();});
