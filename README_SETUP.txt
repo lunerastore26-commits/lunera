@@ -16,6 +16,8 @@ WHAT IS IN THE REPOSITORY
 - lunera-cloud.js: Firebase Authentication and Firestore client
 - firestore.rules: database access controls
 - lunera-logo.png: brand logo
+- privacy.html: customer privacy policy
+- returns.html: seven-calendar-day return and exchange policy
 
 ONE-TIME FIREBASE SETUP
 1. Firebase Console > Authentication > Sign-in method: enable Email/Password and Phone.
