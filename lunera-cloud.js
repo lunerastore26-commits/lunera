@@ -21,10 +21,21 @@ const ready=(async()=>{
 })();
 async function syncCatalogue(){
  if(syncPromise)return syncPromise;
- syncPromise=(async()=>{try{const s=await db.collection("site").doc("catalogue").get();if(!s.exists)return;const d=s.data()||{};let changed=false;
- for(const k of KEYS)if(Object.prototype.hasOwnProperty.call(d,k)){let old=null;try{old=JSON.parse(localStorage.getItem(k)||"null")}catch(_){}if(JSON.stringify(old)!==JSON.stringify(d[k])){localStorage.setItem(k,JSON.stringify(d[k]));changed=true}}
- if(changed){window.dispatchEvent(new CustomEvent("lunera:catalogue-updated",{detail:d}));}
- }catch(e){console.warn("LUNÉRA cloud catalogue unavailable:",e.message||e)}
+ syncPromise=(async()=>{
+  try{
+   const s=await db.collection("site").doc("catalogue").get();
+   if(!s.exists)return;
+   const d=s.data()||{};let changed=false;
+   for(const k of KEYS){
+    if(Object.prototype.hasOwnProperty.call(d,k)){
+     let old=null;try{old=JSON.parse(localStorage.getItem(k)||"null")}catch(_){}
+     if(JSON.stringify(old)!==JSON.stringify(d[k])){localStorage.setItem(k,JSON.stringify(d[k]));changed=true}
+    }
+   }
+   if(changed)window.dispatchEvent(new CustomEvent("lunera:catalogue-updated",{detail:d}));
+  }catch(e){console.warn("LUNÉRA cloud catalogue unavailable:",e.message||e)}
+ })();
+ try{return await syncPromise}finally{syncPromise=null}
 }
 async function ensureCatalogue(values){
  await ready;
