@@ -692,8 +692,8 @@ selectedHeroFile,
 status
 );
 
-localStorage.setItem("luneraHero", image);
 await window.LuneraCloud.saveCatalogue({luneraHero:image});
+localStorage.setItem("luneraHero", image);
 document.getElementById("heroPreview").src=image;
 selectedHeroFile=null;
 document.getElementById("heroImageFile").value="";
@@ -781,7 +781,7 @@ return;
 
 categories.push(name);
 
-try{await saveData();}catch(error){alert(error.message||"Category could not be saved to the shared store.");return;}
+try{await saveData();}catch(error){categories.pop();alert(error.message||"Category could not be saved to the shared store.");return;}
 
 input.value="";
 
@@ -823,9 +823,9 @@ category +
 )
 )return;
 
-categories.splice(index,1);
+const removedCategory=categories.splice(index,1)[0];
 
-try{await saveData();}catch(error){alert(error.message||"Category could not be saved to the shared store.");return;}
+try{await saveData();}catch(error){categories.splice(index,0,removedCategory);alert(error.message||"Category could not be saved to the shared store.");return;}
 
 renderCategories();
 renderCategorySelect();
@@ -972,7 +972,7 @@ async function addProduct(){
   const images=[];for(const file of selectedNewImageFiles)images.push(await uploadImage(file,status));
   const id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now();
   products.push({id,name,price,category,sizes:sizes||"S, M, L, XL",image:images[0],images,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
-  await saveData();clearProductForm();render();showStatus();alert("Product and all photos added successfully.");
+  try{await saveData();}catch(saveError){products.pop();throw saveError;}clearProductForm();render();showStatus();alert("Product and all photos added successfully.");
  }catch(error){status.textContent=error.message||"Image upload failed.";status.className="upload-status error";alert(error.message||"Product was not added.");}
  finally{button.disabled=false;button.textContent="ADD PRODUCT TO CATALOGUE";}
 }
@@ -1018,10 +1018,11 @@ async function setProductMainImage(i,j){
  const source=Array.isArray(products[i].images)&&products[i].images.length?products[i].images:[products[i].image].filter(Boolean);
  const removed=new Set(removedExistingImages[i]||[]),available=source.filter((_,index)=>!removed.has(index));
  const chosen=source[j];if(!chosen||removed.has(j))return;
+ const oldProduct=products[i],oldFiles=selectedExistingFiles[i],oldRemoved=removedExistingImages[i];
  const reordered=[chosen,...available.filter(url=>url!==chosen)];
  products[i]={...products[i],image:reordered[0],images:reordered};
  selectedExistingFiles[i]=[];delete removedExistingImages[i];
- try{await saveData();render();showStatus();}catch(error){alert(error.message||"Could not update the main product photo.");}
+ try{await saveData();render();showStatus();}catch(error){products[i]=oldProduct;selectedExistingFiles[i]=oldFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Could not update the main product photo.");}
 }
 
 
@@ -1040,6 +1041,7 @@ async function handleExistingImageSelect(i,event){
 
 async function saveProduct(i){
  const button=document.activeElement&&document.activeElement.tagName==="BUTTON"?document.activeElement:null;
+ const oldProduct=products[i],oldFiles=selectedExistingFiles[i],oldRemoved=removedExistingImages[i];
  try{
   const name=document.getElementById("name-"+i).value.trim(),price=document.getElementById("price-"+i).value.trim(),category=document.getElementById("category-"+i).value,sizes=document.getElementById("sizes-"+i).value.trim();
   if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category||!sizes){alert("Enter a product name, valid price, category and sizes.");return;}
@@ -1050,7 +1052,7 @@ async function saveProduct(i){
   if(!images.length){alert("A product must keep at least one photo.");return;}
   products[i]={id:products[i].id,name,price,category,sizes,image:images[0],images,description:document.getElementById("description-"+i).value.trim()};
   selectedExistingFiles[i]=[];delete removedExistingImages[i];await saveData();render();showStatus();
- }catch(error){alert(error.message||"Could not save product.");}
+ }catch(error){products[i]=oldProduct;selectedExistingFiles[i]=oldFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Could not save product.");}
  finally{if(button){button.disabled=false;button.textContent="SAVE PRODUCT";}}
 }
 
@@ -1062,12 +1064,12 @@ if(
 )
 )return;
 
-products.splice(i,1);
-
+const removedProduct=products.splice(i,1)[0];
+const oldFiles=selectedExistingFiles[i],oldRemoved=removedExistingImages[i];
 delete selectedExistingFiles[i];
 delete removedExistingImages[i];
 
-try{await saveData();}catch(error){alert(error.message||"Product could not be saved to the shared store.");return;}
+try{await saveData();}catch(error){products.splice(i,0,removedProduct);if(oldFiles)selectedExistingFiles[i]=oldFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Product could not be saved to the shared store.");return;}
 
 render();
 
@@ -1077,6 +1079,7 @@ showStatus();
 
 async function saveAll(){
 
+const previousProducts=products;
 products =
 products.map(
 (p,i)=>({
@@ -1118,75 +1121,35 @@ if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(parseManagePr
  alert("One or more products have invalid details. Check name, positive price, category and sizes.");
  return;
 }
-try{await saveData();showStatus();}catch(error){alert(error.message||"Catalogue could not be saved to the shared store.");}
+try{await saveData();showStatus();}catch(error){products=previousProducts;alert(error.message||"Catalogue could not be saved to the shared store.");}
 }
 
 
 /* RESET */
 
 async function resetAll(){
-
-if(
-!confirm(
-"Reset all LUNÉRA catalogue changes?"
-)
-)return;
-
-localStorage.removeItem("luneraProducts");
-localStorage.removeItem("luneraCategories");
-localStorage.removeItem("luneraHero");
-localStorage.removeItem("luneraCategoryCovers");
-categoryCovers={};selectedCategoryCoverFiles={};
-
-products =
-JSON.parse(JSON.stringify(defaults));
-
-categories =
-[
-"Bras",
-"Panties",
-"Lingerie Sets",
-"Nightwear",
-"Essentials"
-];
-
-localStorage.setItem("luneraHero", defaultHero);
-try{
- if(!window.LuneraCloud)throw Error("Cloud services are not ready. Please refresh and try again.");
- await window.LuneraCloud.saveCatalogue({luneraProducts:products,luneraCategories:categories,luneraHero:defaultHero,luneraCategoryCovers:{}});
- showStatus();
-}catch(error){
- alert(error.message||"Catalogue reset could not be saved to the shared store.");
- return;
+ if(!confirm("Reset all LUNÉRA catalogue changes?"))return;
+ const resetProducts=JSON.parse(JSON.stringify(defaults));
+ const resetCategories=["Bras","Panties","Lingerie Sets","Nightwear","Essentials"];
+ const resetCovers={};
+ try{
+  if(!window.LuneraCloud)throw Error("Cloud services are not ready. Please refresh and try again.");
+  await window.LuneraCloud.saveCatalogue({luneraProducts:resetProducts,luneraCategories:resetCategories,luneraHero:defaultHero,luneraCategoryCovers:resetCovers});
+ }catch(error){
+  alert(error.message||"Catalogue reset could not be saved to the shared store.");
+  return;
+ }
+ products=resetProducts;categories=resetCategories;categoryCovers=resetCovers;selectedCategoryCoverFiles={};
+ localStorage.setItem("luneraProducts",JSON.stringify(products));
+ localStorage.setItem("luneraCategories",JSON.stringify(categories));
+ localStorage.setItem("luneraHero",defaultHero);
+ localStorage.setItem("luneraCategoryCovers",JSON.stringify(resetCovers));
+ document.getElementById("heroPreview").src=defaultHero;
+ selectedHeroFile=null;
+ document.getElementById("heroImageFile").value="";
+ document.getElementById("heroFileName").textContent="No image selected";
+ clearProductForm();renderCategories();renderCategoryCovers();renderCategorySelect();render();showStatus();
 }
-
-document.getElementById(
-"heroPreview"
-).src=defaultHero;
-
-selectedHeroFile=null;
-
-document.getElementById(
-"heroImageFile"
-).value="";
-
-document.getElementById(
-"heroFileName"
-).textContent="No image selected";
-
-clearProductForm();
-
-renderCategories();
-renderCategoryCovers();
-
-renderCategorySelect();
-
-render();
-
-showStatus();
-
-}
-
 
 /* STATUS */
 
