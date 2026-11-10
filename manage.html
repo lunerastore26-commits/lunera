@@ -111,24 +111,8 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 .owner-access{display:inline-block;margin-top:8px;font:9px/1.5 "Montserrat",Arial,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#cfc8bf;text-decoration:none;opacity:.72}.owner-access:hover{opacity:1}
 
-/* Founder portrait crop editor — precise 4:5 framing on desktop and mobile */
-#sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:4/5;object-fit:cover;display:none}
-.crop-modal{position:fixed;inset:0;z-index:9999;background:rgba(12,16,13,.88);display:none;align-items:center;justify-content:center;padding:14px}
-.crop-modal.open{display:flex}
-.crop-dialog{width:min(720px,100%);max-height:94vh;overflow:auto;background:#f7f4ef;color:#151212;padding:22px;border:1px solid #d8d0c5}
-.crop-title{font:26px 'Bodoni Moda',serif;margin-bottom:6px}
-.crop-help{font:11px/1.7 'Montserrat',sans-serif;color:#5b554d;margin-bottom:16px}
-.crop-stage-wrap{display:flex;justify-content:center;align-items:center;min-height:180px;max-height:58vh;overflow:hidden;background:#ddd6cc;padding:10px}
-.crop-stage{position:relative;flex:none;max-width:100%;max-height:55vh;touch-action:none;user-select:none}
-.crop-stage>img{width:100%;height:100%;display:block;object-fit:fill;pointer-events:none}
-.crop-frame{position:absolute;left:10%;top:10%;width:80%;aspect-ratio:4/5;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.48);cursor:move;touch-action:none}
-.crop-frame:after{content:"";position:absolute;inset:0;background:linear-gradient(to right,transparent 33.1%,rgba(255,255,255,.65) 33.3%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.65) 66.7%,transparent 67%),linear-gradient(to bottom,transparent 33.1%,rgba(255,255,255,.65) 33.3%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.65) 66.7%,transparent 67%);pointer-events:none}
-.crop-controls{display:grid;grid-template-columns:1fr;gap:8px;margin-top:15px}
-.crop-controls label{margin:0}
-.crop-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
-.crop-actions button{min-height:44px}
-.crop-cancel{background:transparent!important;color:#151212!important;border:1px solid #aaa!important}
-@media(max-width:520px){.crop-modal{padding:8px}.crop-dialog{padding:14px;max-height:96vh}.crop-stage-wrap{max-height:48vh;padding:6px}.crop-stage{max-height:46vh}.crop-title{font-size:23px}.crop-actions{display:grid;grid-template-columns:1fr 1fr}.crop-actions button{width:100%;padding:12px 8px;font-size:9px}}
+/* Founder photos stay in a fixed 4:5 frame without cutting off the original image */
+#sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:4/5;object-fit:contain;object-position:center;display:none;background:#e8e0d4}
 
 </style>
 <link rel="icon" type="image/png" href="lunera-logo.png?v=9">
