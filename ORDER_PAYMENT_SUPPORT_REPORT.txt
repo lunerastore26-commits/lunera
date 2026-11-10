@@ -1,44 +1,39 @@
 LUNÉRA — ORDER, PAYMENT & CUSTOMER SUPPORT STATUS
-Updated: 28 October 2026
+Updated: 10 November 2026
 
-WHAT IS FIXED IN THIS PACKAGE
-- All required storefront pages are included at the ZIP root: index.html, product.html, detail.html, cart.html, checkout.html, admin.html, manage.html, and lunera-logo.png.
-- Local page links were checked against the files included in this package.
-- JavaScript syntax was checked for all HTML pages.
-- Product and cart prices now use INR consistently, and product/cart/checkout code can parse both numeric prices and values such as ₹1,499.
-- Checkout validates the required customer details, stores an order under localStorage key luneraOrders, clears luneraCart only after the order has been saved, and shows a confirmation.
-- Order email notification is attempted using EmailJS. Email failure no longer blocks the local order confirmation; the checkout page displays a clear notification status instead.
-- The checkout flow was tested with a simulated browser form and verified to save an order and clear the cart after successful local storage.
+CURRENT STORE SETUP
+- Storefront is hosted on GitHub Pages.
+- Firebase Authentication supports customer accounts and verified admin access.
+- Firestore stores the shared catalogue at site/catalogue and customer orders in orders.
+- Customers must be signed in to place an order. Each order is associated with the authenticated Firebase UID.
+- The Manage panel is restricted to the verified admin account lunerastore26@gmail.com.
+- Manage catalogue changes are saved to Firestore before the browser cache is updated.
+- Checkout is COD-only. Razorpay is intentionally not enabled in the customer checkout.
+- Product, category cover and hero image uploads use Cloudinary. The Manage editor uses 1005:563 for homepage hero/collection covers and 4:5 for product photos and founder portraits.
+- EmailJS order notification is attempted after the order is saved. An email failure does not cancel the saved COD order.
 
-IMPORTANT LIMITATIONS — PLEASE READ
-1. This is still a static GitHub Pages website. Orders saved to localStorage exist only in the browser/device that placed the order. They are not a central cloud order database and will not automatically appear on another device.
-2. EmailJS delivery has not been verified against the live EmailJS account from this package-building environment. Confirm that service_26ob5sw and template e00x0gi are active, that the template recipient is lunerastore26@gmail.com, and that it uses the template variables below. If the email fails, checkout still confirms the locally saved order and displays a warning.
-3. No real online payment is collected or verified. The order is marked payment pending. Do not mark an order paid based only on a browser redirect or customer screenshot.
-4. Admin/manage pages remain locked or limited until server-backed authentication is connected. Browser-only passwords and localStorage are not secure for customer order administration.
-5. Do not use localStorage as the only production order record. Before taking real public orders at scale, connect a backend/database, server-side email sending, secure admin authentication, and a verified payment gateway if online payment is needed.
+EMAILJS CONFIGURATION IN CHECKOUT
+- Service: service_26ob5sw
+- Template: template_o9wrz7c
+- Public key: rRuwYFo_icpYCBj6H
+- Fixed recipient: lunerastore26@gmail.com
+- Template variables: order_id, customer_name, customer_phone, customer_email, delivery_address, order_details, order_total, customer_notes.
+EmailJS is a best-effort browser-side notification. Confirm delivery through a real checkout test; an HTTP success response alone is not proof that the recipient received the email.
 
-EMAILJS TEMPLATE VARIABLES
-The EmailJS template should include these fields:
+IMPORTANT LIMITATIONS
+1. This repository contains firestore.rules, but the deployed Firebase Console rules cannot be verified from GitHub. Publish the exact repository rules in Firebase Console > Firestore Database > Rules.
+2. GitHub Pages is static hosting. Firebase Authentication and Firestore provide the shared account/order data; no private application server runs on GitHub Pages.
+3. Checkout revalidates product IDs, prices, sizes and quantities against the shared catalogue in the client before saving. Firestore rules restrict order ownership and admin updates, but they do not independently perform a full server-side catalogue price calculation for arbitrary direct Firestore writes. Do not describe the current COD flow as fraud-proof.
+4. Historical orders created before userId was added may not appear in a customer's account history.
+5. No online payment is collected in checkout. Do not mark an order paid from a browser redirect, screenshot or customer message. A future payment launch must use a server-side endpoint and verified gateway signatures.
 
-New order received on LUNÉRA!
-
-Order ID: {{order_id}}
-Customer Name: {{customer_name}}
-Phone: {{customer_phone}}
-Customer Email: {{customer_email}}
-
-Delivery Address:
-{{delivery_address}}
-
-Order Details:
-{{order_details}}
-
-Total Amount: {{order_total}}
-
-Customer Notes:
-{{customer_notes}}
-
-The recipient should be set to lunerastore26@gmail.com in the EmailJS template/dashboard. Never put a private email password or payment secret in frontend HTML.
-
-DEPLOYMENT
-Extract the ZIP and upload the files inside it directly to the root of the GitHub Pages repository. Do not upload an extra parent folder. Keep filenames exactly as supplied. Then test: Home → Collection → product → Add to Bag → Bag → Proceed to Checkout → Place Order. Use a real test order only after confirming the email template and privacy handling.
+PRE-LAUNCH CHECKS
+- Verify Firebase Email/Password and Phone providers and the GitHub Pages authorized domain.
+- Verify the admin account email is verified and the Firestore rules are published.
+- Test product/category/hero changes from Manage, then open a fresh browser session and confirm the changes persist.
+- Test Cloudinary uploads for collection covers, hero images and multiple product photos.
+- Test customer registration, sign-in and phone OTP.
+- Place a real test COD order; verify it appears in Manage and in the correct customer's Profile only.
+- Test admin order status updates and customer order-history refresh.
+- Confirm EmailJS notification reaches lunerastore26@gmail.com.
+- Test all main flows on desktop and mobile before accepting public orders.
