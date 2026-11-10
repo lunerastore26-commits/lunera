@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="LUNÉRA monogram">
+  <g fill="none" stroke="#17352b" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 15.5H76"/>
+    <path d="M50.5 15.5V76.5C50.5 82 54.5 85 61 85H83"/>
+    <path d="M50.5 76.5C43 88 29 93 17 83"/>
+    <path d="M20 83.5H33" stroke-width="1.35"/>
+  </g>
+</svg>
