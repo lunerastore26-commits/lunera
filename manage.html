@@ -390,7 +390,7 @@ function selectStoryPortrait(kind,event){
  const status=document.getElementById(kind+"StoryPhotoStatus");
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="Please choose a JPG, PNG or WebP image.";status.className="upload-status error";event.target.value="";return;}
  if(file.size>15*1024*1024){status.textContent="Please choose a photo smaller than 15 MB.";status.className="upload-status error";event.target.value="";return;}
- cropPhotoKind=kind;cropPhotoFile=file;
+ cropPhotoKind=kind;cropPhotoFile=file;event.target.value="";
  if(cropPhotoObjectUrl)URL.revokeObjectURL(cropPhotoObjectUrl);
  cropPhotoObjectUrl=URL.createObjectURL(file);
  const img=document.getElementById("storyCropSource"),stage=document.getElementById("storyCropStage");
@@ -426,7 +426,7 @@ function resizeStoryCrop(value){
 function closeStoryCrop(){
  document.getElementById("storyCropModal").classList.remove("open");
  if(cropPhotoObjectUrl)URL.revokeObjectURL(cropPhotoObjectUrl);
- cropPhotoObjectUrl="";cropPhotoFile=null;cropDrag=null;
+ cropPhotoObjectUrl="";cropPhotoFile=null;cropDrag=null;const input=document.getElementById(cropPhotoKind+"StoryPhotoFile");if(input)input.value="";
 }
 const storyCropFrame=document.getElementById("storyCropFrame");
 storyCropFrame.addEventListener("pointerdown",event=>{
