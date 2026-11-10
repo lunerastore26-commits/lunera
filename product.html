@@ -88,6 +88,22 @@ footer{background:#151212;color:#f7f4ef;padding:70px 6% 35px}
 .empty-state p{font-family:"Cormorant Garamond",serif;font-size:19px;color:#49443f}
 @media(max-width:900px){header{padding:18px 5%;gap:20px}.nav{gap:16px}.product-layout{grid-template-columns:1fr;gap:45px}.product-image-wrap{min-height:500px}.product-image{height:500px}.product-info{max-width:none}.product-details{grid-template-columns:1fr;gap:45px}.footer-grid{grid-template-columns:1fr 1fr}.collection-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 16px}}
 @media(max-width:600px){header{flex-direction:column;align-items:flex-start;min-height:76px;padding:16px 5%}.logo{font-size:28px}nav{width:100%;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:9px}.page{padding:42px 5% 70px}.product-image-wrap{min-height:420px;height:420px}.product-image{height:420px}.product-name{font-size:45px}.description{font-size:19px}.footer-grid{grid-template-columns:1fr;gap:35px}.footer-bottom{flex-direction:column}.collection-grid{grid-template-columns:1fr 1fr;gap:26px 12px}.card-name{font-size:20px}.card-price{font-size:20px}.card-actions{flex-direction:column}.card-btn{width:100%}.filter-btn{padding:10px 12px;font-size:9px}.collection-title{font-size:43px}}
+
+/* LUNÉRA footer — typography matched to the site's existing brand fonts */
+footer{background:#151212;color:#f7f4ef;padding:76px 6% 32px;font-family:"Montserrat",Arial,sans-serif}
+.footer-grid{width:100%;max-width:1380px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;column-gap:54px;row-gap:38px}
+.footer-brand-block{min-width:0}
+.footer-brand{display:inline-block;color:#f7f4ef;text-decoration:none;font-family:"Bodoni Moda",Georgia,serif;font-size:32px;font-weight:400;letter-spacing:5px;line-height:1.25;margin-bottom:13px}
+.footer-tagline{font-family:"Cormorant Garamond",Georgia,serif;font-size:20px;line-height:1.45;color:#cfc8bf;margin:0}
+.footer-column{min-width:0}
+.footer-heading{font-family:"Montserrat",Arial,sans-serif;font-size:10px;font-weight:500;letter-spacing:2.4px;line-height:1.4;color:#cfc8bf;margin:5px 0 21px;text-transform:uppercase}
+.footer-links{display:flex;flex-direction:column;align-items:flex-start;gap:13px}
+.footer-links a{font-family:"Montserrat",Arial,sans-serif;font-size:12px;font-weight:400;line-height:1.5;letter-spacing:.15px;color:#f7f4ef;text-decoration:none;transition:color .2s ease,opacity .2s ease}
+.footer-links a:hover{color:#c7b99f;opacity:1}
+.footer-bottom{width:100%;max-width:1380px;margin:62px auto 0;padding-top:22px;border-top:1px solid rgba(247,244,239,.17);display:flex;justify-content:space-between;gap:18px;font-family:"Montserrat",Arial,sans-serif;font-size:9px;font-weight:400;line-height:1.6;letter-spacing:1.5px;color:#aaa39b}
+@media(max-width:900px){.footer-grid{grid-template-columns:1.2fr 1fr;column-gap:36px;row-gap:38px}.footer-bottom{margin-top:44px}}
+@media(max-width:560px){footer{padding:54px 6% 26px}.footer-grid{grid-template-columns:1fr 1fr;column-gap:20px;row-gap:34px}.footer-brand-block{grid-column:1/-1}.footer-brand{font-size:29px}.footer-tagline{font-size:19px}.footer-heading{margin-bottom:15px}.footer-links{gap:12px}.footer-links a{font-size:11px}.footer-bottom{margin-top:38px;flex-direction:column;gap:8px;font-size:8px;letter-spacing:1.2px}}
+
 </style>
 </head>
 <body>
@@ -103,35 +119,36 @@ footer{background:#151212;color:#f7f4ef;padding:70px 6% 35px}
 <main class="page" id="mainContent" aria-live="polite"></main>
 <footer id="contact">
   <div class="footer-grid">
-    <div>
-      <div class="footer-brand">LUNÉRA</div>
-      <div class="footer-tagline">Elegance in Every Layer.</div>
+    <div class="footer-brand-block">
+      <a class="footer-brand" href="index.html" aria-label="LUNÉRA home">LUNÉRA</a>
+      <p class="footer-tagline">Elegance in Every Layer.</p>
     </div>
-    <div>
-      <div class="footer-heading">SHOP</div>
+    <div class="footer-column">
+      <h2 class="footer-heading">SHOP</h2>
       <div class="footer-links" id="footerCategories"></div>
     </div>
-    <div>
-      <div class="footer-heading">HELP</div>
+    <div class="footer-column">
+      <h2 class="footer-heading">HELP</h2>
       <div class="footer-links">
-        <a href="index.html#contact">Contact</a>
-        <a href="returns.html">Shipping & Returns</a>
-        <a href="returns.html">7-Day Returns</a>
+        <a href="mailto:lunerastore26@gmail.com">Contact Us</a>
+        <a href="returns.html">Shipping &amp; Returns</a>
         <a href="profile.html">Order Tracking</a>
       </div>
     </div>
-    <div>
-      <div class="footer-heading">LUNÉRA</div>
+    <div class="footer-column">
+      <h2 class="footer-heading">LUNÉRA</h2>
       <div class="footer-links">
         <a href="index.html#about">Our Story</a>
-        <a href="product.html">Collection</a>
+        <a href="product.html">View Collection</a>
         <a href="privacy.html">Privacy Policy</a>
         <a href="https://www.instagram.com/lunera.nior/" target="_blank" rel="noopener noreferrer">Instagram</a>
-        <a href="manage.html" class="developer-link" id="manageLink" style="display:none">Manage</a>
       </div>
     </div>
   </div>
-  <div class="footer-bottom"><span>© 2026 LUNÉRA. ALL RIGHTS RESERVED.</span><span>ELEGANCE IN EVERY LAYER.</span></div>
+  <div class="footer-bottom">
+    <span>© 2026 LUNÉRA. ALL RIGHTS RESERVED.</span>
+    <span>ELEGANCE IN EVERY LAYER.</span>
+  </div>
 </footer>
 <script>
 "use strict";
