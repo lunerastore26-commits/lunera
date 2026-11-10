@@ -1514,28 +1514,3 @@ updateBagCount();
     object-position: center;
   }
 }
-
-/* LUNÉRA image columns: fill the complete cover frame on desktop and mobile */
-.editorial-tile img,
-.feature img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover !important;
-  object-position: center center;
-}
-@media (max-width: 760px) {
-  .editorial-tile, .feature {
-    width: 100%;
-    height: auto !important;
-    min-height: 0;
-    aspect-ratio: 4 / 5;
-    overflow: hidden;
-  }
-  .editorial-tile img, .feature img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover !important;
-    object-position: center center;
-  }
-}
