@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@400;500&display=optional" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
 
@@ -688,6 +688,16 @@ footer{background:#151212;color:#f7f4ef;padding:76px 6% 32px;font-family:"Montse
 .story-inner{max-width:1240px;margin:0 auto}.story-eyebrow{font:500 9px Montserrat,sans-serif;letter-spacing:4px;color:#8b806f;text-align:center;margin-bottom:22px}.founders-story h2{font:400 clamp(38px,5vw,64px)/1.08 'Bodoni Moda',serif;text-align:center;max-width:900px;margin:0 auto 22px}.story-intro{font:13px/1.9 Montserrat,sans-serif;color:#71695f;text-align:center;max-width:760px;margin:0 auto 65px}.story-columns{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid #d9d1c6;border-bottom:1px solid #d9d1c6}.story-founder{padding:42px 48px}.story-founder+ .story-founder{border-left:1px solid #d9d1c6}.story-index{font:9px Montserrat,sans-serif;letter-spacing:2.5px;color:#8b806f}.story-founder h3{font:400 clamp(27px,3vw,38px)/1.15 'Bodoni Moda',serif;margin:22px 0 18px}.story-founder p{font:13px/2 Cormorant Garamond,serif;font-size:19px;color:#625b52}.story-founder-name{margin-top:30px;font:500 10px Montserrat,sans-serif;letter-spacing:2px}.story-founder-name span{display:block;margin-top:8px;color:#8b806f;font:9px Montserrat,sans-serif;letter-spacing:2px}.story-closing{max-width:760px;margin:40px auto 0;text-align:center;font:italic 22px/1.6 'Cormorant Garamond',serif;color:#655c50}
 @media(max-width:700px){.founders-story{padding:78px 6%}.story-intro{margin-bottom:38px}.story-columns{grid-template-columns:1fr}.story-founder{padding:32px 8px}.story-founder+.story-founder{border-left:0;border-top:1px solid #d9d1c6}.story-founder p{font-size:18px}.story-closing{font-size:20px}}
 
+
+/* LUNÉRA typography system — consistent across every page */
+html{font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body,button,input,textarea,select{font-family:"Montserrat",Arial,sans-serif}
+h1,h2,h3,h4,.logo,.brand,.footer-brand,.collection-title,.product-name,.page-heading h1,.section-title,.login-box h2{font-family:"Bodoni Moda",Georgia,serif}
+p,.description,.detail-text,.collection-description,.footer-tagline,.story-founder p,.founder p,.sub{font-family:"Cormorant Garamond",Georgia,serif}
+small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a,.back,.intro,.index,.name span{font-family:"Montserrat",Arial,sans-serif}
+
+
+.owner-access{display:inline-block;margin-top:8px;font:9px/1.5 "Montserrat",Arial,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#cfc8bf;text-decoration:none;opacity:.72}.owner-access:hover{opacity:1}
 </style>
 
 </head>
@@ -997,7 +1007,7 @@ ADEEB QURESHI
         <a href="returns.html">Shipping &amp; Returns</a>
         <a href="profile.html">Order Tracking</a>
       </div>
-    </div>
+    <a class="owner-access" href="manage.html">Owner Access</a></div>
     <div class="footer-column">
       <h2 class="footer-heading">LUNÉRA</h2>
       <div class="footer-links">
