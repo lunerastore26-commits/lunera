@@ -205,6 +205,8 @@ window.addEventListener("storage",()=>{updateBagCount();renderFooter();if(!new U
 window.addEventListener("popstate",()=>startPage());
 function startPage(){const params=new URLSearchParams(location.search);if(params.has("product"))renderProduct();else renderCollection(params.get("category")||"");renderFooter();updateBagCount();}
 renderFooter();updateBagCount();startPage();
+window.addEventListener("lunera:catalogue-updated",()=>{const q=new URLSearchParams(location.search);if(q.has("product"))renderProduct();else renderCollection(q.get("category")||"");renderFooter();updateBagCount();});
+
 </script>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
