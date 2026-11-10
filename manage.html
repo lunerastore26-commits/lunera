@@ -199,6 +199,14 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 </section>
 
 <section class="section">
+<div class="section-title">Collection Cover Images</div>
+<p class="intro">Set separate homepage cover images for Bras, Lingerie Sets and Essentials. Upload a JPG, PNG or WebP image, then save it to update the live store.</p>
+<div id="categoryCoverManager" class="products"></div>
+<div class="actions"><button class="save" id="saveCategoryCoversButton" type="button" onclick="saveCategoryCovers()">SAVE COLLECTION COVERS</button></div>
+<div id="categoryCoverStatus" class="upload-status"></div>
+</section>
+
+<section class="section">
 <div class="section-title">Add Catalogue</div>
 
 <div class="add-box">
@@ -291,6 +299,9 @@ let categories = loadArray(
 let selectedNewImageFile = null;
 let selectedHeroFile = null;
 let selectedExistingFiles = {};
+let selectedCategoryCoverFiles = {};
+let categoryCovers = {};
+try { categoryCovers = JSON.parse(localStorage.getItem("luneraCategoryCovers") || "{}") || {}; } catch (_) { categoryCovers = {}; }
 
 function loadArray(key,fallback){
 try{
@@ -726,6 +737,43 @@ ${escapeHTML(c)}
 
 }
 
+
+/* HOMEPAGE COLLECTION COVERS */
+const defaultCategoryCovers={
+ "Bras":"https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=2400&q=95",
+ "Lingerie Sets":"https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=2400&q=95",
+ "Essentials":"https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=2400&q=95"
+};
+function renderCategoryCovers(){
+ const root=document.getElementById("categoryCoverManager");if(!root)return;
+ const keys=["Bras","Lingerie Sets","Essentials"];
+ root.innerHTML=keys.map((name,index)=>{
+  const src=categoryCovers[name]||defaultCategoryCovers[name];
+  return '<div class="product-card"><div class="product-number">0'+(index+1)+' — '+escapeHTML(name)+'</div><img class="product-preview" id="category-cover-preview-'+index+'" src="'+escapeAttr(src)+'" alt="'+escapeAttr(name)+' homepage cover"><label for="category-cover-file-'+index+'">'+escapeHTML(name)+' COVER IMAGE</label><input id="category-cover-file-'+index+'" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleCategoryCoverSelect(\''+name+'\','+index+',event)"><div class="file-name" id="category-cover-file-name-'+index+'">Choose a new image to replace this cover</div></div>';
+ }).join("");
+}
+function handleCategoryCoverSelect(name,index,event){
+ const file=event.target.files&&event.target.files[0];if(!file)return;
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)){alert("Please choose a JPG, PNG or WebP image.");event.target.value="";return;}
+ if(file.size>10*1024*1024){alert("Please choose an image smaller than 10 MB.");event.target.value="";return;}
+ selectedCategoryCoverFiles[name]=file;
+ document.getElementById("category-cover-file-name-"+index).textContent=file.name;
+ const reader=new FileReader();reader.onload=()=>{document.getElementById("category-cover-preview-"+index).src=reader.result};reader.readAsDataURL(file);
+}
+async function saveCategoryCovers(){
+ const button=document.getElementById("saveCategoryCoversButton"),status=document.getElementById("categoryCoverStatus");
+ const keys=["Bras","Lingerie Sets","Essentials"];
+ if(!keys.some(k=>selectedCategoryCoverFiles[k])){status.textContent="Choose at least one cover image before saving.";status.className="upload-status error";return;}
+ button.disabled=true;button.textContent="UPLOADING...";
+ try{
+  const next={...categoryCovers};
+  for(const name of keys){if(selectedCategoryCoverFiles[name])next[name]=await uploadImage(selectedCategoryCoverFiles[name],status);}
+  await window.LuneraCloud.saveCatalogue({luneraCategoryCovers:next});
+  categoryCovers=next;localStorage.setItem("luneraCategoryCovers",JSON.stringify(next));selectedCategoryCoverFiles={};
+  renderCategoryCovers();status.textContent="COLLECTION COVERS SAVED. THE HOMEPAGE WILL SHOW THE NEW IMAGES.";status.className="upload-status success";
+ }catch(error){status.textContent=error.message||"Could not save collection covers.";status.className="upload-status error";}
+ finally{button.disabled=false;button.textContent="SAVE COLLECTION COVERS";}
+}
 
 /* NEW PRODUCT IMAGE */
 
@@ -1332,6 +1380,8 @@ if(
 localStorage.removeItem("luneraProducts");
 localStorage.removeItem("luneraCategories");
 localStorage.removeItem("luneraHero");
+localStorage.removeItem("luneraCategoryCovers");
+categoryCovers={};selectedCategoryCoverFiles={};
 
 products =
 JSON.parse(JSON.stringify(defaults));
@@ -1348,7 +1398,7 @@ categories =
 localStorage.setItem("luneraHero", defaultHero);
 try{
  if(!window.LuneraCloud)throw Error("Cloud services are not ready. Please refresh and try again.");
- await window.LuneraCloud.saveCatalogue({luneraProducts:products,luneraCategories:categories,luneraHero:defaultHero});
+ await window.LuneraCloud.saveCatalogue({luneraProducts:products,luneraCategories:categories,luneraHero:defaultHero,luneraCategoryCovers:{}});
  showStatus();
 }catch(error){
  alert(error.message||"Catalogue reset could not be saved to the shared store.");
@@ -1372,6 +1422,7 @@ document.getElementById(
 clearProductForm();
 
 renderCategories();
+renderCategoryCovers();
 
 renderCategorySelect();
 
@@ -1427,6 +1478,7 @@ return escapeHTML(value);
 /* START */
 
 renderCategories();
+renderCategoryCovers();
 
 renderCategorySelect();
 
