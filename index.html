@@ -1317,10 +1317,19 @@ updateBagCount();
       const img=document.getElementById(id),url=String(value[name]||"").trim();
       if(!img || !url.startsWith("https://")) return;
       if(img.dataset.adminCoverUrl===url && img.complete && img.naturalWidth>0) return;
+      if(!img.dataset.defaultCover)img.dataset.defaultCover=img.getAttribute("src")||"";
       img.dataset.adminCoverUrl=url;
       img.loading="eager";
       img.decoding="async";
-      img.onerror=()=>{img.classList.add("cover-image-error");console.error("LUNÉRA "+name+" cover could not load:",url);};
+      img.onerror=()=>{
+        if(img.dataset.defaultCover && img.src!==img.dataset.defaultCover){
+          img.onerror=()=>{img.classList.add("cover-image-error");console.error("LUNÉRA "+name+" default cover could not load.");};
+          img.src=img.dataset.defaultCover;
+        }else{
+          img.classList.add("cover-image-error");
+          console.error("LUNÉRA "+name+" cover could not load:",url);
+        }
+      };
       img.onload=()=>img.classList.remove("cover-image-error");
       img.src=url;
     });
