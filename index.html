@@ -1485,32 +1485,30 @@ updateBagCount();
 </body>
 </html>
 
-/* LUNÉRA mobile image frame alignment: keep uploaded 4:5 photos fully visible */
+/* Responsive image sizing: preserve each uploaded photo's original proportions */
+.editorial-tile,
+.feature {
+  height: auto;
+  min-height: 0;
+}
+.editorial-tile img,
+.feature img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+}
 @media (max-width: 760px) {
-  .editorial-tile {
-    width: 100%;
-    height: auto !important;
-    min-height: 0;
-    aspect-ratio: 4 / 5;
-  }
-  .editorial-tile img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center;
-  }
+  .editorial-tile,
   .feature {
     width: 100%;
-    height: auto !important;
-    min-height: 0;
-    aspect-ratio: 4 / 5;
+    height: auto;
+    aspect-ratio: auto;
   }
+  .editorial-tile img,
   .feature img {
-    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: contain;
-    object-position: center;
+    height: auto;
   }
 }
