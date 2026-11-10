@@ -1341,10 +1341,15 @@ updateBagCount();
     if(url.startsWith('"') && url.endsWith('"')){try{url=JSON.parse(url)}catch(_){}}
     if(!/^https:\/\//i.test(url)) return;
     if(img.dataset.adminHeroUrl===url && img.complete && img.naturalWidth>0) return;
+    if(!img.dataset.defaultHeroUrl)img.dataset.defaultHeroUrl=img.getAttribute("src")||"";
     img.dataset.adminHeroUrl=url;
     img.onload=()=>{img.style.visibility="visible";};
-    img.onerror=()=>{img.style.visibility="hidden";console.error("LUNÉRA admin hero image could not load.");};
-    img.style.visibility="hidden";
+    img.onerror=()=>{
+      const fallback=img.dataset.defaultHeroUrl;
+      if(fallback && img.src!==fallback){img.onerror=()=>{img.style.visibility="hidden";};img.src=fallback;}
+      else{img.style.visibility="hidden";}
+      console.error("LUNÉRA admin hero image could not load.");
+    };
     img.src=url;
   }
   window.addEventListener("lunera:catalogue-updated",e=>{
