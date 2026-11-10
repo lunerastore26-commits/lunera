@@ -1139,7 +1139,7 @@ async function resetAll(){
   alert(error.message||"Catalogue reset could not be saved to the shared store.");
   return;
  }
- products=resetProducts;categories=resetCategories;categoryCovers=resetCovers;selectedCategoryCoverFiles={};
+ products=resetProducts;categories=resetCategories;categoryCovers=resetCovers;selectedCategoryCoverFiles={};selectedNewImageFiles=[];selectedExistingFiles={};removedExistingImages={};
  localStorage.setItem("luneraProducts",JSON.stringify(products));
  localStorage.setItem("luneraCategories",JSON.stringify(categories));
  localStorage.setItem("luneraHero",defaultHero);
