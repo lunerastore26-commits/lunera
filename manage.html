@@ -1475,6 +1475,14 @@ return escapeHTML(value);
 }
 
 
+window.addEventListener("lunera:catalogue-updated",function(event){
+ if(event.detail && event.detail.luneraCategoryCovers && typeof event.detail.luneraCategoryCovers==="object"){
+  categoryCovers=event.detail.luneraCategoryCovers;
+  localStorage.setItem("luneraCategoryCovers",JSON.stringify(categoryCovers));
+  renderCategoryCovers();
+ }
+});
+
 /* START */
 
 renderCategories();
