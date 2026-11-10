@@ -343,7 +343,7 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 </main>
 <div class="image-editor-modal" id="imageEditorModal" role="dialog" aria-modal="true">
  <div class="image-editor-panel">
-  <div class="image-editor-title">Edit Image · 4:5</div>
+  <div class="image-editor-title" id="imageEditorTitle">Edit Image · 4:5</div>
   <p class="image-editor-help">Photo poori rakhne ke liye FIT FULL PHOTO chunein. Manual crop ke liye image drag/zoom karein aur CROP &amp; USE dabayein.</p>
   <div class="image-editor-stage"><img id="imageEditorImage" alt="Image being edited"></div>
   <div class="image-editor-actions">
@@ -413,6 +413,7 @@ function openImageEditor(file,aspectRatio=4/5){
  return new Promise((resolve,reject)=>{
   if(!window.Cropper){reject(Error("Image editor is loading. Please refresh."));return;}
   currentEditFile=file;currentEditAspectRatio=aspectRatio;cropResolve=resolve;cropObjectUrl=URL.createObjectURL(file);
+  const title=document.getElementById("imageEditorTitle");if(title)title.textContent=aspectRatio>1?"Edit Image · 1005:563":"Edit Image · 4:5";
   const modal=document.getElementById("imageEditorModal"),img=document.getElementById("imageEditorImage");
   modal.style.display="grid";
   img.onload=()=>{if(cropperInstance)cropperInstance.destroy();cropperInstance=new Cropper(img,{aspectRatio:currentEditAspectRatio,viewMode:0,dragMode:"move",autoCropArea:.95,background:false,responsive:true,guides:true,center:true,movable:true,zoomable:true,cropBoxMovable:true,cropBoxResizable:true,toggleDragModeOnDblclick:false});};
