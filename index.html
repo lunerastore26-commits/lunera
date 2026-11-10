@@ -1484,3 +1484,33 @@ updateBagCount();
 
 </body>
 </html>
+
+/* LUNÉRA mobile image frame alignment: keep uploaded 4:5 photos fully visible */
+@media (max-width: 760px) {
+  .editorial-tile {
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    aspect-ratio: 4 / 5;
+  }
+  .editorial-tile img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+  .feature {
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    aspect-ratio: 4 / 5;
+  }
+  .feature img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
+  }
+}
