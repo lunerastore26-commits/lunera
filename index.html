@@ -855,6 +855,7 @@ Buy Now
 src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=2400&q=95"
 alt="LUNÉRA Bras Collection"
 loading="lazy"
+id="categoryCoverBras"
 >
 
 <div class="editorial-overlay">
@@ -894,6 +895,7 @@ Buy Now
 src="https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=2400&q=95"
 alt="LUNÉRA Lingerie Sets"
 loading="lazy"
+id="categoryCoverLingerie"
 >
 
 <div class="editorial-overlay">
@@ -960,6 +962,7 @@ Nightwear
 src="https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=2400&q=95"
 alt="LUNÉRA Essentials"
 loading="lazy"
+id="categoryCoverEssentials"
 >
 
 <div class="feature-overlay">
@@ -1281,6 +1284,18 @@ updateBagCount();
 <script>
 /* Homepage hero is controlled by the Admin Panel's shared Firestore catalogue. */
 (function(){
+  function applyAdminCategoryCovers(value){
+    if(!value || typeof value!=="object") return;
+    const targets={"Bras":"categoryCoverBras","Lingerie Sets":"categoryCoverLingerie","Essentials":"categoryCoverEssentials"};
+    Object.entries(targets).forEach(([name,id])=>{
+      const img=document.getElementById(id),url=String(value[name]||"").trim();
+      if(!img || !url.startsWith("https://")) return;
+      if(img.dataset.adminCoverUrl===url && img.complete && img.naturalWidth>0) return;
+      img.dataset.adminCoverUrl=url;
+      img.onerror=()=>{console.error("LUNÉRA "+name+" cover could not load.");};
+      img.src=url;
+    });
+  }
   function applyAdminHero(value){
     const img=document.getElementById("heroImageLayer");
     if(!img || value==null) return;
@@ -1296,12 +1311,14 @@ updateBagCount();
   }
   window.addEventListener("lunera:catalogue-updated",e=>{
     if(e.detail && Object.prototype.hasOwnProperty.call(e.detail,"luneraHero")) applyAdminHero(e.detail.luneraHero);
+    if(e.detail && Object.prototype.hasOwnProperty.call(e.detail,"luneraCategoryCovers")) applyAdminCategoryCovers(e.detail.luneraCategoryCovers);
   });
   window.addEventListener("load",async()=>{
     try{
       if(window.LuneraCloud && typeof window.LuneraCloud.refreshCatalogue==="function"){
         const data=await window.LuneraCloud.refreshCatalogue();
         if(data && Object.prototype.hasOwnProperty.call(data,"luneraHero")) applyAdminHero(data.luneraHero);
+        if(data && Object.prototype.hasOwnProperty.call(data,"luneraCategoryCovers")) applyAdminCategoryCovers(data.luneraCategoryCovers);
       }
     }catch(error){console.error("LUNÉRA Admin hero sync failed:",error);}
   });
