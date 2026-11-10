@@ -26,7 +26,7 @@ IMPORTANT
 2. Add lunerastore26-commits.github.io to Firebase Authentication authorised domains.
 3. Verify Email/Password and Phone sign-in providers are enabled.
 4. Confirm the Cloudinary unsigned preset lunera_products is restricted to image files and an appropriate upload size.
-5. Confirm EmailJS service service_26ob5sw and template e00x0gi are active and test delivery.
+5. Confirm EmailJS service service_26ob5sw and template template_o9wrz7c are active and test delivery.
 6. Place a test COD order and verify it appears in Firestore and the admin panel.
 7. Test the complete flow on desktop and mobile before accepting public orders.
 
