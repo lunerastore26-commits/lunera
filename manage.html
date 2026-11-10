@@ -110,6 +110,26 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 
 .owner-access{display:inline-block;margin-top:8px;font:9px/1.5 "Montserrat",Arial,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#cfc8bf;text-decoration:none;opacity:.72}.owner-access:hover{opacity:1}
+
+/* Founder portrait crop editor — precise 4:5 framing on desktop and mobile */
+#sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:4/5;object-fit:cover;display:none}
+.crop-modal{position:fixed;inset:0;z-index:9999;background:rgba(12,16,13,.88);display:none;align-items:center;justify-content:center;padding:14px}
+.crop-modal.open{display:flex}
+.crop-dialog{width:min(720px,100%);max-height:94vh;overflow:auto;background:#f7f4ef;color:#151212;padding:22px;border:1px solid #d8d0c5}
+.crop-title{font:26px 'Bodoni Moda',serif;margin-bottom:6px}
+.crop-help{font:11px/1.7 'Montserrat',sans-serif;color:#5b554d;margin-bottom:16px}
+.crop-stage-wrap{display:flex;justify-content:center;align-items:center;min-height:180px;max-height:58vh;overflow:hidden;background:#ddd6cc;padding:10px}
+.crop-stage{position:relative;flex:none;max-width:100%;max-height:55vh;touch-action:none;user-select:none}
+.crop-stage>img{width:100%;height:100%;display:block;object-fit:fill;pointer-events:none}
+.crop-frame{position:absolute;left:10%;top:10%;width:80%;aspect-ratio:4/5;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,.48);cursor:move;touch-action:none}
+.crop-frame:after{content:"";position:absolute;inset:0;background:linear-gradient(to right,transparent 33.1%,rgba(255,255,255,.65) 33.3%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.65) 66.7%,transparent 67%),linear-gradient(to bottom,transparent 33.1%,rgba(255,255,255,.65) 33.3%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.65) 66.7%,transparent 67%);pointer-events:none}
+.crop-controls{display:grid;grid-template-columns:1fr;gap:8px;margin-top:15px}
+.crop-controls label{margin:0}
+.crop-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.crop-actions button{min-height:44px}
+.crop-cancel{background:transparent!important;color:#151212!important;border:1px solid #aaa!important}
+@media(max-width:520px){.crop-modal{padding:8px}.crop-dialog{padding:14px;max-height:96vh}.crop-stage-wrap{max-height:48vh;padding:6px}.crop-stage{max-height:46vh}.crop-title{font-size:23px}.crop-actions{display:grid;grid-template-columns:1fr 1fr}.crop-actions button{width:100%;padding:12px 8px;font-size:9px}}
+
 </style>
 <link rel="icon" type="image/png" href="lunera-logo.png?v=9">
 </head>
@@ -174,10 +194,10 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 <label>Introduction</label><textarea id="storyIntroInput"></textarea>
 <label>Sonu Qureshi — heading</label><input id="sonuTitleInput">
 <label>Sonu Qureshi — story</label><textarea id="sonuBodyInput" style="min-height:150px"></textarea>
-<div class="upload-box small-upload"><strong>SONU QURESHI — FOUNDER PHOTO</strong><img id="sonuStoryPhotoPreview" class="upload-preview" alt="Sonu Qureshi photo preview"><input id="sonuStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="uploadStoryPortrait('sonu',event)"><label for="sonuStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="sonuStoryPhotoStatus" class="upload-status"></div></div>
+<div class="upload-box small-upload"><strong>SONU QURESHI — FOUNDER PHOTO</strong><img id="sonuStoryPhotoPreview" class="upload-preview" alt="Sonu Qureshi photo preview"><input id="sonuStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('sonu',event)"><label for="sonuStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="sonuStoryPhotoStatus" class="upload-status"></div></div>
 <label>Your name — heading</label><input id="adeebTitleInput">
 <label>Your story</label><textarea id="adeebBodyInput" style="min-height:150px"></textarea>
-<div class="upload-box small-upload"><strong>ADEEB QURESHI — FOUNDER PHOTO</strong><img id="adeebStoryPhotoPreview" class="upload-preview" alt="Adeeb Qureshi photo preview"><input id="adeebStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="uploadStoryPortrait('adeeb',event)"><label for="adeebStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="adeebStoryPhotoStatus" class="upload-status"></div></div>
+<div class="upload-box small-upload"><strong>ADEEB QURESHI — FOUNDER PHOTO</strong><img id="adeebStoryPhotoPreview" class="upload-preview" alt="Adeeb Qureshi photo preview"><input id="adeebStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('adeeb',event)"><label for="adeebStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="adeebStoryPhotoStatus" class="upload-status"></div></div>
 <label>Closing line</label><textarea id="storyClosingInput"></textarea>
 <div class="actions"><button id="saveStoryButton" class="save" onclick="saveStory()">SAVE OUR STORY</button><button class="secondary" onclick="resetStoryFields()">RESET STORY TEXT</button></div>
 <div id="storySaveStatus" class="upload-status"></div>
@@ -261,6 +281,18 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 <div class="status" id="status">CHANGES SAVED</div>
 </section>
+
+
+<div class="crop-modal" id="storyCropModal" role="dialog" aria-modal="true" aria-labelledby="storyCropTitle">
+ <div class="crop-dialog">
+  <div class="crop-title" id="storyCropTitle">Adjust founder portrait</div>
+  <p class="crop-help">Your full photo is visible here. Drag the 4:5 frame to choose the position, then adjust its size before saving.</p>
+  <div class="crop-stage-wrap"><div class="crop-stage" id="storyCropStage"><img id="storyCropSource" alt="Full original photo"><div class="crop-frame" id="storyCropFrame"></div></div></div>
+  <div class="crop-controls"><label for="storyCropZoom">CROP SIZE</label><input id="storyCropZoom" type="range" min="50" max="100" value="82"></div>
+  <div class="crop-actions"><button type="button" class="save" id="storyCropSave">CROP &amp; SAVE PHOTO</button><button type="button" class="secondary crop-cancel" id="storyCropCancel">CANCEL</button></div>
+  <div class="upload-status" id="storyCropStatus" aria-live="polite"></div>
+ </div>
+</div>
 
 </main>
 
@@ -352,12 +384,95 @@ const defaultLuneraStory={"eyebrow":"THE PEOPLE BEHIND LUNÉRA","title":"Built o
 function currentStory(){try{const v=JSON.parse(localStorage.getItem("luneraStory")||"null");return v&&typeof v==="object"?{...defaultLuneraStory,...v}:{...defaultLuneraStory}}catch(_){return {...defaultLuneraStory}}}
 function fillStoryFields(){const s=currentStory();["sonu","adeeb"].forEach(k=>{const p=document.getElementById(k+"StoryPhotoPreview");if(p&&s[k+"Photo"]){p.src=s[k+"Photo"];p.style.display="block"}});const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};Object.entries(map).forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.value=s[k]||""})}
 async function saveStory(){const b=document.getElementById("saveStoryButton"),st=document.getElementById("storySaveStatus");const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};const next={...currentStory()};Object.entries(map).forEach(([id,k])=>next[k]=document.getElementById(id).value.trim());if(Object.values(map).some(k=>!next[k])){alert("Please complete all Our Story fields before saving.");return}b.disabled=true;b.textContent="SAVING...";st.textContent="Saving text and founder photos to shared catalogue…";st.className="upload-status loading";try{if(!window.LuneraCloud)throw Error("Cloud services are not ready. Refresh and try again.");await window.LuneraCloud.saveCatalogue({luneraStory:next});localStorage.setItem("luneraStory",JSON.stringify(next));st.textContent="OUR STORY AND BOTH FOUNDER PHOTO SETTINGS SAVED TO THE SHARED STORE.";st.className="upload-status success";showStatus()}catch(e){st.textContent=e.message||"Could not save the story.";st.className="upload-status error";alert(st.textContent)}finally{b.disabled=false;b.textContent="SAVE OUR STORY"}}
-async function uploadStoryPortrait(kind,event){
+let cropPhotoKind="",cropPhotoFile=null,cropPhotoObjectUrl="",cropRect={x:0,y:0,w:0,h:0},cropDrag=null;
+function selectStoryPortrait(kind,event){
  const file=event.target.files&&event.target.files[0];if(!file)return;
  const status=document.getElementById(kind+"StoryPhotoStatus");
- try{const url=await uploadImage(file,status);const story={...currentStory(),[kind+"Photo"]:url};await window.LuneraCloud.saveCatalogue({luneraStory:story});localStorage.setItem("luneraStory",JSON.stringify(story));const preview=document.getElementById(kind+"StoryPhotoPreview");preview.src=url;preview.style.display="block";status.textContent="PHOTO SAVED. IT WILL APPEAR ON THE OUR STORY PAGE.";status.className="upload-status success";}
- catch(error){status.textContent=error.message||"Photo upload failed.";status.className="upload-status error";}
+ if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="Please choose a JPG, PNG or WebP image.";status.className="upload-status error";event.target.value="";return;}
+ if(file.size>15*1024*1024){status.textContent="Please choose a photo smaller than 15 MB.";status.className="upload-status error";event.target.value="";return;}
+ cropPhotoKind=kind;cropPhotoFile=file;
+ if(cropPhotoObjectUrl)URL.revokeObjectURL(cropPhotoObjectUrl);
+ cropPhotoObjectUrl=URL.createObjectURL(file);
+ const img=document.getElementById("storyCropSource"),stage=document.getElementById("storyCropStage");
+ img.onload=()=>{
+  const maxW=Math.min(520,window.innerWidth-60),maxH=Math.min(window.innerHeight*.52,560);
+  const scale=Math.min(maxW/img.naturalWidth,maxH/img.naturalHeight,1);
+  const w=Math.max(120,Math.round(img.naturalWidth*scale)),h=Math.max(150,Math.round(img.naturalHeight*scale));
+  stage.style.width=w+"px";stage.style.height=h+"px";
+  const maxCropW=Math.min(w*.9,h*.8*.8);
+  cropRect.w=maxCropW*.82;cropRect.h=cropRect.w/0.8;
+  cropRect.x=(w-cropRect.w)/2;cropRect.y=(h-cropRect.h)/2;
+  drawStoryCropFrame();
+  document.getElementById("storyCropZoom").value="82";
+  document.getElementById("storyCropStatus").textContent="Move the frame over the part of the photo you want to keep.";
+  document.getElementById("storyCropModal").classList.add("open");
+ };
+ img.onerror=()=>{status.textContent="This photo could not be opened. Please choose another image.";status.className="upload-status error";};
+ img.src=cropPhotoObjectUrl;
 }
+function drawStoryCropFrame(){
+ const f=document.getElementById("storyCropFrame");
+ f.style.width=cropRect.w+"px";f.style.height=cropRect.h+"px";
+ f.style.left=cropRect.x+"px";f.style.top=cropRect.y+"px";
+}
+function resizeStoryCrop(value){
+ const stage=document.getElementById("storyCropStage"),w=stage.clientWidth,h=stage.clientHeight;
+ const maxW=Math.min(w*.9,h*.8*.8),centerX=cropRect.x+cropRect.w/2,centerY=cropRect.y+cropRect.h/2;
+ cropRect.w=maxW*(Number(value)/100);cropRect.h=cropRect.w/0.8;
+ cropRect.x=Math.max(0,Math.min(w-cropRect.w,centerX-cropRect.w/2));
+ cropRect.y=Math.max(0,Math.min(h-cropRect.h,centerY-cropRect.h/2));
+ drawStoryCropFrame();
+}
+function closeStoryCrop(){
+ document.getElementById("storyCropModal").classList.remove("open");
+ if(cropPhotoObjectUrl)URL.revokeObjectURL(cropPhotoObjectUrl);
+ cropPhotoObjectUrl="";cropPhotoFile=null;cropDrag=null;
+}
+const storyCropFrame=document.getElementById("storyCropFrame");
+storyCropFrame.addEventListener("pointerdown",event=>{
+ event.preventDefault();cropDrag={x:event.clientX,y:event.clientY,left:cropRect.x,top:cropRect.y};
+ storyCropFrame.setPointerCapture(event.pointerId);
+});
+storyCropFrame.addEventListener("pointermove",event=>{
+ if(!cropDrag)return;
+ const stage=document.getElementById("storyCropStage");
+ cropRect.x=Math.max(0,Math.min(stage.clientWidth-cropRect.w,cropDrag.left+event.clientX-cropDrag.x));
+ cropRect.y=Math.max(0,Math.min(stage.clientHeight-cropRect.h,cropDrag.top+event.clientY-cropDrag.y));
+ drawStoryCropFrame();
+});
+storyCropFrame.addEventListener("pointerup",()=>cropDrag=null);
+storyCropFrame.addEventListener("pointercancel",()=>cropDrag=null);
+document.getElementById("storyCropZoom").addEventListener("input",event=>resizeStoryCrop(event.target.value));
+document.getElementById("storyCropCancel").addEventListener("click",closeStoryCrop);
+document.getElementById("storyCropSave").addEventListener("click",async()=>{
+ const button=document.getElementById("storyCropSave"),status=document.getElementById("storyCropStatus");
+ const stage=document.getElementById("storyCropStage"),img=document.getElementById("storyCropSource");
+ if(!cropPhotoFile||!img.naturalWidth)return;
+ button.disabled=true;button.textContent="UPLOADING...";
+ try{
+  const canvas=document.createElement("canvas");canvas.width=1200;canvas.height=1500;
+  const ctx=canvas.getContext("2d");
+  const sx=cropRect.x/stage.clientWidth*img.naturalWidth,sy=cropRect.y/stage.clientHeight*img.naturalHeight;
+  const sw=cropRect.w/stage.clientWidth*img.naturalWidth,sh=cropRect.h/stage.clientHeight*img.naturalHeight;
+  ctx.drawImage(img,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+  const cropped=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.92));
+  if(!cropped)throw Error("Could not prepare the cropped photo. Please try again.");
+  const uploadFile=new File([cropped],cropPhotoKind+"-portrait-4x5.jpg",{type:"image/jpeg"});
+  const url=await uploadImage(uploadFile,status);
+  const story={...currentStory(),[cropPhotoKind+"Photo"]:url};
+  await window.LuneraCloud.saveCatalogue({luneraStory:story});
+  localStorage.setItem("luneraStory",JSON.stringify(story));
+  const preview=document.getElementById(cropPhotoKind+"StoryPhotoPreview");
+  preview.src=url;preview.style.display="block";
+  document.getElementById(cropPhotoKind+"StoryPhotoStatus").textContent="PHOTO SAVED IN 4:5 FORMAT.";
+  document.getElementById(cropPhotoKind+"StoryPhotoStatus").className="upload-status success";
+  closeStoryCrop();
+ }catch(error){status.textContent=error.message||"Photo crop or upload failed.";status.className="upload-status error";}
+ finally{button.disabled=false;button.textContent="CROP & SAVE PHOTO";}
+});
+document.getElementById("storyCropCancel").addEventListener("click",closeStoryCrop);
+document.getElementById("storyCropModal").addEventListener("click",event=>{if(event.target.id==="storyCropModal")closeStoryCrop();});
+
 function resetStoryFields(){if(!confirm("Restore the default founders’ story text?"))return;Object.assign(document,{});const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};Object.entries(map).forEach(([id,k])=>document.getElementById(id).value=defaultLuneraStory[k])}
 
 fillStoryFields();
