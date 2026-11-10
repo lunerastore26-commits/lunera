@@ -79,6 +79,7 @@ async function saveCatalogue(values){
 }
 window.LuneraCloud={
  ready,
+ refreshCatalogue,
  saveCatalogue,
  ensureCatalogue,
  async currentUser(){await ready;await authReady;return auth.currentUser||null},
