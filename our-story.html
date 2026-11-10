@@ -20,19 +20,20 @@ nav a{font:10px Montserrat,sans-serif;letter-spacing:2px;text-transform:uppercas
 .eyebrow{font:9px Montserrat,sans-serif;letter-spacing:4px;color:#cfc8bf;margin-bottom:25px}
 h1{font:400 clamp(44px,6vw,78px)/1.08 'Bodoni Moda',serif;max-width:980px;margin:0 auto 25px}
 .lead{font:14px/2 Montserrat,sans-serif;max-width:760px;margin:auto;color:#e2dbd1}
-.story-main{max-width:1240px;margin:0 auto;padding:90px 8% 110px}
-.founders{display:grid;grid-template-columns:1fr 1fr;gap:34px}
-.founder{padding:0 0 34px;border:0!important}
+/* Founder text panels sized like the approved reference: green only behind the copy. */
+.story-main{max-width:none;width:100%;box-sizing:border-box;margin:0 auto;padding:12px 13px 70px}
+.founders{display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:stretch}
+.founder{padding:0;margin:0;border:0!important;min-width:0}
 .founder-photo{width:100%;height:310px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:linear-gradient(135deg,#e8e0d4,#cfc4b4);color:#17352b;font:500 54px 'Bodoni Moda',serif;letter-spacing:5px}
 .founder-photo img{width:100%;height:100%;object-fit:cover;display:block}
-.founder-copy{background:#102f24;color:#f7f4ef;padding:34px 34px 38px;border-radius:2px;min-height:100%}
+.founder-copy{box-sizing:border-box;width:100%;height:100%;background:#102f24;color:#f7f4ef;padding:34px 34px 38px;border-radius:2px}
 .founder+.founder{border:0}
 .index{font:9px Montserrat,sans-serif;letter-spacing:2.5px;color:#cfc8bf}
 h2{font:400 clamp(30px,3.5vw,43px)/1.15 'Bodoni Moda',serif;margin:24px 0 20px;color:#f7f4ef}
 .founder p{font:19px/2 'Cormorant Garamond',serif;color:#e2dbd1}
 .name{margin-top:32px;font:500 10px Montserrat,sans-serif;letter-spacing:2px;color:#f7f4ef}
 .name span{display:block;margin-top:8px;color:#cfc8bf;font:9px Montserrat,sans-serif;letter-spacing:2px}
-@media(max-width:700px){.founders{grid-template-columns:1fr;gap:28px}.founder-photo{height:270px}.founder-copy{padding:28px 24px 32px}}
+@media(max-width:700px){.story-main{padding:12px 13px 55px}.founders{grid-template-columns:1fr;gap:24px}.founder-photo{height:270px}.founder-copy{height:auto;padding:28px 24px 32px}}
 .closing{max-width:800px;margin:48px auto 0;text-align:center;font:italic 24px/1.6 'Cormorant Garamond',serif;color:#655c50}
 footer{background:#151212;color:#f7f4ef;padding:70px 6% 35px}
 .footer-grid{max-width:1380px;margin:auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:50px}
