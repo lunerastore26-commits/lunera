@@ -1298,6 +1298,8 @@ renderCart();
 renderFooter();
 
 updateBagCount();
+window.addEventListener("lunera:catalogue-updated",function(){renderCart();renderFooter();updateBagCount();});
+
 
 </script>
 
