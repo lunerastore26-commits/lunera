@@ -121,10 +121,10 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 /* Match each editor preview to the image frame used on its storefront section. */
 .hero-preview,.category-cover-preview{display:block;width:100%;max-width:100%;height:auto;aspect-ratio:1005 / 563;max-height:none;object-fit:cover;object-position:center;background:#e8e0d4}
-.product-preview,.upload-preview{display:block;width:min(100%,420px);max-width:100%;height:auto;aspect-ratio:4 / 5;max-height:none;object-fit:contain;object-position:center;background:#e8e0d4}
-.product-preview{margin:0 auto 20px}
-.small-upload .upload-preview{height:auto}
-#sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:4/5;object-fit:contain;object-position:center;display:none;background:#e8e0d4}
+.product-preview{display:block;width:min(100%,420px);max-width:100%;height:auto;aspect-ratio:4 / 5;max-height:none;object-fit:contain;object-position:center;background:#e8e0d4;margin:0 auto 20px}
+.upload-preview{display:block;width:min(100%,420px);max-width:100%;height:auto;aspect-ratio:auto;max-height:none;object-fit:contain;object-position:center;background:#e8e0d4}
+.small-upload .upload-preview{height:auto;aspect-ratio:auto}
+#sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:auto;object-fit:contain;object-position:center;display:none;background:#e8e0d4}
 .gallery-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
 .gallery-preview figure{position:relative;width:clamp(78px,18%,120px);aspect-ratio:4 / 5;background:#e8e0d4;border:1px solid #e1dbd2}
 .gallery-preview img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
@@ -251,10 +251,10 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 <label>Introduction</label><textarea id="storyIntroInput"></textarea>
 <label>Sonu Qureshi — heading</label><input id="sonuTitleInput">
 <label>Sonu Qureshi — story</label><textarea id="sonuBodyInput" style="min-height:150px"></textarea>
-<div class="upload-box small-upload"><strong>SONU QURESHI — FOUNDER PHOTO</strong><img id="sonuStoryPhotoPreview" class="upload-preview" alt="Sonu Qureshi photo preview"><input id="sonuStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('sonu',event)"><label for="sonuStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="sonuStoryPhotoStatus" class="upload-status"></div></div>
+<div class="upload-box small-upload"><strong>SONU QURESHI — FOUNDER PHOTO</strong><p class="intro" style="margin:8px 0 14px">Original photo is kept in its natural shape; no 4:5 crop is applied.</p><img id="sonuStoryPhotoPreview" class="upload-preview" alt="Sonu Qureshi photo preview"><input id="sonuStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('sonu',event)"><label for="sonuStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="sonuStoryPhotoStatus" class="upload-status"></div></div>
 <label>Your name — heading</label><input id="adeebTitleInput">
 <label>Your story</label><textarea id="adeebBodyInput" style="min-height:150px"></textarea>
-<div class="upload-box small-upload"><strong>ADEEB QURESHI — FOUNDER PHOTO</strong><img id="adeebStoryPhotoPreview" class="upload-preview" alt="Adeeb Qureshi photo preview"><input id="adeebStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('adeeb',event)"><label for="adeebStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="adeebStoryPhotoStatus" class="upload-status"></div></div>
+<div class="upload-box small-upload"><strong>ADEEB QURESHI — FOUNDER PHOTO</strong><p class="intro" style="margin:8px 0 14px">Original photo is kept in its natural shape; no 4:5 crop is applied.</p><img id="adeebStoryPhotoPreview" class="upload-preview" alt="Adeeb Qureshi photo preview"><input id="adeebStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('adeeb',event)"><label for="adeebStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="adeebStoryPhotoStatus" class="upload-status"></div></div>
 <label>Closing line</label><textarea id="storyClosingInput"></textarea>
 <div class="actions"><button id="saveStoryButton" class="save" onclick="saveStory()">SAVE OUR STORY</button><button class="secondary" onclick="resetStoryFields()">RESET STORY TEXT</button></div>
 <div id="storySaveStatus" class="upload-status"></div>
@@ -514,16 +514,15 @@ async function selectStoryPortrait(kind,event){
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="Please choose a JPG, PNG or WebP image.";status.className="upload-status error";input.value="";return;}
  if(file.size>10*1024*1024){status.textContent="Please choose a photo smaller than 10 MB.";status.className="upload-status error";input.value="";return;}
  try{
-  status.textContent="OPENING 4:5 IMAGE EDITOR...";
+  status.textContent="UPLOADING ORIGINAL PHOTO — NO FIXED RATIO OR CROP...";
   status.className="upload-status loading";
-  const edited=await openImageEditor(file);if(!edited)return;
-  const url=await uploadImage(edited,status);
-  const story={...currentStory(),[kind+"Photo"]:url};
-  await window.LuneraCloud.saveCatalogue({luneraStory:story});
-  localStorage.setItem("luneraStory",JSON.stringify(story));
+  const url=await uploadImage(file,status);
+  const nextStory={...currentStory(),[kind+"Photo"]:url};
+  await window.LuneraCloud.saveCatalogue({luneraStory:nextStory});
+  localStorage.setItem("luneraStory",JSON.stringify(nextStory));
   const preview=document.getElementById(kind+"StoryPhotoPreview");
   preview.src=url;preview.style.display="block";
-  status.textContent="ORIGINAL PHOTO SAVED — NO CROP APPLIED.";
+  status.textContent="ORIGINAL OUR STORY PHOTO SAVED.";
   status.className="upload-status success";
  }catch(error){
   status.textContent=error.message||"Photo upload failed.";
@@ -954,7 +953,7 @@ async function handleNewImageSelect(event){
  if(files.some(f=>f.size>10*1024*1024)){alert("Each image must be smaller than 10 MB.");event.target.value="";return;}
  try{
   for(const file of files){const edited=await openImageEditor(file);if(edited)selectedNewImageFiles.push(edited);}
-  name.textContent=selectedNewImageFiles.length+" photo(s) ready · 4:5";
+  name.textContent=selectedNewImageFiles.length+" product photo(s) ready · 4:5";
   selectedNewImageFiles.forEach((file,i)=>{const fig=document.createElement("figure"),img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="Product photo "+(i+1);fig.appendChild(img);preview.appendChild(fig);});
   status.textContent=selectedNewImageFiles.length+" IMAGE(S) READY TO UPLOAD.";
  }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
@@ -1033,7 +1032,7 @@ async function handleExistingImageSelect(i,event){
  if(files.some(f=>f.size>10*1024*1024)){alert("Each image must be smaller than 10 MB.");event.target.value="";return;}
  try{
   const edited=[];for(const file of files){const next=await openImageEditor(file);if(next)edited.push(next);}
-  selectedExistingFiles[i]=edited;name.textContent=edited.length+" new photo(s) ready · 4:5";preview.innerHTML="";
+  selectedExistingFiles[i]=edited;name.textContent=edited.length+" additional product photo(s) ready · 4:5";preview.innerHTML="";
   edited.forEach((file,j)=>{const fig=document.createElement("figure"),img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="New product photo "+(j+1);fig.appendChild(img);preview.appendChild(fig);});
   status.textContent=edited.length+" PHOTO(S) READY TO ADD.";
  }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
