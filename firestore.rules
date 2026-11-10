@@ -59,7 +59,23 @@ service cloud.firestore {
     && request.resource.data.createdAt == request.time;
    allow read: if isAdmin()
     || (signedIn() && resource.data.userId == request.auth.uid);
-   allow update, delete: if isAdmin();
+   allow update: if isAdmin()
+    && request.resource.data.diff(resource.data).affectedKeys()
+       .hasOnly(['status','paymentStatus','paymentCollectedAt','updatedAt'])
+    && request.resource.data.status in
+       ['New','Confirmed','Processing','Shipped','Delivered','Cancelled']
+    && request.resource.data.updatedAt == request.time
+    && (
+      (request.resource.data.status == 'Delivered'
+       && request.resource.data.paymentStatus == 'Paid'
+       && request.resource.data.paymentCollectedAt == request.time)
+      ||
+      (request.resource.data.status != 'Delivered'
+       && request.resource.data.paymentStatus == resource.data.paymentStatus
+       && request.resource.data.get('paymentCollectedAt', null)
+          == resource.data.get('paymentCollectedAt', null))
+    );
+   allow delete: if isAdmin();
   }
  }
 }
