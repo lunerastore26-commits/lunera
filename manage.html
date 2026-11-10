@@ -155,6 +155,23 @@ table { max-width: 100%; }
 </div>
 </section>
 
+
+<section class="section" id="ourStoryEditor">
+<div class="section-title">Our Story</div>
+<p class="intro" style="margin:0 0 24px">Edit the founders’ story shown on the homepage. Changes are saved to the shared store catalogue.</p>
+<div class="add-box">
+<label>Small heading</label><input id="storyEyebrowInput">
+<label>Main headline</label><input id="storyTitleInput">
+<label>Introduction</label><textarea id="storyIntroInput"></textarea>
+<label>Sonu Qureshi — heading</label><input id="sonuTitleInput">
+<label>Sonu Qureshi — story</label><textarea id="sonuBodyInput" style="min-height:150px"></textarea>
+<label>Your name — heading</label><input id="adeebTitleInput">
+<label>Your story</label><textarea id="adeebBodyInput" style="min-height:150px"></textarea>
+<label>Closing line</label><textarea id="storyClosingInput"></textarea>
+<div class="actions"><button id="saveStoryButton" class="save" onclick="saveStory()">SAVE OUR STORY</button><button class="secondary" onclick="resetStoryFields()">RESET STORY TEXT</button></div>
+<div id="storySaveStatus" class="upload-status"></div>
+</div></section>
+
 <section class="section">
 <div class="section-title">Categories</div>
 
@@ -287,7 +304,8 @@ async function login(){
     await window.LuneraCloud.ensureCatalogue({
       luneraProducts: products,
       luneraCategories: categories,
-      luneraHero: localStorage.getItem("luneraHero") || defaultHero
+      luneraHero: localStorage.getItem("luneraHero") || defaultHero,
+      luneraStory: currentStory()
     });
     error.style.display = "none";
     document.getElementById("login").style.display = "none";
@@ -306,6 +324,15 @@ async function resetAdminPassword(){
  catch(e){error.textContent=e.message||"Could not send reset email. Check the email and Firebase Authentication settings.";}
 }
 
+
+
+const defaultLuneraStory={"eyebrow":"THE PEOPLE BEHIND LUNÉRA","title":"Built on experience. Driven by a new vision.","intro":"LUNÉRA brings together deep knowledge of intimate-apparel manufacturing and a fresh ambition to build a thoughtful, enduring brand.","sonuTitle":"Experience that shapes every layer.","sonuBody":"With 30 years of experience in manufacturing bras, panties and lingerie, Sonu Qureshi understands the craft behind intimate apparel—from product construction to the details that matter in everyday wear. That experience became the foundation for a new idea: to take that knowledge beyond manufacturing and build a brand of our own.","adeebTitle":"A new perspective. A shared ambition.","adeebBody":"As a new entrepreneur, Adeeb Qureshi brings fresh ideas, curiosity and the drive to grow LUNÉRA into a distinctive brand. Working alongside Sonu, he is focused on shaping the brand’s identity, reaching customers and building its future—one thoughtful step at a time.","closing":"Different journeys, one shared belief: create intimate essentials with care, confidence and timeless refinement."};
+function currentStory(){try{const v=JSON.parse(localStorage.getItem("luneraStory")||"null");return v&&typeof v==="object"?{...defaultLuneraStory,...v}:{...defaultLuneraStory}}catch(_){return {...defaultLuneraStory}}}
+function fillStoryFields(){const s=currentStory();const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};Object.entries(map).forEach(([id,k])=>{const el=document.getElementById(id);if(el)el.value=s[k]||""})}
+async function saveStory(){const b=document.getElementById("saveStoryButton"),st=document.getElementById("storySaveStatus");const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};const next={};Object.entries(map).forEach(([id,k])=>next[k]=document.getElementById(id).value.trim());if(Object.values(next).some(v=>!v)){alert("Please complete all Our Story fields before saving.");return}b.disabled=true;b.textContent="SAVING...";st.textContent="Saving to shared catalogue…";st.className="upload-status loading";try{if(!window.LuneraCloud)throw Error("Cloud services are not ready. Refresh and try again.");await window.LuneraCloud.saveCatalogue({luneraStory:next});localStorage.setItem("luneraStory",JSON.stringify(next));st.textContent="OUR STORY SAVED TO THE SHARED STORE.";st.className="upload-status success";showStatus()}catch(e){st.textContent=e.message||"Could not save the story.";st.className="upload-status error";alert(st.textContent)}finally{b.disabled=false;b.textContent="SAVE OUR STORY"}}
+function resetStoryFields(){if(!confirm("Restore the default founders’ story text?"))return;Object.assign(document,{});const map={storyEyebrowInput:"eyebrow",storyTitleInput:"title",storyIntroInput:"intro",sonuTitleInput:"sonuTitle",sonuBodyInput:"sonuBody",adeebTitleInput:"adeebTitle",adeebBodyInput:"adeebBody",storyClosingInput:"closing"};Object.entries(map).forEach(([id,k])=>document.getElementById(id).value=defaultLuneraStory[k])}
+
+fillStoryFields();
 
 /* HERO */
 
