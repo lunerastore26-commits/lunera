@@ -33,7 +33,15 @@ nav a{transition:.25s ease}nav a:hover{opacity:.55}
 .collection-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:38px 22px}
 .product-card{min-width:0}
 .card-image-link{display:block;background:#eee9e1;overflow:hidden;aspect-ratio:4/5;margin-bottom:17px}
-.card-image{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s ease}
+.card-image{width:100%;height:100%;object-fit:contain;display:block;transition:transform .5s ease}
+.product-gallery{width:100%;min-width:0}
+.product-gallery-main{background:#eee9e1;aspect-ratio:4/5;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.product-gallery-main .product-image{width:100%;height:100%;max-height:850px;object-fit:contain;display:block}
+.product-gallery-thumbs{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.product-gallery-thumb{width:clamp(64px,14%,104px);aspect-ratio:4/5;padding:0;border:1px solid rgba(21,18,18,.22);background:#eee9e1;cursor:pointer;overflow:hidden}
+.product-gallery-thumb.active{border:2px solid #17352b}
+.product-gallery-thumb img{width:100%;height:100%;object-fit:contain;display:block}
+
 .product-card:hover .card-image{transform:scale(1.035)}
 .card-category{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:#17352b;margin-bottom:9px}
 .card-name{font-family:"Bodoni Moda",serif;font-size:25px;font-weight:400;line-height:1.2;margin-bottom:9px}
@@ -43,8 +51,8 @@ nav a{transition:.25s ease}nav a:hover{opacity:.55}
 .card-btn.secondary{background:transparent;color:#151212;border-color:rgba(21,18,18,.3)}
 .card-btn:hover{opacity:.85}
 .product-layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:80px;align-items:start}
-.product-image-wrap{background:#eee9e1;min-height:650px;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.product-image{width:100%;height:650px;object-fit:contain;display:block}
+.product-image-wrap{background:transparent;min-height:0;display:block;overflow:visible}
+.product-image{width:100%;height:100%;object-fit:contain;display:block}
 .product-info{padding-top:20px;max-width:540px}
 .product-name{font-family:"Bodoni Moda",serif;font-size:clamp(42px,5vw,72px);font-weight:400;line-height:1;margin-bottom:22px}
 .price{font-family:"Cormorant Garamond",serif;font-size:30px;margin-bottom:35px}
@@ -85,8 +93,8 @@ footer{background:#151212;color:#f7f4ef;padding:70px 6% 35px}
 .empty-state{text-align:center;padding:60px 15px;grid-column:1/-1}
 .empty-state h2{font-family:"Bodoni Moda",serif;font-size:34px;font-weight:400;margin-bottom:12px}
 .empty-state p{font-family:"Cormorant Garamond",serif;font-size:19px;color:#49443f}
-@media(max-width:900px){header{padding:18px 5%;gap:20px}.nav{gap:16px}.product-layout{grid-template-columns:1fr;gap:45px}.product-image-wrap{min-height:500px}.product-image{height:500px}.product-info{max-width:none}.product-details{grid-template-columns:1fr;gap:45px}.footer-grid{grid-template-columns:1fr 1fr}.collection-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 16px}}
-@media(max-width:600px){header{flex-direction:column;align-items:flex-start;min-height:76px;padding:16px 5%}.logo{font-size:28px}nav{width:100%;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:9px}.page{padding:42px 5% 70px}.product-image-wrap{min-height:420px;height:420px}.product-image{height:420px}.product-name{font-size:45px}.description{font-size:19px}.footer-grid{grid-template-columns:1fr;gap:35px}.footer-bottom{flex-direction:column}.collection-grid{grid-template-columns:1fr 1fr;gap:26px 12px}.card-name{font-size:20px}.card-price{font-size:20px}.card-actions{flex-direction:column}.card-btn{width:100%}.filter-btn{padding:10px 12px;font-size:9px}.collection-title{font-size:43px}}
+@media(max-width:900px){header{padding:18px 5%;gap:20px}.nav{gap:16px}.product-layout{grid-template-columns:1fr;gap:45px}.product-image-wrap{min-height:0}.product-gallery-main{max-height:700px}.product-info{max-width:none}.product-details{grid-template-columns:1fr;gap:45px}.footer-grid{grid-template-columns:1fr 1fr}.collection-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 16px}}
+@media(max-width:600px){header{flex-direction:column;align-items:flex-start;min-height:76px;padding:16px 5%}.logo{font-size:28px}nav{width:100%;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:9px}.page{padding:42px 5% 70px}.product-gallery-main{max-height:560px}.product-name{font-size:45px}.description{font-size:19px}.footer-grid{grid-template-columns:1fr;gap:35px}.footer-bottom{flex-direction:column}.collection-grid{grid-template-columns:1fr 1fr;gap:26px 12px}.card-name{font-size:20px}.card-price{font-size:20px}.card-actions{flex-direction:column}.card-btn{width:100%}.filter-btn{padding:10px 12px;font-size:9px}.collection-title{font-size:43px}}
 
 /* LUNÉRA footer — typography matched to the site's existing brand fonts */
 footer{background:#151212;color:#f7f4ef;padding:76px 6% 32px;font-family:"Montserrat",Arial,sans-serif}
@@ -207,7 +215,24 @@ function showTemporaryNotice(message){let el=document.getElementById("collection
 function addItemToCart(product,size,quantity){const price=parsePrice(product.price);if(!Number.isFinite(price)||price<0)throw new Error("Invalid product price");const cart=safeCart();const existing=cart.find(i=>String(i.id)===String(product.id)&&String(i.size)===String(size));if(existing){const current=Math.max(0,Math.floor(Number(existing.quantity)||0));if(current+quantity>20)throw new Error("Maximum 20 units per product and size.");existing.quantity=current+quantity;}else{cart.push({id:product.id,name:String(product.name||""),price,category:String(product.category||""),image:String(product.image||""),size,quantity});}localStorage.setItem("luneraCart",JSON.stringify(cart));updateBagCount();}
 let selectedProduct=null,selectedSize="",selectedQuantity=1;
 function getProduct(){const params=new URLSearchParams(location.search);const value=params.get("product")||"";const products=getProducts();if(value)return getProductByParam(value,products);const category=params.get("category")||"";if(category)return products.find(p=>String(p.category||"").toLowerCase()===category.toLowerCase())||null;return null;}
-function renderProduct(){const product=getProduct();const main=document.getElementById("mainContent");if(!product){renderCollection(new URLSearchParams(location.search).get("category")||"");return;}selectedProduct=product;const sizes=Array.isArray(product.sizes)&&product.sizes.length?product.sizes:["Standard"];selectedSize=String(sizes[0]);selectedQuantity=1;main.innerHTML=`<a href="product.html" class="back">← Back to Collection</a><section class="product-layout"><div class="product-image-wrap"><img src="${escapeHTML(product.image||"")}" alt="${escapeHTML(product.name)}" class="product-image" onerror="this.onerror=null;this.src='https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=85'"></div><div class="product-info"><div class="category">${escapeHTML(product.category||"LUNÉRA")}</div><h1 class="product-name">${escapeHTML(product.name)}</h1><div class="price">${money(Number(product.price)||0)}</div><p class="description">${escapeHTML(product.description||"A refined LUNÉRA essential designed with elegance and ease.")}</p><div class="option-title">Select Size</div><div class="sizes" id="sizes">${sizes.map((size,index)=>`<button type="button" class="size-btn ${index===0?"active":""}" data-size="${escapeHTML(size)}" aria-pressed="${index===0?"true":"false"}">${escapeHTML(size)}</button>`).join("")}</div><div class="option-title">Quantity</div><div class="quantity-row"><div class="quantity"><button type="button" id="minusQty" aria-label="Decrease quantity">−</button><span id="quantity" aria-live="polite">1</span><button type="button" id="plusQty" aria-label="Increase quantity">+</button></div></div><button class="add-btn" id="addBtn" type="button">Add to Bag</button><button class="buy-btn" id="buyBtn" type="button">Buy Now</button><div class="notice" id="notice" role="status"></div></div></section><section class="product-details"><div><h2 class="detail-title">The LUNÉRA Edit</h2><p class="detail-text">Designed around understated luxury, each LUNÉRA piece is created to become part of your everyday wardrobe. Thoughtful silhouettes and timeless styling define the collection.</p></div><div><h2 class="detail-title">Product Information</h2><ul class="info-list"><li><span>Category</span><span>${escapeHTML(product.category||"—")}</span></li><li><span>Available Sizes</span><span>${sizes.map(escapeHTML).join(", ")}</span></li><li><span>Shipping</span><span>Complimentary on all orders</span></li><li><span>Returns</span><span>See return policy</span></li></ul></div></section>`;
+function renderProduct(){
+ const product=getProduct(),main=document.getElementById("mainContent");
+ if(!product){renderCollection(new URLSearchParams(location.search).get("category")||"");return;}
+ selectedProduct=product;const sizes=Array.isArray(product.sizes)&&product.sizes.length?product.sizes:["Standard"];selectedSize=String(sizes[0]);selectedQuantity=1;
+ const images=Array.from(new Set([product.image].concat(Array.isArray(product.images)?product.images:[]).filter(Boolean)));
+ const thumbs=images.map((url,index)=>'<button type="button" class="product-gallery-thumb '+(index===0?"active":"")+'" data-gallery-image="'+index+'" aria-label="View product photo '+(index+1)+'"><img src="'+escapeHTML(url)+'" alt="'+escapeHTML(product.name)+' photo '+(index+1)+'"></button>').join("");
+ main.innerHTML='<a href="product.html" class="back">← Back to Collection</a><section class="product-layout">'+
+ '<div class="product-gallery"><div class="product-gallery-main"><img id="productMainImage" src="'+escapeHTML(images[0]||"")+'" alt="'+escapeHTML(product.name)+'" class="product-image" onerror="this.onerror=null;this.src=\\'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=85\\'"></div>'+
+ (images.length>1?'<div class="product-gallery-thumbs" aria-label="More product photos">'+thumbs+'</div>':'')+'</div>'+
+ '<div class="product-info"><div class="category">'+escapeHTML(product.category||"LUNÉRA")+'</div><h1 class="product-name">'+escapeHTML(product.name)+'</h1><div class="price">'+money(Number(product.price)||0)+'</div><p class="description">'+escapeHTML(product.description||"A refined LUNÉRA essential designed with elegance and ease.")+'</p>'+
+ '<div class="option-title">Select Size</div><div class="sizes" id="sizes">'+sizes.map((size,index)=>'<button type="button" class="size-btn '+(index===0?"active":"")+'" data-size="'+escapeHTML(size)+'" aria-pressed="'+(index===0?"true":"false")+'">'+escapeHTML(size)+'</button>').join("")+'</div>'+
+ '<div class="option-title">Quantity</div><div class="quantity-row"><div class="quantity"><button type="button" id="minusQty" aria-label="Decrease quantity">−</button><span id="quantity" aria-live="polite">1</span><button type="button" id="plusQty" aria-label="Increase quantity">+</button></div></div>'+
+ '<button class="add-btn" id="addBtn" type="button">Add to Bag</button><button class="buy-btn" id="buyBtn" type="button">Buy Now</button><div class="notice" id="notice" role="status"></div></div></section>'+
+ '<section class="product-details"><div><h2 class="detail-title">The LUNÉRA Edit</h2><p class="detail-text">Designed around understated luxury, each LUNÉRA piece is created to become part of your everyday wardrobe. Thoughtful silhouettes and timeless styling define the collection.</p></div><div><h2 class="detail-title">Product Information</h2><ul class="info-list"><li><span>Category</span><span>'+escapeHTML(product.category||"—")+'</span></li><li><span>Available Sizes</span><span>'+sizes.map(escapeHTML).join(", ")+'</span></li><li><span>Shipping</span><span>Complimentary on all orders</span></li><li><span>Returns</span><span>See return policy</span></li></ul></div></section>';
+ main.querySelectorAll("[data-gallery-image]").forEach(btn=>btn.addEventListener("click",()=>{
+  const index=Number(btn.dataset.galleryImage),img=images[index],hero=document.getElementById("productMainImage");
+  if(hero&&img)hero.src=img;main.querySelectorAll(".product-gallery-thumb").forEach(item=>item.classList.toggle("active",item===btn));
+ }));
  main.querySelectorAll("[data-size]").forEach(btn=>btn.addEventListener("click",()=>{selectedSize=btn.dataset.size;main.querySelectorAll("[data-size]").forEach(b=>{const active=b===btn;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));});}));
  document.getElementById("minusQty").addEventListener("click",()=>changeQuantity(-1));document.getElementById("plusQty").addEventListener("click",()=>changeQuantity(1));document.getElementById("addBtn").addEventListener("click",()=>addToBag(false));document.getElementById("buyBtn").addEventListener("click",()=>addToBag(true));
 }
