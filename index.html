@@ -19,6 +19,7 @@
 <meta name="twitter:image" content="https://lunerastore26-commits.github.io/lunera/lunera-logo.png">
 
 <title>LUNÉRA — Elegance in Every Layer</title>
+<script>try{document.documentElement.classList.add("lunera-hero-pending")}catch(_){}</script>
 
 <!-- Browser Tab Logo / Favicon -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -182,6 +183,7 @@ overflow:hidden
 }
 
  .hero-image-layer{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;z-index:0;display:block}
+html.lunera-hero-pending .hero-image-layer{visibility:hidden}
 .hero-content{
 position:relative;
 z-index:1;
@@ -1368,20 +1370,37 @@ updateBagCount();
       img.src=displayUrl;
     });
   }
+  function revealHeroFallback(){
+    const img=document.getElementById("heroImageLayer");
+    if(!img)return;
+    const reveal=()=>document.documentElement.classList.remove("lunera-hero-pending");
+    if(img.complete){reveal();return;}
+    img.addEventListener("load",reveal,{once:true});
+    img.addEventListener("error",reveal,{once:true});
+  }
   function applyAdminHero(value){
     const img=document.getElementById("heroImageLayer");
-    if(!img || value==null) return;
+    if(!img)return;
+    if(value==null || !String(value).trim()){revealHeroFallback();return;}
     let url=String(value).trim();
     if(url.startsWith('"') && url.endsWith('"')){try{url=JSON.parse(url)}catch(_){}}
-    if(!/^https:\/\//i.test(url)) return;
-    if(img.dataset.adminHeroUrl===url && img.complete && img.naturalWidth>0) return;
+    if(!/^https:\/\//i.test(url)){revealHeroFallback();return;}
+    if(img.dataset.adminHeroUrl===url){
+      if(img.complete && img.naturalWidth>0)document.documentElement.classList.remove("lunera-hero-pending");
+      return;
+    }
     if(!img.dataset.defaultHeroUrl)img.dataset.defaultHeroUrl=img.getAttribute("src")||"";
     img.dataset.adminHeroUrl=url;
-    img.onload=()=>{img.style.visibility="visible";};
+    img.onload=()=>{img.style.visibility="visible";document.documentElement.classList.remove("lunera-hero-pending");};
     img.onerror=()=>{
       const fallback=img.dataset.defaultHeroUrl;
-      if(fallback && img.src!==fallback){img.onerror=()=>{img.style.visibility="hidden";};img.src=fallback;}
-      else{img.style.visibility="hidden";}
+      if(fallback && img.src!==fallback){
+        img.onerror=()=>{document.documentElement.classList.remove("lunera-hero-pending");};
+        img.onload=()=>{img.style.visibility="visible";document.documentElement.classList.remove("lunera-hero-pending");};
+        img.src=fallback;
+      }else{
+        document.documentElement.classList.remove("lunera-hero-pending");
+      }
       console.error("LUNÉRA admin hero image could not load.");
     };
     img.src=url;
@@ -1397,7 +1416,7 @@ updateBagCount();
         if(data && Object.prototype.hasOwnProperty.call(data,"luneraHero")) applyAdminHero(data.luneraHero);
         if(data && Object.prototype.hasOwnProperty.call(data,"luneraCategoryCovers")) applyAdminCategoryCovers(data.luneraCategoryCovers);
       }
-    }catch(error){console.error("LUNÉRA Admin hero sync failed:",error);}
+    }catch(error){console.error("LUNÉRA Admin hero sync failed:",error);revealHeroFallback();}
   });
 })();
 </script>
