@@ -1319,9 +1319,27 @@ updateBagCount();
       if(img.dataset.adminCoverUrl===url && img.complete && img.naturalWidth>0) return;
       if(!img.dataset.defaultCover)img.dataset.defaultCover=img.getAttribute("src")||"";
       img.dataset.adminCoverUrl=url;
-      img.loading="lazy";
-       img.fetchPriority="low";
+      img.loading="eager";
+      img.fetchPriority="low";
       img.decoding="async";
+      /* Serve a lighter mobile-friendly rendition without changing the stored original. */
+      let displayUrl=url;
+      try{
+        const parsed=new URL(url);
+        if(parsed.hostname==="res.cloudinary.com"){
+          const parts=parsed.pathname.split("/upload/");
+          if(parts.length===2 && !/^(?:f_|q_|w_|h_|c_|dpr_)/.test(parts[1])){
+            parsed.pathname=parts[0]+"/upload/f_auto,q_auto,w_1100,c_limit/"+parts[1];
+          }
+          displayUrl=parsed.toString();
+        }else if(parsed.hostname==="images.unsplash.com"){
+          parsed.searchParams.set("w","1100");
+          parsed.searchParams.set("q","82");
+          parsed.searchParams.set("auto","format");
+          displayUrl=parsed.toString();
+        }
+      }catch(_){}
+
       img.onerror=()=>{
         if(img.dataset.defaultCover && img.src!==img.dataset.defaultCover){
           img.onerror=()=>{img.classList.add("cover-image-error");console.error("LUNÉRA "+name+" default cover could not load.");};
@@ -1332,7 +1350,7 @@ updateBagCount();
         }
       };
       img.onload=()=>img.classList.remove("cover-image-error");
-      img.src=url;
+      img.src=displayUrl;
     });
   }
   function applyAdminHero(value){
