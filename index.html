@@ -1485,6 +1485,13 @@ updateBagCount();
     if(e.detail && Object.prototype.hasOwnProperty.call(e.detail,"luneraHero")) applyAdminHero(e.detail.luneraHero);
     if(e.detail && Object.prototype.hasOwnProperty.call(e.detail,"luneraCategoryCovers")) applyAdminCategoryCovers(e.detail.luneraCategoryCovers);
   });
+  /* Paint the last confirmed shared catalogue immediately; Firestore sync may emit an update afterward. */
+  const cachedHero=localStorage.getItem("luneraHero");
+  if(cachedHero)applyAdminHero(cachedHero);else revealHeroFallback();
+  try{
+    const cachedCovers=JSON.parse(localStorage.getItem("luneraCategoryCovers")||"{}");
+    applyAdminCategoryCovers(cachedCovers);
+  }catch(_){}
   /* Initial catalogue sync is already handled once by lunera-cloud.js.
      Avoid a second Firestore read on every homepage visit. */
 })();
