@@ -1319,7 +1319,8 @@ updateBagCount();
       if(img.dataset.adminCoverUrl===url && img.complete && img.naturalWidth>0) return;
       if(!img.dataset.defaultCover)img.dataset.defaultCover=img.getAttribute("src")||"";
       img.dataset.adminCoverUrl=url;
-      img.loading="eager";
+      img.loading="lazy";
+       img.fetchPriority="low";
       img.decoding="async";
       img.onerror=()=>{
         if(img.dataset.defaultCover && img.src!==img.dataset.defaultCover){
