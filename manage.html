@@ -451,7 +451,7 @@ async function selectStoryPortrait(kind,event){
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="Please choose a JPG, PNG or WebP image.";status.className="upload-status error";input.value="";return;}
  if(file.size>10*1024*1024){status.textContent="Please choose a photo smaller than 10 MB.";status.className="upload-status error";input.value="";return;}
  try{
-  status.textContent="UPLOADING ORIGINAL PHOTO...";
+  status.textContent="OPENING 4:5 IMAGE EDITOR...";
   status.className="upload-status loading";
   const edited=await openImageEditor(file);if(!edited)return;
   const url=await uploadImage(edited,status);
@@ -858,10 +858,12 @@ async function handleCategoryCoverSelect(name,index,event){
  const file=event.target.files&&event.target.files[0];if(!file)return;
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){alert("Please choose a JPG, PNG or WebP image.");event.target.value="";return;}
  if(file.size>10*1024*1024){alert("Please choose an image smaller than 10 MB.");event.target.value="";return;}
- const edited=await openImageEditor(file);if(!edited){event.target.value="";return;}
- selectedCategoryCoverFiles[name]=edited;
- document.getElementById("category-cover-file-name-"+index).textContent=file.name+" · 4:5 edited";
- document.getElementById("category-cover-preview-"+index).src=URL.createObjectURL(edited);
+ try{
+  const edited=await openImageEditor(file);if(!edited){event.target.value="";return;}
+  selectedCategoryCoverFiles[name]=edited;
+  document.getElementById("category-cover-file-name-"+index).textContent=file.name+" · 4:5 edited";
+  document.getElementById("category-cover-preview-"+index).src=URL.createObjectURL(edited);
+ }catch(error){alert(error.message||"Image editing failed.");}
 }
 async function saveCategoryCovers(){
  const button=document.getElementById("saveCategoryCoversButton"),status=document.getElementById("categoryCoverStatus");
