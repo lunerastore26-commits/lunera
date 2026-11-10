@@ -13,6 +13,7 @@ service cloud.firestore {
   }
   match /orders/{orderId} {
    allow create: if signedIn()
+    && request.resource.data.paymentMethod == 'Cash on Delivery (COD)'
     && request.resource.data.keys().hasAll([
       'id','userId','date','customer','items','total',
       'status','paymentStatus','paymentMethod','emailStatus','createdAt'
