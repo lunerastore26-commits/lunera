@@ -32,9 +32,9 @@ The management panel uses cloud name r5kxmdor and unsigned preset lunera_product
 EMAIL NOTIFICATIONS
 Checkout attempts an EmailJS notification using:
 - Service: service_26ob5sw
-- Template: e00x0gi
+- Template: template_o9wrz7c
 - Public key: configured in checkout.html
-Set the template recipient (To Email) to the fixed address lunerastore26@gmail.com; do not use a browser-supplied recipient variable. Include: order_id, customer_name, customer_phone, customer_email, delivery_address, order_details, order_total, customer_notes, to_email.
+Set the template recipient (To Email) to the fixed address lunerastore26@gmail.com; do not use a browser-supplied recipient variable. Include: order_id, customer_name, customer_phone, customer_email, delivery_address, order_details, order_total, customer_notes.
 EmailJS is best-effort browser-side notification. Confirm the service/template are active and test delivery.
 
 ORDER AND CUSTOMER DATA
