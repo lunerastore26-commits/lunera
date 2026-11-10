@@ -3,13 +3,30 @@
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>LUNÉRA — Checkout</title>
-<link rel="icon" type="image/png" href="lunera-logo.png">
+<link rel="icon" type="image/png" href="lunera-monogram.svg">
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:wght@400;500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}body{background:#f7f4ef;color:#151212;font-family:Montserrat,sans-serif}header{background:#151212;padding:25px 8%;display:flex;justify-content:space-between;align-items:center}.logo{color:white;text-decoration:none;font:500 29px 'Bodoni Moda',serif;letter-spacing:2px}.back{color:white;text-decoration:none;font-size:9px;letter-spacing:2px}.container{width:84%;max-width:1100px;margin:60px auto 90px}h1{font:400 60px 'Bodoni Moda',serif;margin-bottom:40px}h2{font:400 30px 'Cormorant Garamond',serif;margin-bottom:22px}.grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:55px}.form-box,.order-box{background:white;padding:30px}input,textarea{width:100%;padding:15px;margin-bottom:14px;border:1px solid #ddd;font:11px Montserrat,sans-serif}textarea{height:100px}button{width:100%;padding:18px;background:#17352b;color:white;border:0;font:500 10px Montserrat,sans-serif;letter-spacing:2px;cursor:pointer}button:disabled{opacity:.6}.order{border-top:1px solid #151212}.order-row{display:flex;justify-content:space-between;gap:18px;padding:14px 0;font-size:10px;line-height:1.6}.total{border-top:1px solid #ddd;margin-top:8px;padding-top:20px}.note{font-size:10px;line-height:1.8;opacity:.7;margin-top:18px}.error{display:none;color:#8a1c1c;font-size:11px;line-height:1.7;margin:12px 0}.success{display:none;text-align:center;padding:80px 15px}.success h2{font:400 46px 'Bodoni Moda',serif}.success p{font-size:11px;line-height:1.9;margin:18px 0}a.return{display:inline-block;background:#17352b;color:white;padding:16px 25px;text-decoration:none;font-size:10px;letter-spacing:2px}.payment-options{display:grid;gap:12px;margin:8px 0 18px}.payment-option{display:flex;align-items:flex-start;gap:12px;padding:15px;border:1px solid #ddd;cursor:pointer}.payment-option input{width:auto;margin:2px 0 0}.payment-option strong{display:block;font-size:11px;margin-bottom:6px}.payment-option small{display:block;font-size:10px;line-height:1.7;opacity:.75}#emailStatusNote{margin-top:15px;font-size:12px}@media(max-width:850px){.container{width:90%;margin-top:40px}h1{font-size:46px}.grid{grid-template-columns:1fr;gap:35px}}@media(max-width:500px){header{padding:20px 6%}.container{width:90%}h1{font-size:40px}.form-box,.order-box{padding:20px}}
-</style></head>
+</style>
+<style id="lunera-refined-logo">
+.logo-lockup{display:inline-flex!important;align-items:center;gap:12px;text-decoration:none!important;white-space:nowrap;letter-spacing:normal!important;line-height:1;color:inherit}
+.logo-lockup .logo-symbol{display:block;flex:0 0 auto;width:52px;height:56px;color:currentColor}
+.logo-lockup .logo-symbol path{stroke:currentColor}
+.logo-lockup .logo-divider{display:block;width:1px;height:42px;background:currentColor;opacity:.52;flex:0 0 1px}
+.logo-lockup .logo-wordmark{display:inline-block;font-family:"Bodoni Moda",Georgia,serif!important;font-size:27px!important;font-weight:400!important;line-height:1.15;letter-spacing:.27em!important;color:inherit!important;white-space:nowrap;margin-right:-.27em}
+.footer-brand.logo-lockup{gap:14px;margin-bottom:13px}
+.footer-brand.logo-lockup .logo-symbol{width:62px;height:66px}
+.footer-brand.logo-lockup .logo-divider{height:49px}
+.footer-brand.logo-lockup .logo-wordmark{font-size:30px!important}
+.brand.logo-lockup .logo-symbol{width:45px;height:49px}
+.brand.logo-lockup .logo-divider{height:37px}
+.brand.logo-lockup .logo-wordmark{font-size:25px!important}
+@media(max-width:850px){.logo-lockup{gap:9px}.logo-lockup .logo-symbol{width:42px;height:46px}.logo-lockup .logo-divider{height:34px}.logo-lockup .logo-wordmark{font-size:21px!important;letter-spacing:.22em!important;margin-right:-.22em}.footer-brand.logo-lockup .logo-symbol{width:54px;height:58px}.footer-brand.logo-lockup .logo-wordmark{font-size:26px!important}}
+@media(max-width:420px){.logo-lockup{gap:7px}.logo-lockup .logo-symbol{width:36px;height:40px}.logo-lockup .logo-divider{height:30px}.logo-lockup .logo-wordmark{font-size:18px!important;letter-spacing:.18em!important;margin-right:-.18em}}
+</style>
+</head>
 <body>
-<header><a href="index.html" class="logo">LUNÉRA</a><a href="cart.html" class="back">BACK TO BAG</a></header>
+<header><a href="index.html" class="logo logo-lockup"><svg class="logo-symbol" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><g fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="M25 15.5H76"/><path d="M50.5 15.5V76.5C50.5 82 54.5 85 61 85H83"/><path d="M50.5 76.5C43 88 29 93 17 83"/><path d="M20 83.5H33" stroke-width="1.35"/></g></svg><span class="logo-divider" aria-hidden="true"></span><span class="logo-wordmark">LUNÉRA</span></a><a href="cart.html" class="back">BACK TO BAG</a></header>
 <main class="container"><h1>Checkout</h1>
 <div id="authRequired" style="display:none;padding:28px;background:#fffdfa;border:1px solid #e9e2d9;margin:20px 0"><h2>Sign in to continue</h2><p>Your LUNÉRA orders are saved privately to your account. Please sign in or create an account before checkout.</p><a class="return" href="customer-auth.html?return=checkout.html">SIGN IN / CREATE ACCOUNT</a></div><div id="checkoutContent" style="display:none"><div class="grid"><section><h2>Delivery Details</h2><div class="form-box"><form id="form">
 <input id="name" placeholder="Full Name" required autocomplete="name">
