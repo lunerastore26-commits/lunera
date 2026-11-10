@@ -92,10 +92,10 @@ form.addEventListener("submit",async e=>{
  if(!signedIn){location.href="customer-auth.html?return=checkout.html";return}
  if(!cart.length){showError("Your bag is empty.");return}
  if(!form.reportValidity())return;
- const name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\\D/g,""),email=document.getElementById("email").value.trim(),address=document.getElementById("address").value.trim(),city=document.getElementById("city").value.trim(),state=document.getElementById("state").value.trim(),pin=document.getElementById("pin").value.replace(/\\D/g,""),notes=document.getElementById("notes").value.trim();
+ const name=document.getElementById("name").value.trim(),phone=document.getElementById("phone").value.replace(/\D/g,""),email=document.getElementById("email").value.trim(),address=document.getElementById("address").value.trim(),city=document.getElementById("city").value.trim(),state=document.getElementById("state").value.trim(),pin=document.getElementById("pin").value.replace(/\D/g,""),notes=document.getElementById("notes").value.trim();
  if(!/^[0-9]{10}$/.test(phone)){showError("Please enter a valid 10-digit phone number.");return}
  if(!/^[0-9]{6}$/.test(pin)){showError("Please enter a valid 6-digit PIN code.");return}
- if(email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){showError("Please enter a valid email or leave it blank.");return}
+ if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showError("Please enter a valid email or leave it blank.");return}
  const customer={name,phone,email,address,city,state,pin,notes};
  const btn=form.querySelector('button[type="submit"]'),old=btn.textContent;btn.disabled=true;btn.textContent=payment()==="COD"?"PLACING ORDER…":"CREATING SECURE PAYMENT…";
  if(payment()==="RAZORPAY"){
