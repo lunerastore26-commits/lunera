@@ -3,6 +3,8 @@
 "use strict";
 const firebaseConfig={apiKey:"AIzaSyDkd2oQTREh6JNs9Kh3Q8B-9DvPDk1sSzc",authDomain:"lunera-store.firebaseapp.com",projectId:"lunera-store",storageBucket:"lunera-store.firebasestorage.app",messagingSenderId:"758539336952",appId:"1:758539336952:web:fcea0182f0976804aa0f0d",measurementId:"G-DZ76166JF1"};
 const ADMIN_EMAIL="lunerastore26@gmail.com", KEYS=["luneraProducts","luneraCategories","luneraHero","luneraStory"];
+ function encodeLocal(key,value){return key==="luneraHero"?String(value||""):JSON.stringify(value);}
+ function decodeLocal(key,value){if(value==null)return null;if(key==="luneraHero"){const s=String(value);if(s.startsWith('"')&&s.endsWith('"')){try{return JSON.parse(s)}catch(_){}}return s;}try{return JSON.parse(value)}catch(_){return null;}}
 let auth,db,adminUser=null,resolveAuth,syncPromise=null;
 const authReady=new Promise(r=>resolveAuth=r);
 const ready=(async()=>{
@@ -28,8 +30,8 @@ async function syncCatalogue(){
    const d=s.data()||{};let changed=false;
    for(const k of KEYS){
     if(Object.prototype.hasOwnProperty.call(d,k)){
-     let old=null;try{old=JSON.parse(localStorage.getItem(k)||"null")}catch(_){}
-     if(JSON.stringify(old)!==JSON.stringify(d[k])){localStorage.setItem(k,JSON.stringify(d[k]));changed=true}
+     let old=decodeLocal(k,localStorage.getItem(k));
+     if(JSON.stringify(old)!==JSON.stringify(d[k])){localStorage.setItem(k,encodeLocal(k,d[k]));changed=true}
     }
    }
    if(changed)window.dispatchEvent(new CustomEvent("lunera:catalogue-updated",{detail:d}));
@@ -45,7 +47,7 @@ async function refreshCatalogue(){
   let changed=false;
   for(const k of KEYS){
     if(Object.prototype.hasOwnProperty.call(data,k)){
-      const value=JSON.stringify(data[k]);
+      const value=encodeLocal(k,data[k]);
       if(localStorage.getItem(k)!==value){localStorage.setItem(k,value);changed=true;}
     }
   }
