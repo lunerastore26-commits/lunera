@@ -18,9 +18,9 @@ function clean(v,max=500){return String(v??"").trim().slice(0,max);}
 function moneyNumber(v){const n=Number(String(v??"0").replace(/[^0-9.-]/g,""));return Number.isFinite(n)?n:0;}
 function requireUser(req){if(!req.auth||!req.auth.uid)throw new HttpsError("unauthenticated","Please sign in before checkout.");return req.auth;}
 function validCustomer(c){
- const customer={name:clean(c?.name,120),phone:clean(c?.phone,10).replace(/\\D/g,""),email:clean(c?.email,254),address:clean(c?.address,500),city:clean(c?.city,100),state:clean(c?.state,100),pin:clean(c?.pin,6).replace(/\\D/g,""),notes:clean(c?.notes,1000)};
+ const customer={name:clean(c?.name,120),phone:clean(c?.phone,10).replace(/\D/g,""),email:clean(c?.email,254),address:clean(c?.address,500),city:clean(c?.city,100),state:clean(c?.state,100),pin:clean(c?.pin,6).replace(/\D/g,""),notes:clean(c?.notes,1000)};
  if(!customer.name||!/^[0-9]{10}$/.test(customer.phone)||!customer.address||!customer.city||!customer.state||!/^[0-9]{6}$/.test(customer.pin))throw new HttpsError("invalid-argument","Please check your delivery details.");
- if(customer.email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(customer.email))throw new HttpsError("invalid-argument","Please enter a valid email address.");
+ if(customer.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer.email))throw new HttpsError("invalid-argument","Please enter a valid email address.");
  return customer;
 }
 async function validatedItems(input){
