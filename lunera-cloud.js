@@ -14,7 +14,27 @@ const ready=(async()=>{
  try{await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)}catch(_){}
  auth.onAuthStateChanged(user=>{
   adminUser=user&&user.emailVerified&&String(user.email||"").toLowerCase()===ADMIN_EMAIL?user:null;
-  const m=document.getElementById("manageLink");if(m)m.style.display=adminUser?"inline-block":"none";
+  const preview=sessionStorage.getItem("luneraCustomerPreview")==="yes";
+  const m=document.getElementById("manageLink");if(m)m.style.display=adminUser&&!preview?"inline-block":"none";
+  const toggle=document.getElementById("customerViewToggle");
+  if(toggle){
+   toggle.style.display=adminUser?"inline-block":"none";
+   toggle.textContent=preview?"Exit Customer View":"View as Customer";
+   toggle.setAttribute("aria-pressed",preview?"true":"false");
+   if(!toggle.dataset.bound){
+    toggle.addEventListener("click",()=>{
+     const active=sessionStorage.getItem("luneraCustomerPreview")==="yes";
+     if(active)sessionStorage.removeItem("luneraCustomerPreview");
+     else sessionStorage.setItem("luneraCustomerPreview","yes");
+     const now=sessionStorage.getItem("luneraCustomerPreview")==="yes";
+     const manage=document.getElementById("manageLink");
+     if(manage)manage.style.display=adminUser&&!now?"inline-block":"none";
+     toggle.textContent=now?"Exit Customer View":"View as Customer";
+     toggle.setAttribute("aria-pressed",now?"true":"false");
+    });
+    toggle.dataset.bound="yes";
+   }
+  }
   const p=document.getElementById("profileLink");if(p)p.href=user?"profile.html":"customer-auth.html";
   const l=document.getElementById("login");if(l){l.style.display=adminUser?"none":"grid";if(adminUser&&typeof window.loadCloudOrders==="function")window.loadCloudOrders()}
   resolveAuth(user||null);
