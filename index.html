@@ -741,6 +741,7 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
  .collection-dropdown{left:4%;width:92vw}
 }
 
+.editorial-tile img,.feature img{object-fit:contain;background:#e8e0d4}
 </style>
 <link rel="icon" type="image/png" href="lunera-logo.png">
 </head>
@@ -835,6 +836,7 @@ The LUNÉRA Collection
 <img
 src="https://images.unsplash.com/photo-1596755389378-c31d21fd1273?auto=format&fit=crop&w=1000&q=78"
 alt="LUNÉRA Panties Collection"
+id="categoryCoverPanties"
 loading="eager" fetchpriority="low" decoding="async"
 >
 
@@ -962,6 +964,7 @@ Buy Now
 <img
 src="https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?auto=format&fit=crop&w=1000&q=78"
 alt="LUNÉRA Nightwear"
+id="categoryCoverNightwear"
 loading="eager" fetchpriority="low" decoding="async"
 >
 
@@ -1312,7 +1315,7 @@ updateBagCount();
 (function(){
   function applyAdminCategoryCovers(value){
     if(!value || typeof value!=="object") return;
-    const targets={"Bras":"categoryCoverBras","Lingerie Sets":"categoryCoverLingerie","Essentials":"categoryCoverEssentials"};
+    const targets={"Panties":"categoryCoverPanties","Bras":"categoryCoverBras","Lingerie Sets":"categoryCoverLingerie","Nightwear":"categoryCoverNightwear","Essentials":"categoryCoverEssentials"};
     Object.entries(targets).forEach(([name,id])=>{
       const img=document.getElementById(id),url=String(value[name]||"").trim();
       if(!img || !url.startsWith("https://")) return;
