@@ -2,7 +2,7 @@
 (function () {
 "use strict";
 const firebaseConfig={apiKey:"AIzaSyDkd2oQTREh6JNs9Kh3Q8B-9DvPDk1sSzc",authDomain:"lunera-store.firebaseapp.com",projectId:"lunera-store",storageBucket:"lunera-store.firebasestorage.app",messagingSenderId:"758539336952",appId:"1:758539336952:web:fcea0182f0976804aa0f0d",measurementId:"G-DZ76166JF1"};
-const ADMIN_EMAIL="lunerastore26@gmail.com", KEYS=["luneraProducts","luneraCategories","luneraHero","luneraStory"];
+const ADMIN_EMAIL="lunerastore26@gmail.com", KEYS=["luneraProducts","luneraCategories","luneraHero","luneraStory","luneraCategoryCovers"];
  function encodeLocal(key,value){return key==="luneraHero"?String(value||""):JSON.stringify(value);}
  function decodeLocal(key,value){if(value==null)return null;if(key==="luneraHero"){const s=String(value);if(s.startsWith('"')&&s.endsWith('"')){try{return JSON.parse(s)}catch(_){}}return s;}try{return JSON.parse(value)}catch(_){return null;}}
 let auth,db,adminUser=null,resolveAuth,syncPromise=null;
@@ -105,7 +105,7 @@ window.LuneraCloud={
  saveCatalogue,
  ensureCatalogue,
  async currentUser(){await ready;await authReady;return auth.currentUser||null},
- async createCustomerAccount(email,password,name){await ready;const c=await auth.createUserWithEmailAndPassword(String(email).trim(),password);if(c.user&&name)await c.user.updateProfile({displayName:String(name).trim()});return c.user},
+ async createCustomerAccount(email,password,name){await ready;const c=await auth.createUserWithEmailAndPassword(String(email).trim(),password);if(c.user&&name){try{await c.user.updateProfile({displayName:String(name).trim()})}catch(profileError){console.warn("LUNÉRA account created, but display name could not be saved:",profileError)}}return c.user},
  async signInCustomer(email,password){await ready;return (await auth.signInWithEmailAndPassword(String(email).trim(),password)).user},
  async resetCustomerPassword(email){await ready;return auth.sendPasswordResetEmail(String(email).trim())},
  async signInAdmin(email,password){await ready;if(String(email||"").trim().toLowerCase()!==ADMIN_EMAIL)throw Error("This email is not authorised for management.");const c=await auth.signInWithEmailAndPassword(ADMIN_EMAIL,password);await c.user.reload();await c.user.getIdToken(true);if(!c.user.emailVerified){await auth.signOut();throw Error("Verify the admin email before opening Manage.")}adminUser=c.user;return true},
