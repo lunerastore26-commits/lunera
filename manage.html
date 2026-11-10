@@ -516,7 +516,7 @@ async function selectStoryPortrait(kind,event){
  try{
   status.textContent="OPENING 4:5 IMAGE EDITOR...";
   status.className="upload-status loading";
-  const edited=await openImageEditor(file,1005/563);if(!edited)return;
+  const edited=await openImageEditor(file);if(!edited)return;
   const url=await uploadImage(edited,status);
   const story={...currentStory(),[kind+"Photo"]:url};
   await window.LuneraCloud.saveCatalogue({luneraStory:story});
@@ -603,8 +603,8 @@ return;
 
 try{
  selectedHeroFile=await openImageEditor(file,1005/563);if(!selectedHeroFile){event.target.value="";return;}
- name.textContent=file.name+" · 4:5 edited";preview.src=URL.createObjectURL(selectedHeroFile);
- status.textContent="4:5 HERO IMAGE READY TO UPLOAD.";
+ name.textContent=file.name+" · 1005:563 edited";preview.src=URL.createObjectURL(selectedHeroFile);
+ status.textContent="1005:563 HERO IMAGE READY TO UPLOAD.";
 }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
 
 }
@@ -923,9 +923,9 @@ async function handleCategoryCoverSelect(name,index,event){
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){alert("Please choose a JPG, PNG or WebP image.");event.target.value="";return;}
  if(file.size>10*1024*1024){alert("Please choose an image smaller than 10 MB.");event.target.value="";return;}
  try{
-  const edited=await openImageEditor(file);if(!edited){event.target.value="";return;}
+  const edited=await openImageEditor(file,1005/563);if(!edited){event.target.value="";return;}
   selectedCategoryCoverFiles[name]=edited;
-  document.getElementById("category-cover-file-name-"+index).textContent=file.name+" · 4:5 edited";
+  document.getElementById("category-cover-file-name-"+index).textContent=file.name+" · 1005:563 edited";
   document.getElementById("category-cover-preview-"+index).src=URL.createObjectURL(edited);
  }catch(error){alert(error.message||"Image editing failed.");}
 }
