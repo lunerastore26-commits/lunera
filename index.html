@@ -1050,6 +1050,18 @@ function applyLuneraHero(){
 }
 applyLuneraHero();
 window.addEventListener("lunera:catalogue-updated",applyLuneraHero);
+/* On every visit, prefer the authoritative Firestore hero over a stale browser copy. */
+window.addEventListener("load",async function(){
+ try{
+  if(window.LuneraCloud&&typeof window.LuneraCloud.refreshCatalogue==="function"){
+   const catalogue=await window.LuneraCloud.refreshCatalogue();
+   if(catalogue&&catalogue.luneraHero){
+    localStorage.setItem("luneraHero",catalogue.luneraHero);
+    applyLuneraHero();
+   }
+  }
+ }catch(error){console.warn("LUNÉRA hero refresh failed:",error);}
+});
 window.addEventListener("storage",function(event){
  if(event.key==="luneraHero")applyLuneraHero();
 });
