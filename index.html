@@ -682,6 +682,12 @@ footer{background:#151212;color:#f7f4ef;padding:76px 6% 32px;font-family:"Montse
 @media(max-width:900px){.footer-grid{grid-template-columns:1.2fr 1fr;column-gap:36px;row-gap:38px}.footer-bottom{margin-top:44px}}
 @media(max-width:560px){footer{padding:54px 6% 26px}.footer-grid{grid-template-columns:1fr 1fr;column-gap:20px;row-gap:34px}.footer-brand-block{grid-column:1/-1}.footer-brand{font-size:29px}.footer-tagline{font-size:19px}.footer-heading{margin-bottom:15px}.footer-links{gap:12px}.footer-links a{font-size:11px}.footer-bottom{margin-top:38px;flex-direction:column;gap:8px;font-size:8px;letter-spacing:1.2px}}
 
+
+/* Founders' story — editorial, image-free and editable from Management */
+.founders-story{background:#f7f4ef;color:#151212;padding:112px 8%;border-top:1px solid rgba(21,18,18,.08);border-bottom:1px solid rgba(21,18,18,.08)}
+.story-inner{max-width:1240px;margin:0 auto}.story-eyebrow{font:500 9px Montserrat,sans-serif;letter-spacing:4px;color:#8b806f;text-align:center;margin-bottom:22px}.founders-story h2{font:400 clamp(38px,5vw,64px)/1.08 'Bodoni Moda',serif;text-align:center;max-width:900px;margin:0 auto 22px}.story-intro{font:13px/1.9 Montserrat,sans-serif;color:#71695f;text-align:center;max-width:760px;margin:0 auto 65px}.story-columns{display:grid;grid-template-columns:1fr 1fr;gap:0;border-top:1px solid #d9d1c6;border-bottom:1px solid #d9d1c6}.story-founder{padding:42px 48px}.story-founder+ .story-founder{border-left:1px solid #d9d1c6}.story-index{font:9px Montserrat,sans-serif;letter-spacing:2.5px;color:#8b806f}.story-founder h3{font:400 clamp(27px,3vw,38px)/1.15 'Bodoni Moda',serif;margin:22px 0 18px}.story-founder p{font:13px/2 Cormorant Garamond,serif;font-size:19px;color:#625b52}.story-founder-name{margin-top:30px;font:500 10px Montserrat,sans-serif;letter-spacing:2px}.story-founder-name span{display:block;margin-top:8px;color:#8b806f;font:9px Montserrat,sans-serif;letter-spacing:2px}.story-closing{max-width:760px;margin:40px auto 0;text-align:center;font:italic 22px/1.6 'Cormorant Garamond',serif;color:#655c50}
+@media(max-width:700px){.founders-story{padding:78px 6%}.story-intro{margin-bottom:38px}.story-columns{grid-template-columns:1fr}.story-founder{padding:32px 8px}.story-founder+.story-founder{border-left:0;border-top:1px solid #d9d1c6}.story-founder p{font-size:18px}.story-closing{font-size:20px}}
+
 </style>
 
 </head>
@@ -754,6 +760,29 @@ LUNÉRA creates refined everyday essentials where comfort, confidence and timele
 
 </section>
 
+
+<section class="founders-story" id="founders-story" aria-labelledby="storyTitle">
+  <div class="story-inner">
+    <div class="story-eyebrow" id="storyEyebrow">THE PEOPLE BEHIND LUNÉRA</div>
+    <h2 id="storyTitle">Built on experience. Driven by a new vision.</h2>
+    <p class="story-intro" id="storyIntro">LUNÉRA brings together deep knowledge of intimate-apparel manufacturing and a fresh ambition to build a thoughtful, enduring brand.</p>
+    <div class="story-columns">
+      <article class="story-founder">
+        <span class="story-index">01 / EXPERIENCE</span>
+        <h3 id="sonuStoryTitle">Experience that shapes every layer.</h3>
+        <p id="sonuStoryBody">With 30 years of experience in manufacturing bras, panties and lingerie, Sonu Qureshi understands the craft behind intimate apparel—from product construction to the details that matter in everyday wear. That experience became the foundation for a new idea: to take that knowledge beyond manufacturing and build a brand of our own.</p>
+        <div class="story-founder-name">SONU QURESHI <span>CO-FOUNDER</span></div>
+      </article>
+      <article class="story-founder">
+        <span class="story-index">02 / VISION</span>
+        <h3 id="adeebStoryTitle">A new perspective. A shared ambition.</h3>
+        <p id="adeebStoryBody">As a new entrepreneur, Adeeb Qureshi brings fresh ideas, curiosity and the drive to grow LUNÉRA into a distinctive brand. Working alongside Sonu, he is focused on shaping the brand’s identity, reaching customers and building its future—one thoughtful step at a time.</p>
+        <div class="story-founder-name">ADEEB QURESHI <span>CO-FOUNDER</span></div>
+      </article>
+    </div>
+    <p class="story-closing" id="storyClosing">Different journeys, one shared belief: create intimate essentials with care, confidence and timeless refinement.</p>
+  </div>
+</section>
 
 <section class="collection" id="collection">
 
@@ -1035,6 +1064,16 @@ url("${hero.replace(/"/g,'\\"')}")`;
 }
 
 
+
+/* Editable founders' story synced through the shared Firestore catalogue */
+const defaultLuneraStory={"eyebrow":"THE PEOPLE BEHIND LUNÉRA","title":"Built on experience. Driven by a new vision.","intro":"LUNÉRA brings together deep knowledge of intimate-apparel manufacturing and a fresh ambition to build a thoughtful, enduring brand.","sonuTitle":"Experience that shapes every layer.","sonuBody":"With 30 years of experience in manufacturing bras, panties and lingerie, Sonu Qureshi understands the craft behind intimate apparel—from product construction to the details that matter in everyday wear. That experience became the foundation for a new idea: to take that knowledge beyond manufacturing and build a brand of our own.","adeebTitle":"A new perspective. A shared ambition.","adeebBody":"As a new entrepreneur, Adeeb Qureshi brings fresh ideas, curiosity and the drive to grow LUNÉRA into a distinctive brand. Working alongside Sonu, he is focused on shaping the brand’s identity, reaching customers and building its future—one thoughtful step at a time.","closing":"Different journeys, one shared belief: create intimate essentials with care, confidence and timeless refinement."};
+function renderLuneraStory(){
+ let story=defaultLuneraStory;
+ try{const saved=JSON.parse(localStorage.getItem("luneraStory")||"null");if(saved&&typeof saved==="object")story={...defaultLuneraStory,...saved}}catch(_){}
+ const fields={storyEyebrow:"eyebrow",storyTitle:"title",storyIntro:"intro",sonuStoryTitle:"sonuTitle",sonuStoryBody:"sonuBody",adeebStoryTitle:"adeebTitle",adeebStoryBody:"adeebBody",storyClosing:"closing"};
+ Object.entries(fields).forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.textContent=story[key]||""});
+}
+
 /* =========================
 CATEGORIES
 ========================= */
@@ -1194,6 +1233,7 @@ INITIALIZE
 ========================= */
 
 renderCategories();
+renderLuneraStory();
 
 updateBagCount();
 
