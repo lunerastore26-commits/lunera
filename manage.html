@@ -18,6 +18,10 @@ header{background:#151212;color:white;padding:28px 7%;display:flex;justify-conte
 .eyebrow{font:10px 'Montserrat';letter-spacing:5px;text-transform:uppercase;opacity:.5;margin-bottom:18px}
 h1{font:400 clamp(50px,6vw,82px) 'Bodoni Moda'}
 .intro{margin-top:20px;max-width:650px;font:11px/1.8 'Montserrat';opacity:.6}
+.admin-connection{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:12px 16px;border:1px solid #d8d1c7;background:#fff;font:9px 'Montserrat';letter-spacing:1.5px;color:#6d665d}
+.admin-connection:before{content:"";width:7px;height:7px;border-radius:50%;background:#b08b54}
+.admin-connection.connected:before{background:#26734d}
+.admin-connection.error:before{background:#a33b35}
 .section{margin-top:70px;border-top:1px solid #d8d1c7;padding-top:35px}
 .section-title{font:400 38px 'Bodoni Moda';margin-bottom:30px}
 .hero-settings,.product-card,.category-card{background:white;border:1px solid #e1dbd2;padding:30px}
@@ -211,6 +215,7 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 <div class="eyebrow">The House of LUNÉRA</div>
 <h1>Management</h1>
 <p class="intro">Manage the visual identity, categories and product catalogue of LUNÉRA without editing the website code.</p>
+<div id="adminConnectionStatus" class="admin-connection">WAITING FOR SECURE ADMIN SIGN-IN</div>
 
 <section class="section">
 <div class="section-title">Home Page</div>
@@ -472,9 +477,13 @@ async function login(){
     });
     error.style.display = "none";
     document.getElementById("login").style.display = "none";
+    const connection=document.getElementById("adminConnectionStatus");
+    if(connection){connection.textContent="SECURE ADMIN CONNECTED · SHARED CATALOGUE READY";connection.className="admin-connection connected";}
     loadCloudOrders();
   } catch (e) {
     error.textContent = e.message || "Sign-in failed. Check the admin email and password.";
+    const connection=document.getElementById("adminConnectionStatus");
+    if(connection){connection.textContent="CONNECTION NOT VERIFIED · SIGN-IN FAILED";connection.className="admin-connection error";}
     document.getElementById("password").value = "";
     alert(error.textContent);
   }
@@ -719,16 +728,17 @@ function parseManagePrice(value){
 }
 
 async function saveData(){
- localStorage.setItem("luneraProducts",JSON.stringify(products));
- localStorage.setItem("luneraCategories",JSON.stringify(categories));
  try{
   if(!window.LuneraCloud)throw Error("Cloud services are not ready. Please refresh and try again.");
+  // Firestore is the source of truth: update the browser cache only after the cloud confirms the save.
   await window.LuneraCloud.saveCatalogue({luneraProducts:products,luneraCategories:categories});
+  localStorage.setItem("luneraProducts",JSON.stringify(products));
+  localStorage.setItem("luneraCategories",JSON.stringify(categories));
   showStatus();
   return true;
  }catch(error){
   const s=document.getElementById("status");
-  if(s){s.textContent="CLOUD SAVE FAILED: "+(error.message||"Please try again.");s.classList.add("show");}
+  if(s){s.textContent="CLOUD SAVE FAILED — YOUR CHANGES WERE NOT CONFIRMED: "+(error.message||"Please try again.");s.classList.add("show");}
   throw error;
  }
 }
