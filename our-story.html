@@ -69,6 +69,9 @@ const cats=["Bras","Panties","Lingerie Sets","Nightwear","Essentials"];try{const
 window.addEventListener("lunera:catalogue-updated",function(){renderStory();const c=JSON.parse(localStorage.getItem("luneraCategories")||"[]");if(Array.isArray(c)&&c.length)document.getElementById("footerCategories").innerHTML=c.map(x=>'<a href="product.html?category='+encodeURIComponent(x)+'">'+String(x).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))+'</a>').join("");});
 
 </script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script><script src="lunera-cloud.js">if(window.LuneraCloud&&window.LuneraCloud.refreshCatalogue){window.LuneraCloud.refreshCatalogue().then(data=>{if(data&&data.luneraStory){localStorage.setItem("luneraStory",JSON.stringify(data.luneraStory));renderStory()}}).catch(e=>console.warn("Story sync:",e))}
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script><script src="lunera-cloud.js"></script>
+<script>
+window.addEventListener("lunera:catalogue-updated",renderStory);
+if(window.LuneraCloud&&window.LuneraCloud.refreshCatalogue){window.LuneraCloud.refreshCatalogue().then(data=>{if(data&&data.luneraStory){localStorage.setItem("luneraStory",JSON.stringify(data.luneraStory));renderStory()}}).catch(e=>console.warn("Story sync:",e))}
 </script>
 </body></html>
