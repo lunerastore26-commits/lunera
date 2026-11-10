@@ -757,6 +757,11 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 .editorial-tile img,.feature img{object-fit:contain;background:#e8e0d4}
 
+/* Desktop cover images fill their frames; mobile framing remains unchanged. */
+@media (min-width: 761px){
+ .editorial-tile img,.feature img{object-fit:cover;object-position:center}
+}
+
 /* LUNÉRA cross-device mobile layout repair */
 @media (max-width: 760px) {
   *, *::before, *::after { box-sizing: border-box; }
