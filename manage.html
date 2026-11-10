@@ -120,7 +120,7 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 .gallery-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
 .gallery-preview figure{position:relative;width:clamp(78px,18%,120px);aspect-ratio:4/5;background:#e8e0d4;border:1px solid #e1dbd2}
 .gallery-preview img{width:100%;height:100%;object-fit:contain;display:block}
-.gallery-preview button{position:absolute;right:4px;top:4px;padding:5px 7px;background:#151212;color:white;font-size:8px}
+.gallery-preview button{position:absolute;right:4px;top:4px;padding:5px 7px;background:#151212;color:white;font-size:8px}.gallery-preview button:first-of-type{top:4px;right:4px}.gallery-preview button:last-of-type{top:auto;bottom:4px;right:4px}
 .image-editor-modal{position:fixed;inset:0;z-index:9999;background:#151212ee;display:none;place-items:center;padding:12px}
 .image-editor-panel{width:min(900px,100%);max-height:94vh;overflow:auto;background:#f7f4ef;padding:clamp(16px,3vw,30px);border:1px solid #b49a6b}
 .image-editor-title{font:400 30px 'Bodoni Moda';margin-bottom:8px}
@@ -221,7 +221,7 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 <section class="section">
 <div class="section-title">Collection Cover Images</div>
-<p class="intro">Set homepage cover images for all five collections. Every upload opens the 4:5 editor: fit the full photo or crop and reposition it yourself, then save.</p>
+<p class="intro">Set homepage cover images for all five collections. Every upload opens the 4:5 editor: fit the full photo or crop and reposition it yourself, then save. Product galleries support multiple photos; use MAKE MAIN to choose the first photo customers see.</p>
 <div id="categoryCoverManager" class="products"></div>
 <div class="actions"><button class="save" id="saveCategoryCoversButton" type="button" onclick="saveCategoryCovers()">SAVE COLLECTION COVERS</button></div>
 <div id="categoryCoverStatus" class="upload-status"></div>
@@ -928,7 +928,7 @@ function render(){
  if(!products.length){container.innerHTML='<div class="empty">No products in the catalogue.</div>';return;}
  container.innerHTML=products.map((p,i)=>{
   const imgs=Array.isArray(p.images)&&p.images.length?p.images:[p.image].filter(Boolean);
-  const thumbs=imgs.map((url,j)=>'<figure data-existing-image-index="'+j+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" onclick="removeProductImage('+i+','+j+')">REMOVE</button></figure>').join("");
+  const thumbs=imgs.map((url,j)=>'<figure data-existing-image-index="'+j+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" onclick="setProductMainImage('+i+','+j+')">MAKE MAIN</button><button type="button" onclick="removeProductImage('+i+','+j+')">REMOVE</button></figure>').join("");
   const categoryOptions=categories.map(c=>'<option value="'+escapeAttr(c)+'" '+(c===p.category?"selected":"")+'>'+escapeHTML(c)+'</option>').join("");
   return '<div class="product-card"><div class="product-number">PRODUCT '+String(i+1).padStart(2,"0")+' · '+imgs.length+' PHOTO(S)</div>'+
    '<div class="gallery-preview" id="existing-gallery-'+i+'">'+thumbs+'</div>'+
@@ -949,6 +949,15 @@ function removeProductImage(i,j){
  const gallery=document.getElementById("existing-gallery-"+i),fig=gallery&&gallery.querySelector('[data-existing-image-index="'+j+'"]');
  if(!fig)return;if(gallery.querySelectorAll("figure").length<=1){alert("A product must keep at least one photo.");return;}
  if(!removedExistingImages[i])removedExistingImages[i]=[];removedExistingImages[i].push(j);fig.remove();
+}
+async function setProductMainImage(i,j){
+ const source=Array.isArray(products[i].images)&&products[i].images.length?products[i].images:[products[i].image].filter(Boolean);
+ const removed=new Set(removedExistingImages[i]||[]),available=source.filter((_,index)=>!removed.has(index));
+ const chosen=source[j];if(!chosen||removed.has(j))return;
+ const reordered=[chosen,...available.filter(url=>url!==chosen)];
+ products[i]={...products[i],image:reordered[0],images:reordered};
+ selectedExistingFiles[i]=[];delete removedExistingImages[i];
+ try{await saveData();render();showStatus();}catch(error){alert(error.message||"Could not update the main product photo.");}
 }
 
 
