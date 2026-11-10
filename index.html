@@ -1356,7 +1356,7 @@ updateBagCount();
     if(e.detail && Object.prototype.hasOwnProperty.call(e.detail,"luneraHero")) applyAdminHero(e.detail.luneraHero);
     if(e.detail && Object.prototype.hasOwnProperty.call(e.detail,"luneraCategoryCovers")) applyAdminCategoryCovers(e.detail.luneraCategoryCovers);
   });
-  window.addEventListener("load",async()=>{
+  window.addEventListener("DOMContentLoaded",async()=>{
     try{
       if(window.LuneraCloud && typeof window.LuneraCloud.refreshCatalogue==="function"){
         const data=await window.LuneraCloud.refreshCatalogue();
