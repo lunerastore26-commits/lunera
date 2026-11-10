@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="lunera-logo.png?v=7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=optional" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500;6..96,600&family=Cormorant+Garamond:wght@400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -104,6 +104,16 @@ footer{background:#151212;color:#f7f4ef;padding:76px 6% 32px;font-family:"Montse
 @media(max-width:900px){.footer-grid{grid-template-columns:1.2fr 1fr;column-gap:36px;row-gap:38px}.footer-bottom{margin-top:44px}}
 @media(max-width:560px){footer{padding:54px 6% 26px}.footer-grid{grid-template-columns:1fr 1fr;column-gap:20px;row-gap:34px}.footer-brand-block{grid-column:1/-1}.footer-brand{font-size:29px}.footer-tagline{font-size:19px}.footer-heading{margin-bottom:15px}.footer-links{gap:12px}.footer-links a{font-size:11px}.footer-bottom{margin-top:38px;flex-direction:column;gap:8px;font-size:8px;letter-spacing:1.2px}}
 
+
+/* LUNÉRA typography system — consistent across every page */
+html{font-synthesis:none;text-rendering:optimizeLegibility;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+body,button,input,textarea,select{font-family:"Montserrat",Arial,sans-serif}
+h1,h2,h3,h4,.logo,.brand,.footer-brand,.collection-title,.product-name,.page-heading h1,.section-title,.login-box h2{font-family:"Bodoni Moda",Georgia,serif}
+p,.description,.detail-text,.collection-description,.footer-tagline,.story-founder p,.founder p,.sub{font-family:"Cormorant Garamond",Georgia,serif}
+small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a,.back,.intro,.index,.name span{font-family:"Montserrat",Arial,sans-serif}
+
+
+.owner-access{display:inline-block;margin-top:8px;font:9px/1.5 "Montserrat",Arial,sans-serif;letter-spacing:1.5px;text-transform:uppercase;color:#cfc8bf;text-decoration:none;opacity:.72}.owner-access:hover{opacity:1}
 </style>
 </head>
 <body>
@@ -134,7 +144,7 @@ footer{background:#151212;color:#f7f4ef;padding:76px 6% 32px;font-family:"Montse
         <a href="returns.html">Shipping &amp; Returns</a>
         <a href="profile.html">Order Tracking</a>
       </div>
-    </div>
+    <a class="owner-access" href="manage.html">Owner Access</a></div>
     <div class="footer-column">
       <h2 class="footer-heading">LUNÉRA</h2>
       <div class="footer-links">
