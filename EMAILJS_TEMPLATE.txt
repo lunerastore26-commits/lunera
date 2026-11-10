@@ -1,5 +1,5 @@
 EmailJS service: service_26ob5sw
-EmailJS template: e00x0gi
+EmailJS template: template_o9wrz7c
 Public key configured in checkout.html: rRuwYFo_icpYCBj6H
 
 Set the template recipient (To Email) to the fixed address: lunerastore26@gmail.com. Do not use a browser-supplied recipient variable.
