@@ -37,7 +37,22 @@ async function syncCatalogue(){
  })();
  try{return await syncPromise}finally{syncPromise=null}
 }
-async function ensureCatalogue(values){
+async function refreshCatalogue(){
+  await ready;
+  const snap=await db.collection("site").doc("catalogue").get({source:"server"});
+  if(!snap.exists)return null;
+  const data=snap.data()||{};
+  let changed=false;
+  for(const k of KEYS){
+    if(Object.prototype.hasOwnProperty.call(data,k)){
+      const value=JSON.stringify(data[k]);
+      if(localStorage.getItem(k)!==value){localStorage.setItem(k,value);changed=true;}
+    }
+  }
+  if(changed)window.dispatchEvent(new CustomEvent("lunera:catalogue-updated",{detail:data}));
+  return data;
+ }
+ async function ensureCatalogue(values){
  await ready;
  await authReady;
  if(!adminUser)throw Error("Verified admin sign-in required to initialise the catalogue.");
