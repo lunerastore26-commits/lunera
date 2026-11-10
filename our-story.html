@@ -148,24 +148,3 @@ window.addEventListener("lunera:catalogue-updated",renderStory);
 if(window.LuneraCloud&&window.LuneraCloud.refreshCatalogue){window.LuneraCloud.refreshCatalogue().then(data=>{if(data&&data.luneraStory){localStorage.setItem("luneraStory",JSON.stringify(data.luneraStory));renderStory()}}).catch(e=>console.warn("Story sync:",e))}
 </script>
 </body></html>
-
-/* LUNÉRA Our Story portraits: fill their 4:5 columns edge-to-edge */
-.founder-photo {
-  width: min(100%, 520px);
-  height: auto;
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-  margin: 0 auto;
-}
-.founder-photo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover !important;
-  object-position: center center;
-  background: transparent;
-}
-@media (max-width: 700px) {
-  .founder-photo { width: 100%; height: auto; aspect-ratio: 4 / 5; }
-  .founder-photo img { width: 100%; height: 100%; object-fit: cover !important; }
-}
