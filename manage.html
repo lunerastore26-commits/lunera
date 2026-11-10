@@ -114,8 +114,25 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 /* Founder photos stay in a fixed 4:5 frame without cutting off the original image */
 #sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:4/5;object-fit:contain;object-position:center;display:none;background:#e8e0d4}
 
+
+.hero-preview,.product-preview,.upload-preview,#sonuStoryPhotoPreview,#adeebStoryPhotoPreview{aspect-ratio:4/5;width:min(100%,420px);height:auto;max-height:none;object-fit:contain;object-position:center;background:#e8e0d4}
+.product-preview{display:block;margin:0 auto 20px}
+.gallery-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.gallery-preview figure{position:relative;width:clamp(78px,18%,120px);aspect-ratio:4/5;background:#e8e0d4;border:1px solid #e1dbd2}
+.gallery-preview img{width:100%;height:100%;object-fit:contain;display:block}
+.gallery-preview button{position:absolute;right:4px;top:4px;padding:5px 7px;background:#151212;color:white;font-size:8px}
+.image-editor-modal{position:fixed;inset:0;z-index:9999;background:#151212ee;display:none;place-items:center;padding:12px}
+.image-editor-panel{width:min(900px,100%);max-height:94vh;overflow:auto;background:#f7f4ef;padding:clamp(16px,3vw,30px);border:1px solid #b49a6b}
+.image-editor-title{font:400 30px 'Bodoni Moda';margin-bottom:8px}
+.image-editor-help{font:11px/1.6 'Montserrat';color:#6d665d;margin-bottom:16px}
+.image-editor-stage{height:min(62vh,650px);min-height:260px;background:#e8e0d4;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.image-editor-stage img{display:block;max-width:100%;max-height:100%}
+.image-editor-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.image-editor-actions button{flex:1;min-width:140px}
+@media(max-width:600px){.image-editor-stage{height:52vh;min-height:220px}.image-editor-title{font-size:25px}}
 </style>
 <link rel="icon" type="image/png" href="lunera-logo.png?v=9">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
 </head>
 
 <body>
@@ -230,12 +247,12 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 <label>Product Image</label>
 
 <div class="upload-box">
-<input id="newImageFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleNewImageSelect(event)">
-<label for="newImageFile" class="choose-image">CHOOSE IMAGE</label>
+<input id="newImageFile" type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="handleNewImageSelect(event)">
+<label for="newImageFile" class="choose-image">CHOOSE MULTIPLE PHOTOS</label>
 
 <div id="newFileName" class="file-name">No image selected</div>
 
-<img id="newImagePreview" class="upload-preview" alt="Product Preview">
+<div id="newImageGalleryPreview" class="gallery-preview"></div>
 
 <div id="uploadStatus" class="upload-status"></div>
 </div>
@@ -268,7 +285,19 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 
 </main>
-
+<div class="image-editor-modal" id="imageEditorModal" role="dialog" aria-modal="true">
+ <div class="image-editor-panel">
+  <div class="image-editor-title">Edit Image · 4:5</div>
+  <p class="image-editor-help">Photo poori rakhne ke liye FIT FULL PHOTO chunein. Manual crop ke liye image drag/zoom karein aur CROP &amp; USE dabayein.</p>
+  <div class="image-editor-stage"><img id="imageEditorImage" alt="Image being edited"></div>
+  <div class="image-editor-actions">
+   <button type="button" class="secondary" onclick="finishImageEdit('fit')">FIT FULL PHOTO</button>
+   <button type="button" class="save" onclick="finishImageEdit('crop')">CROP &amp; USE PHOTO</button>
+   <button type="button" class="danger" onclick="finishImageEdit('cancel')">CANCEL</button>
+  </div>
+ </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
 <script>
 
 const CLOUDINARY_CLOUD_NAME = "r5kxmdor";
@@ -301,12 +330,54 @@ let categories = loadArray(
 ["Bras","Panties","Lingerie Sets","Nightwear","Essentials"]
 );
 
-let selectedNewImageFile = null;
+let selectedNewImageFiles = [];
 let selectedHeroFile = null;
 let selectedExistingFiles = {};
+let removedExistingImages = {};
 let selectedCategoryCoverFiles = {};
 let categoryCovers = {};
 try { categoryCovers = JSON.parse(localStorage.getItem("luneraCategoryCovers") || "{}") || {}; } catch (_) { categoryCovers = {}; }
+
+let cropperInstance=null,cropResolve=null,cropObjectUrl="",currentEditFile=null;
+function makeFitFourFive(file){
+ return new Promise((resolve,reject)=>{
+  const url=URL.createObjectURL(file),img=new Image();
+  img.onload=()=>{
+   const canvas=document.createElement("canvas");canvas.width=1000;canvas.height=1250;
+   const ctx=canvas.getContext("2d");ctx.fillStyle="#f7f4ef";ctx.fillRect(0,0,1000,1250);
+   const scale=Math.min(1000/img.naturalWidth,1250/img.naturalHeight),w=img.naturalWidth*scale,h=img.naturalHeight*scale;
+   ctx.drawImage(img,(1000-w)/2,(1250-h)/2,w,h);URL.revokeObjectURL(url);
+   canvas.toBlob(blob=>blob?resolve(new File([blob],(file.name||"lunera").replace(/\.[^.]+$/,"")+".jpg",{type:"image/jpeg",lastModified:Date.now()})):reject(Error("Could not prepare image.")),"image/jpeg",.92);
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);reject(Error("Image could not be opened."))};img.src=url;
+ });
+}
+function openImageEditor(file){
+ return new Promise((resolve,reject)=>{
+  if(!window.Cropper){reject(Error("Image editor is loading. Please refresh."));return;}
+  currentEditFile=file;cropResolve=resolve;cropObjectUrl=URL.createObjectURL(file);
+  const modal=document.getElementById("imageEditorModal"),img=document.getElementById("imageEditorImage");
+  modal.style.display="grid";
+  img.onload=()=>{if(cropperInstance)cropperInstance.destroy();cropperInstance=new Cropper(img,{aspectRatio:4/5,viewMode:0,dragMode:"move",autoCropArea:.95,background:false,responsive:true,guides:true,center:true,movable:true,zoomable:true,cropBoxMovable:true,cropBoxResizable:true,toggleDragModeOnDblclick:false});};
+  img.onerror=()=>{finishImageEdit("cancel");reject(Error("Image could not be opened."));};img.src=cropObjectUrl;
+ });
+}
+async function finishImageEdit(mode){
+ if(!cropResolve)return;const resolve=cropResolve;cropResolve=null;let result=null;
+ try{
+  if(mode==="fit")result=await makeFitFourFive(currentEditFile);
+  if(mode==="crop"){
+   const canvas=cropperInstance&&cropperInstance.getCroppedCanvas({width:1000,height:1250,fillColor:"#f7f4ef",imageSmoothingEnabled:true,imageSmoothingQuality:"high"});
+   if(!canvas)throw Error("Could not crop this image.");
+   const blob=await new Promise(ok=>canvas.toBlob(ok,"image/jpeg",.92));if(!blob)throw Error("Could not crop this image.");
+   result=new File([blob],"lunera-photo.jpg",{type:"image/jpeg",lastModified:Date.now()});
+  }
+ }catch(e){alert(e.message||"Image editing failed.");}
+ document.getElementById("imageEditorModal").style.display="none";
+ if(cropperInstance){cropperInstance.destroy();cropperInstance=null;}
+ if(cropObjectUrl)URL.revokeObjectURL(cropObjectUrl);cropObjectUrl="";currentEditFile=null;resolve(result);
+}
+
 
 function loadArray(key,fallback){
 try{
@@ -382,7 +453,8 @@ async function selectStoryPortrait(kind,event){
  try{
   status.textContent="UPLOADING ORIGINAL PHOTO...";
   status.className="upload-status loading";
-  const url=await uploadImage(file,status);
+  const edited=await openImageEditor(file);if(!edited)return;
+  const url=await uploadImage(edited,status);
   const story={...currentStory(),[kind+"Photo"]:url};
   await window.LuneraCloud.saveCatalogue({luneraStory:story});
   localStorage.setItem("luneraStory",JSON.stringify(story));
@@ -408,7 +480,7 @@ defaultHero;
 
 document.getElementById("heroPreview").src = hero;
 
-function handleHeroSelect(event){
+async function handleHeroSelect(event){
 
 const file =
 event.target.files &&
@@ -466,21 +538,11 @@ return;
 
 }
 
-selectedHeroFile=file;
-
-name.textContent=file.name;
-
-const reader=new FileReader();
-
-reader.onload=function(){
-
-preview.src=reader.result;
-
-};
-
-reader.readAsDataURL(file);
-
-status.textContent="HERO IMAGE READY TO UPLOAD.";
+try{
+ selectedHeroFile=await openImageEditor(file);if(!selectedHeroFile){event.target.value="";return;}
+ name.textContent=file.name+" · 4:5 edited";preview.src=URL.createObjectURL(selectedHeroFile);
+ status.textContent="4:5 HERO IMAGE READY TO UPLOAD.";
+}catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
 
 }
 
@@ -790,13 +852,14 @@ function renderCategoryCovers(){
   return '<div class="product-card"><div class="product-number">0'+(index+1)+' — '+escapeHTML(name)+'</div><img class="product-preview" id="category-cover-preview-'+index+'" src="'+escapeAttr(src)+'" alt="'+escapeAttr(name)+' homepage cover"><label for="category-cover-file-'+index+'">'+escapeHTML(name)+' COVER IMAGE</label><input id="category-cover-file-'+index+'" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleCategoryCoverSelect(\''+name+'\','+index+',event)"><div class="file-name" id="category-cover-file-name-'+index+'">Choose a new image to replace this cover</div></div>';
  }).join("");
 }
-function handleCategoryCoverSelect(name,index,event){
+async function handleCategoryCoverSelect(name,index,event){
  const file=event.target.files&&event.target.files[0];if(!file)return;
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){alert("Please choose a JPG, PNG or WebP image.");event.target.value="";return;}
  if(file.size>10*1024*1024){alert("Please choose an image smaller than 10 MB.");event.target.value="";return;}
- selectedCategoryCoverFiles[name]=file;
- document.getElementById("category-cover-file-name-"+index).textContent=file.name;
- const reader=new FileReader();reader.onload=()=>{document.getElementById("category-cover-preview-"+index).src=reader.result};reader.readAsDataURL(file);
+ const edited=await openImageEditor(file);if(!edited){event.target.value="";return;}
+ selectedCategoryCoverFiles[name]=edited;
+ document.getElementById("category-cover-file-name-"+index).textContent=file.name+" · 4:5 edited";
+ document.getElementById("category-cover-preview-"+index).src=URL.createObjectURL(edited);
 }
 async function saveCategoryCovers(){
  const button=document.getElementById("saveCategoryCoversButton"),status=document.getElementById("categoryCoverStatus");
@@ -815,528 +878,103 @@ async function saveCategoryCovers(){
 
 /* NEW PRODUCT IMAGE */
 
-function handleNewImageSelect(event){
-
-const file =
-event.target.files &&
-event.target.files[0];
-
-const preview =
-document.getElementById("newImagePreview");
-
-const fileName =
-document.getElementById("newFileName");
-
-const status =
-document.getElementById("uploadStatus");
-
-selectedNewImageFile=null;
-
-status.textContent="";
-status.className="upload-status";
-
-if(!file){
-
-fileName.textContent="No image selected";
-
-preview.style.display="none";
-
-preview.removeAttribute("src");
-
-return;
-
-}
-
-const allowed =
-["image/jpeg","image/png","image/webp"];
-
-if(!allowed.includes(file.type)){
-
-alert(
-"Please choose a JPG, PNG or WebP image."
-);
-
-event.target.value="";
-
-return;
-
-}
-
-if(file.size > 10 * 1024 * 1024){
-
-alert(
-"Please choose an image smaller than 10 MB."
-);
-
-event.target.value="";
-
-return;
-
-}
-
-selectedNewImageFile=file;
-
-fileName.textContent=file.name;
-
-const reader=new FileReader();
-
-reader.onload=function(){
-
-preview.src=reader.result;
-
-preview.style.display="block";
-
-};
-
-reader.readAsDataURL(file);
-
-status.textContent =
-"IMAGE READY TO UPLOAD.";
-
+async function handleNewImageSelect(event){
+ const files=Array.from(event.target.files||[]),preview=document.getElementById("newImageGalleryPreview"),name=document.getElementById("newFileName"),status=document.getElementById("uploadStatus");
+ selectedNewImageFiles=[];preview.innerHTML="";status.textContent="";status.className="upload-status";
+ if(!files.length){name.textContent="No images selected";return;}
+ if(files.some(f=>!["image/jpeg","image/png","image/webp"].includes(f.type))){alert("Choose JPG, PNG or WebP images only.");event.target.value="";return;}
+ if(files.some(f=>f.size>10*1024*1024)){alert("Each image must be smaller than 10 MB.");event.target.value="";return;}
+ try{
+  for(const file of files){const edited=await openImageEditor(file);if(edited)selectedNewImageFiles.push(edited);}
+  name.textContent=selectedNewImageFiles.length+" photo(s) ready · 4:5";
+  selectedNewImageFiles.forEach((file,i)=>{const fig=document.createElement("figure"),img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="Product photo "+(i+1);fig.appendChild(img);preview.appendChild(fig);});
+  status.textContent=selectedNewImageFiles.length+" IMAGE(S) READY TO UPLOAD.";
+ }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
 }
 
 
 /* ADD PRODUCT */
 
 async function addProduct(){
-
-const button =
-document.getElementById("addProductButton");
-
-const name =
-document.getElementById("newName")
-.value.trim();
-
-const price =
-document.getElementById("newPrice")
-.value.trim();
-
-const category =
-document.getElementById("newCategorySelect")
-.value;
-
-const sizes =
-document.getElementById("newSizes")
-.value.trim();
-
-const description =
-document.getElementById("newDescription")
-.value.trim();
-
-if(!name || !Number.isFinite(parseManagePrice(price)) || parseManagePrice(price)<=0 || parseManagePrice(price)>10000000 || !category){
-
-alert(
-"Enter a product name, a valid price greater than zero, and a category."
-);
-
-return;
-
-}
-
-if(!selectedNewImageFile){
-
-alert(
-"Please choose a product image."
-);
-
-return;
-
-}
-
-button.disabled=true;
-
-button.textContent="UPLOADING IMAGE...";
-
-try{
-
-const image =
-await uploadImage(
-selectedNewImageFile,
-document.getElementById("uploadStatus")
-);
-
-const id =
-name
-.toLowerCase()
-.replace(/[^a-z0-9]+/g,"-")
-.replace(/^-|-$/g,"")
-+
-"-"
-+
-Date.now();
-
-products.push({
-
-id:id,
-
-name:name,
-
-price:price,
-
-category:category,
-
-sizes:sizes || "S, M, L, XL",
-
-image:image,
-
-description:
-description ||
-"Refined LUNÉRA design created around comfort and timeless elegance."
-
-});
-
-await saveData();
-
-clearProductForm();
-
-render();
-
-showStatus();
-
-alert(
-"Product added successfully."
-);
-
-}catch(error){
-
-document.getElementById(
-"uploadStatus"
-).textContent =
-error.message ||
-"Image upload failed.";
-
-document.getElementById(
-"uploadStatus"
-).className =
-"upload-status error";
-
-alert(
-error.message ||
-"Image upload failed. Product was not added."
-);
-
-}finally{
-
-button.disabled=false;
-
-button.textContent=
-"ADD PRODUCT TO CATALOGUE";
-
-}
-
+ const button=document.getElementById("addProductButton"),name=document.getElementById("newName").value.trim(),price=document.getElementById("newPrice").value.trim(),category=document.getElementById("newCategorySelect").value,sizes=document.getElementById("newSizes").value.trim(),description=document.getElementById("newDescription").value.trim(),status=document.getElementById("uploadStatus");
+ if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category){alert("Enter a product name, valid price and category.");return;}
+ if(!selectedNewImageFiles.length){alert("Choose at least one product photo.");return;}
+ button.disabled=true;button.textContent="UPLOADING PHOTOS...";
+ try{
+  const images=[];for(const file of selectedNewImageFiles)images.push(await uploadImage(file,status));
+  const id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now();
+  products.push({id,name,price,category,sizes:sizes||"S, M, L, XL",image:images[0],images,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
+  await saveData();clearProductForm();render();showStatus();alert("Product and all photos added successfully.");
+ }catch(error){status.textContent=error.message||"Image upload failed.";status.className="upload-status error";alert(error.message||"Product was not added.");}
+ finally{button.disabled=false;button.textContent="ADD PRODUCT TO CATALOGUE";}
 }
 
 function clearProductForm(){
-
-document.getElementById("newName").value="";
-document.getElementById("newPrice").value="";
-document.getElementById("newSizes").value="";
-document.getElementById("newDescription").value="";
-
-document.getElementById("newImageFile").value="";
-
-selectedNewImageFile=null;
-
-const preview =
-document.getElementById("newImagePreview");
-
-preview.src="";
-preview.style.display="none";
-
-document.getElementById(
-"newFileName"
-).textContent="No image selected";
-
-document.getElementById(
-"uploadStatus"
-).textContent="";
-
-document.getElementById(
-"uploadStatus"
-).className="upload-status";
-
+ ["newName","newPrice","newSizes","newDescription","newImageFile"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ selectedNewImageFiles=[];document.getElementById("newImageGalleryPreview").innerHTML="";
+ document.getElementById("newFileName").textContent="No images selected";
+ const status=document.getElementById("uploadStatus");status.textContent="";status.className="upload-status";
 }
 
 
 /* EXISTING PRODUCTS */
 
 function render(){
-
-const container =
-document.getElementById("products");
-
-if(products.length===0){
-
-container.innerHTML =
-'<div class="empty">No products in the catalogue.</div>';
-
-return;
-
+ const container=document.getElementById("products");
+ if(!products.length){container.innerHTML='<div class="empty">No products in the catalogue.</div>';return;}
+ container.innerHTML=products.map((p,i)=>{
+  const imgs=Array.isArray(p.images)&&p.images.length?p.images:[p.image].filter(Boolean);
+  const thumbs=imgs.map((url,j)=>'<figure data-existing-image-index="'+j+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" onclick="removeProductImage('+i+','+j+')">REMOVE</button></figure>').join("");
+  const categoryOptions=categories.map(c=>'<option value="'+escapeAttr(c)+'" '+(c===p.category?"selected":"")+'>'+escapeHTML(c)+'</option>').join("");
+  return '<div class="product-card"><div class="product-number">PRODUCT '+String(i+1).padStart(2,"0")+' · '+imgs.length+' PHOTO(S)</div>'+
+   '<div class="gallery-preview" id="existing-gallery-'+i+'">'+thumbs+'</div>'+
+   '<label>Product Name</label><input id="name-'+i+'" value="'+escapeAttr(p.name)+'">'+
+   '<label>Price</label><input id="price-'+i+'" value="'+escapeAttr(p.price)+'">'+
+   '<label>Category</label><select id="category-'+i+'">'+categoryOptions+'</select>'+
+   '<label>Available Sizes</label><input id="sizes-'+i+'" value="'+escapeAttr(Array.isArray(p.sizes)?p.sizes.join(", "):p.sizes)+'">'+
+   '<label>Add More Product Photos · 4:5</label><div class="upload-box small-upload">'+
+   '<input id="existingImage-'+i+'" type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="handleExistingImageSelect('+i+',event)">'+
+   '<label for="existingImage-'+i+'" class="choose-image">ADD MULTIPLE PHOTOS</label>'+
+   '<div id="existingFileName-'+i+'" class="file-name">No new photos selected</div>'+
+   '<div id="existing-new-gallery-'+i+'" class="gallery-preview"></div><div id="existingStatus-'+i+'" class="upload-status"></div></div>'+
+   '<label>Description</label><textarea id="description-'+i+'">'+escapeHTML(p.description||"")+'</textarea>'+
+   '<div class="actions"><button class="save" onclick="saveProduct('+i+')">SAVE PRODUCT</button><button class="danger" onclick="deleteProduct('+i+')">DELETE PRODUCT</button></div></div>';
+ }).join("");
+}
+function removeProductImage(i,j){
+ const gallery=document.getElementById("existing-gallery-"+i),fig=gallery&&gallery.querySelector('[data-existing-image-index="'+j+'"]');
+ if(!fig)return;if(gallery.querySelectorAll("figure").length<=1){alert("A product must keep at least one photo.");return;}
+ if(!removedExistingImages[i])removedExistingImages[i]=[];removedExistingImages[i].push(j);fig.remove();
 }
 
-container.innerHTML =
-products.map(
-(p,i)=>`
 
-<div class="product-card">
-
-<div class="product-number">
-Product ${String(i+1).padStart(2,"0")}
-</div>
-
-<img
-id="preview-${i}"
-class="product-preview"
-src="${escapeAttr(p.image)}"
-onerror="this.style.opacity='.3'"
-alt="${escapeAttr(p.name)}"
->
-
-<label>Product Name</label>
-
-<input
-id="name-${i}"
-value="${escapeAttr(p.name)}"
->
-
-<label>Price</label>
-
-<input
-id="price-${i}"
-value="${escapeAttr(p.price)}"
->
-
-<label>Category</label>
-
-<select id="category-${i}">
-
-${categories.map(
-c =>
-`<option
-value="${escapeAttr(c)}"
-${c===p.category?"selected":""}
->
-${escapeHTML(c)}
-</option>`
-).join("")}
-
-</select>
-
-<label>Available Sizes</label>
-
-<input
-id="sizes-${i}"
-value="${escapeAttr(p.sizes)}"
->
-
-<label>Replace Product Image</label>
-
-<div class="upload-box small-upload">
-
-<input
-id="existingImage-${i}"
-type="file"
-accept="image/jpeg,image/png,image/webp"
-onchange="handleExistingImageSelect(${i},event)"
->
-
-<label
-for="existingImage-${i}"
-class="choose-image"
->
-CHOOSE NEW IMAGE
-</label>
-
-<div
-id="existingFileName-${i}"
-class="file-name"
->
-No new image selected
-</div>
-
-<div
-id="existingStatus-${i}"
-class="upload-status"
-></div>
-
-</div>
-
-<label>Description</label>
-
-<textarea
-id="description-${i}"
->${escapeHTML(p.description)}</textarea>
-
-<div class="actions">
-
-<button
-class="save"
-onclick="saveProduct(${i})"
->
-SAVE PRODUCT
-</button>
-
-<button
-class="danger"
-onclick="deleteProduct(${i})"
->
-DELETE PRODUCT
-</button>
-
-</div>
-
-</div>
-
-`
-).join("");
-
-}
-
-function handleExistingImageSelect(i,event){
-
-const file =
-event.target.files &&
-event.target.files[0];
-
-const name =
-document.getElementById(
-"existingFileName-"+i
-);
-
-const status =
-document.getElementById(
-"existingStatus-"+i
-);
-
-if(!file){
-
-selectedExistingFiles[i]=null;
-
-name.textContent="No new image selected";
-
-status.textContent="";
-
-return;
-
-}
-
-const allowed =
-["image/jpeg","image/png","image/webp"];
-
-if(!allowed.includes(file.type)){
-
-alert(
-"Please choose a JPG, PNG or WebP image."
-);
-
-event.target.value="";
-
-return;
-
-}
-
-if(file.size > 10 * 1024 * 1024){
-
-alert(
-"Please choose an image smaller than 10 MB."
-);
-
-event.target.value="";
-
-return;
-
-}
-
-selectedExistingFiles[i]=file;
-
-name.textContent=file.name;
-
-status.textContent=
-"NEW IMAGE READY TO UPLOAD.";
-
+async function handleExistingImageSelect(i,event){
+ const files=Array.from(event.target.files||[]),name=document.getElementById("existingFileName-"+i),status=document.getElementById("existingStatus-"+i),preview=document.getElementById("existing-new-gallery-"+i);
+ if(!files.length){selectedExistingFiles[i]=[];name.textContent="No new photos selected";preview.innerHTML="";status.textContent="";return;}
+ if(files.some(f=>!["image/jpeg","image/png","image/webp"].includes(f.type))){alert("Choose JPG, PNG or WebP images only.");event.target.value="";return;}
+ if(files.some(f=>f.size>10*1024*1024)){alert("Each image must be smaller than 10 MB.");event.target.value="";return;}
+ try{
+  const edited=[];for(const file of files){const next=await openImageEditor(file);if(next)edited.push(next);}
+  selectedExistingFiles[i]=edited;name.textContent=edited.length+" new photo(s) ready · 4:5";preview.innerHTML="";
+  edited.forEach((file,j)=>{const fig=document.createElement("figure"),img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="New product photo "+(j+1);fig.appendChild(img);preview.appendChild(fig);});
+  status.textContent=edited.length+" PHOTO(S) READY TO ADD.";
+ }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
 }
 
 async function saveProduct(i){
-
-const button = document.activeElement && document.activeElement.tagName === "BUTTON" ? document.activeElement : null;
-const newImage = selectedExistingFiles[i];
-
-try{
-const name=document.getElementById("name-"+i).value.trim();
-const price=document.getElementById("price-"+i).value.trim();
-const category=document.getElementById("category-"+i).value;
-const sizes=document.getElementById("sizes-"+i).value.trim();
-if(!name || !Number.isFinite(parseManagePrice(price)) || parseManagePrice(price)<=0 || parseManagePrice(price)>10000000 || !category || !sizes){
- alert("Enter a product name, valid positive price, category and available sizes.");
- return;
-}
-let image=products[i].image;
-
-if(newImage){
-
-const status =
-document.getElementById(
-"existingStatus-"+i
-);
-
-if(button){
-button.disabled=true;
-button.textContent="UPLOADING...";
-}
-
-image =
-await uploadImage(
-newImage,
-status
-);
-
-}
-
-products[i]={
-
-id:products[i].id,
-
-name,
-price,
-category,
-sizes,
-
-image:image,
-
-description:
-document.getElementById(
-"description-"+i
-).value.trim()
-
-};
-
-selectedExistingFiles[i]=null;
-
-await saveData();
-
-render();
-
-showStatus();
-
-}catch(error){
-
-alert(
-error.message ||
-"Could not save product."
-);
-
-}finally{
-
-if(button){
-
-button.disabled=false;
-
-button.textContent="SAVE PRODUCT";
-
-}
-
-}
-
+ const button=document.activeElement&&document.activeElement.tagName==="BUTTON"?document.activeElement:null;
+ try{
+  const name=document.getElementById("name-"+i).value.trim(),price=document.getElementById("price-"+i).value.trim(),category=document.getElementById("category-"+i).value,sizes=document.getElementById("sizes-"+i).value.trim();
+  if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category||!sizes){alert("Enter a product name, valid price, category and sizes.");return;}
+  const oldImages=Array.isArray(products[i].images)&&products[i].images.length?products[i].images:[products[i].image].filter(Boolean),removed=new Set(removedExistingImages[i]||[]);
+  let images=oldImages.filter((_,index)=>!removed.has(index));
+  if(button){button.disabled=true;button.textContent="SAVING PHOTOS...";}
+  for(const file of (selectedExistingFiles[i]||[]))images.push(await uploadImage(file,document.getElementById("existingStatus-"+i)));
+  if(!images.length){alert("A product must keep at least one photo.");return;}
+  products[i]={id:products[i].id,name,price,category,sizes,image:images[0],images,description:document.getElementById("description-"+i).value.trim()};
+  selectedExistingFiles[i]=[];delete removedExistingImages[i];await saveData();render();showStatus();
+ }catch(error){alert(error.message||"Could not save product.");}
+ finally{if(button){button.disabled=false;button.textContent="SAVE PRODUCT";}}
 }
 
 async function deleteProduct(i){
@@ -1350,6 +988,7 @@ if(
 products.splice(i,1);
 
 delete selectedExistingFiles[i];
+delete removedExistingImages[i];
 
 try{await saveData();}catch(error){alert(error.message||"Product could not be saved to the shared store.");return;}
 
@@ -1388,6 +1027,7 @@ document.getElementById(
 ).value.trim(),
 
 image:p.image,
+images:Array.isArray(p.images)?p.images:[p.image].filter(Boolean),
 
 description:
 document.getElementById(
