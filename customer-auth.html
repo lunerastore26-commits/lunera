@@ -274,13 +274,18 @@
           "auth/weak-password": "Please choose a password with at least 6 characters.",
           "auth/too-many-requests": "Too many attempts. Please wait and try again later.",
           "auth/invalid-phone-number": "Enter a valid phone number with country code, such as +91.",
-          "auth/operation-not-allowed": "This login method is not enabled in Firebase Authentication.",
+          "auth/operation-not-allowed": "Email/password sign-up is disabled in Firebase. Enable Email/Password in Firebase Console → Authentication → Sign-in method.",
+          "auth/admin-restricted-operation": "Firebase is blocking public account creation. Enable Email/Password in Firebase Console → Authentication → Sign-in method.",
+          "auth/unauthorized-domain": "This website domain is not authorised in Firebase Authentication. Add the current domain under Firebase Console → Authentication → Settings → Authorised domains.",
+          "auth/invalid-api-key": "Firebase rejected the project API key. Check the Firebase web app configuration.",
+          "auth/app-not-authorized": "This website is not authorised to use the Firebase project. Check Firebase authorised domains and API key restrictions.",
+          "auth/internal-error": "Firebase had an internal error. Please try again; if it continues, check Firebase Authentication settings.",
           "auth/captcha-check-failed": "The security check failed. Refresh the page and try again.",
           "auth/invalid-verification-code": "That OTP is incorrect. Please check it and try again.",
           "auth/code-expired": "This OTP has expired. Please request a new one.",
           "auth/network-request-failed": "Network issue. Please check your internet and try again."
         };
-        return messages[code] || (error && error.message) || "Something went wrong. Please try again.";
+        return messages[code] || ((error && error.message) ? error.message + (code ? " (Firebase code: " + code + ")" : "") : "Something went wrong. Please try again.");
       }
 
       function setMode(next) {
