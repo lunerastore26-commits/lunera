@@ -1035,24 +1035,24 @@ ADEEB QURESHI
 <script>
 
 /* =========================
-HERO FROM MANAGEMENT PANEL
+HERO IMAGE — persistent cloud + local sync
 ========================= */
-
-const hero = localStorage.getItem("luneraHero");
-
-if(hero){
-
-document.querySelector(".hero").style.backgroundImage =
-
-`linear-gradient(
-90deg,
-rgba(0,0,0,.72),
-rgba(0,0,0,.35),
-rgba(0,0,0,.05)
-),
-url("${hero.replace(/"/g,'\\"')}")`;
-
+function applyLuneraHero(){
+ const hero=localStorage.getItem("luneraHero");
+ const element=document.querySelector(".hero");
+ if(!element)return;
+ if(!hero){
+  element.style.removeProperty("background-image");
+  return;
+ }
+ const safeURL=String(hero).replace(/\\/g,"\\\\").replace(/"/g,'\\"').replace(/[\\r\\n]/g,"");
+ element.style.backgroundImage=`linear-gradient(90deg,rgba(0,0,0,.72),rgba(0,0,0,.35),rgba(0,0,0,.05)),url("${safeURL}")`;
 }
+applyLuneraHero();
+window.addEventListener("lunera:catalogue-updated",applyLuneraHero);
+window.addEventListener("storage",function(event){
+ if(event.key==="luneraHero")applyLuneraHero();
+});
 
 
 
