@@ -3,7 +3,7 @@
 "use strict";
 const firebaseConfig={apiKey:"AIzaSyDkd2oQTREh6JNs9Kh3Q8B-9DvPDk1sSzc",authDomain:"lunera-store.firebaseapp.com",projectId:"lunera-store",storageBucket:"lunera-store.firebasestorage.app",messagingSenderId:"758539336952",appId:"1:758539336952:web:fcea0182f0976804aa0f0d",measurementId:"G-DZ76166JF1"};
 const ADMIN_EMAIL="lunerastore26@gmail.com", KEYS=["luneraProducts","luneraCategories","luneraHero","luneraStory"];
-let auth,db,adminUser=null,resolveAuth;
+let auth,db,adminUser=null,resolveAuth,syncPromise=null;
 const authReady=new Promise(r=>resolveAuth=r);
 const ready=(async()=>{
  if(!window.firebase)throw Error("Firebase libraries did not load.");
@@ -20,9 +20,10 @@ const ready=(async()=>{
  await syncCatalogue();
 })();
 async function syncCatalogue(){
- try{const s=await db.collection("site").doc("catalogue").get();if(!s.exists)return;const d=s.data()||{};let changed=false;
+ if(syncPromise)return syncPromise;
+ syncPromise=(async()=>{try{const s=await db.collection("site").doc("catalogue").get();if(!s.exists)return;const d=s.data()||{};let changed=false;
  for(const k of KEYS)if(Object.prototype.hasOwnProperty.call(d,k)){let old=null;try{old=JSON.parse(localStorage.getItem(k)||"null")}catch(_){}if(JSON.stringify(old)!==JSON.stringify(d[k])){localStorage.setItem(k,JSON.stringify(d[k]));changed=true}}
- if(changed)location.reload();
+ if(changed){window.dispatchEvent(new CustomEvent("lunera:catalogue-updated",{detail:d}));}
  }catch(e){console.warn("LUNÉRA cloud catalogue unavailable:",e.message||e)}
 }
 async function ensureCatalogue(values){
