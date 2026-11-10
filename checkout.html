@@ -31,7 +31,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 "use strict";
-const EMAILJS_PUBLIC_KEY="rRuwYFo_icpYCBj6H", EMAILJS_SERVICE_ID="service_26ob5sw", EMAILJS_TEMPLATE_ID="e00x0gi";
+const EMAILJS_PUBLIC_KEY="rRuwYFo_icpYCBj6H", EMAILJS_SERVICE_ID="service_26ob5sw", EMAILJS_TEMPLATE_ID="template_o9wrz7c";
 let cart=[];try{const v=JSON.parse(localStorage.getItem("luneraCart")||"[]");cart=Array.isArray(v)?v:[]}catch(_){}
 const orderEl=document.getElementById("order"),form=document.getElementById("form"),errorEl=document.getElementById("error");let total=0;
 function parsePrice(v){const n=Number(String(v??"0").replace(/[^0-9.-]/g,""));return Number.isFinite(n)&&n>=0?n:0}
