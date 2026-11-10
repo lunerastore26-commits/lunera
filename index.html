@@ -1215,6 +1215,8 @@ renderCategories();
 renderLuneraStory();
 
 updateBagCount();
+window.addEventListener("lunera:catalogue-updated",function(){renderCategories();renderLuneraStory();updateBagCount();checkAdminAccess();});
+
 
 checkAdminAccess();
 
