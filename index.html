@@ -817,6 +817,21 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
   h1, h2, h3 { overflow-wrap: anywhere; }
 }
 
+/* Mobile homepage category covers use the same 1005:563 frame as desktop.
+   All other mobile layout and hero sizing remain unchanged. */
+@media (max-width:760px){
+  .editorial-tile,.feature{
+    height:auto;
+    aspect-ratio:1005 / 563;
+  }
+  .editorial-tile img,.feature img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+  }
+}
+
 </style>
 <link rel="icon" type="image/png" href="lunera-logo.png">
 </head>
