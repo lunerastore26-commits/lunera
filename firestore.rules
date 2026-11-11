@@ -18,12 +18,16 @@ service cloud.firestore {
         && (item.id is string || item.id is int)
         && item.name is string
         && item.name.size() > 0
+        && item.name.size() <= 160
         && item.price is number
         && item.price > 0
         && item.price <= 10000000
         && item.category is string
+        && item.category.size() <= 80
         && item.image is string
+        && item.image.size() <= 2048
         && item.size is string
+        && item.size.size() <= 40
         && item.quantity is int
         && item.quantity >= 1
         && item.quantity <= 20;
@@ -117,6 +121,7 @@ service cloud.firestore {
         && request.resource.data.customer.phone is string
         && request.resource.data.customer.phone.matches('[0-9]{10}')
         && request.resource.data.customer.email is string
+        && request.resource.data.customer.email == request.auth.token.email
         && request.resource.data.customer.address is string
         && request.resource.data.customer.address.size() > 0
         && request.resource.data.customer.city is string
