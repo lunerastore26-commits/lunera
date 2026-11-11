@@ -832,6 +832,32 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
   }
 }
 
+
+/* Mobile collection covers: keep the desktop editorial composition, scaled to phone width. */
+@media (max-width:760px){
+  .collection{padding:58px 6% 68px}
+  .section-heading{margin-bottom:24px}
+  .section-title{font-size:clamp(27px,7.2vw,34px);line-height:1.08}
+  .editorial-tile{height:auto;aspect-ratio:1005 / 563;margin-bottom:18px}
+  .editorial-overlay{padding:clamp(16px,4.5vw,24px)}
+  .editorial-number{font-size:8px;letter-spacing:2.5px;margin-bottom:7px}
+  .editorial-title{font-size:clamp(27px,7.4vw,36px);line-height:1;margin-bottom:7px;letter-spacing:-.5px}
+  .editorial-description{max-width:310px;font-size:8px;line-height:1.5;margin-bottom:12px}
+  .tile-buttons{gap:6px;flex-wrap:nowrap}
+  .tile-button{padding:9px 11px;font-size:7px;letter-spacing:1.2px;min-height:0;white-space:nowrap}
+  .feature-grid{padding:0 6% 68px;gap:18px}
+  .feature{height:auto;aspect-ratio:1005 / 563}
+  .feature-overlay{padding:clamp(16px,4.5vw,24px)}
+  .feature-overlay span{font-size:8px;letter-spacing:2px}
+  .feature-overlay h3{font-size:clamp(26px,7vw,34px);line-height:1.05;margin-top:6px}
+}
+@media (max-width:420px){
+  .section-title{font-size:29px}
+  .editorial-title{font-size:28px}
+  .editorial-description{font-size:7.5px}
+  .tile-button{padding:8px 9px;font-size:6.5px;letter-spacing:1px}
+}
+
 </style>
 <link rel="icon" type="image/png" href="lunera-logo.png">
 </head>
