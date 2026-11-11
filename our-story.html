@@ -130,6 +130,12 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 @media(max-width:700px){.founder-photo{width:100%;height:auto;min-height:0;aspect-ratio:auto}.founder-photo img{width:100%;height:auto;object-fit:contain}}
 
 
+
+/* Prevent the cream body background showing as a white strip at the page's bottom */
+html, body { background: #151212 !important; }
+body { min-height: 100vh; }
+footer { display: block; width: 100%; margin: 0; background: #151212 !important; }
+
 /* Remove stray horizontal rules at the absolute bottom of the Our Story page */
 footer hr,
 footer::before,
