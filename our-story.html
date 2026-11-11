@@ -129,6 +129,21 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 .founder-photo img{width:100%;height:auto;max-height:none;aspect-ratio:auto;object-fit:contain;object-position:center;display:block}
 @media(max-width:700px){.founder-photo{width:100%;height:auto;min-height:0;aspect-ratio:auto}.founder-photo img{width:100%;height:auto;object-fit:contain}}
 
+
+/* Remove stray horizontal rules at the absolute bottom of the Our Story page */
+footer hr,
+footer::before,
+footer::after,
+footer .footer-bottom::before,
+footer .footer-bottom::after {
+  display: none !important;
+  content: none !important;
+}
+footer, footer .footer-bottom {
+  border: 0 !important;
+  box-shadow: none !important;
+  outline: 0 !important;
+}
 </style>
 <link rel="icon" type="image/png" href="lunera-logo.png">
 </head>
