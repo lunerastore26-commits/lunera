@@ -121,7 +121,6 @@ service cloud.firestore {
         && request.resource.data.customer.phone is string
         && request.resource.data.customer.phone.matches('[0-9]{10}')
         && request.resource.data.customer.email is string
-        && request.resource.data.customer.email == request.auth.token.email
         && request.resource.data.customer.address is string
         && request.resource.data.customer.address.size() > 0
         && request.resource.data.customer.city is string
