@@ -65,6 +65,7 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .upload-status.loading{color:#151212}
 .small-upload{margin-bottom:25px}
 .small-upload .upload-preview{height:220px}
+.small-upload select[id$="StoryPhotoMode"]{display:block!important;visibility:visible!important;opacity:1!important;width:100%;min-height:46px;margin:8px 0 14px;padding:13px 14px;background:#faf8f4;color:#151212;border:1px solid #d8d1c7;font:13px "Montserrat",Arial,sans-serif;cursor:pointer}
 
 /* LUNÉRA responsive safeguards — preserves the existing palette, fonts and visual theme */
 img, video, iframe { max-width: 100%; }
@@ -411,50 +412,59 @@ function makeFitImage(file,aspectRatio=4/5){
 }
 function openImageEditor(file,aspectRatio=4/5){
  return new Promise((resolve,reject)=>{
-  if(!window.Cropper){reject(Error("Image editor is loading. Please refresh."));return;}
+  if(!window.Cropper){reject(Error("Image editor could not load. Please refresh the page and try again."));return;}
+  const modal=document.getElementById("imageEditorModal"),img=document.getElementById("imageEditorImage");
+  if(!modal||!img){reject(Error("Photo editor is unavailable on this page."));return;}
+  if(cropperInstance){cropperInstance.destroy();cropperInstance=null;}
+  if(cropObjectUrl)URL.revokeObjectURL(cropObjectUrl);
   currentEditFile=file;currentEditAspectRatio=aspectRatio;cropResolve=resolve;cropObjectUrl=URL.createObjectURL(file);
   const title=document.getElementById("imageEditorTitle");
-  if(title){
-   title.textContent=Number.isNaN(aspectRatio)?"Edit Image · Custom Crop":aspectRatio>1?"Edit Image · 1005:563":"Edit Image · 4:5";
-  }
+  if(title)title.textContent=Number.isNaN(aspectRatio)?"Edit Image · Custom Crop":aspectRatio>1?"Edit Image · 1005:563":"Edit Image · 4:5";
   const fitButton=document.getElementById("imageEditorFitButton");
   if(fitButton)fitButton.style.display=Number.isNaN(aspectRatio)?"none":"";
-  const help=document.querySelector("#imageEditorModal .image-editor-help");
-  if(help){
-   help.textContent=Number.isNaN(aspectRatio)
-    ?"Drag and resize the crop area freely. Choose CROP & USE when it looks right."
-    :"Photo poori rakhne ke liye FIT FULL PHOTO chunein. Manual crop ke liye image drag/zoom karein aur CROP & USE dabayein.";
-  }
-  const modal=document.getElementById("imageEditorModal"),img=document.getElementById("imageEditorImage");
-  modal.style.display="grid";
-  img.onload=()=>{if(cropperInstance)cropperInstance.destroy();cropperInstance=new Cropper(img,{aspectRatio:currentEditAspectRatio,viewMode:0,dragMode:"move",autoCropArea:.95,background:false,responsive:true,guides:true,center:true,movable:true,zoomable:true,cropBoxMovable:true,cropBoxResizable:true,toggleDragModeOnDblclick:false});};
-  img.onerror=()=>{finishImageEdit("cancel");reject(Error("Image could not be opened."));};img.src=cropObjectUrl;
+  const help=modal.querySelector(".image-editor-help");
+  if(help)help.textContent=Number.isNaN(aspectRatio)?"Drag and resize the crop area freely. Choose CROP & USE when it looks right.":"Photo poori rakhne ke liye FIT FULL PHOTO chunein. Manual crop ke liye image drag/zoom karein aur CROP & USE dabayein.";
+  modal.style.display="grid";modal.dataset.editorReady="no";
+  img.onload=()=>{
+   try{
+    if(cropperInstance){cropperInstance.destroy();cropperInstance=null;}
+    cropperInstance=new Cropper(img,{aspectRatio:aspectRatio,viewMode:0,dragMode:"move",autoCropArea:.92,background:false,responsive:true,guides:true,center:true,movable:true,zoomable:true,cropBoxMovable:true,cropBoxResizable:true,toggleDragModeOnDblclick:false,ready(){modal.dataset.editorReady="yes";}});
+   }catch(error){
+    modal.style.display="none";cropResolve=null;
+    if(cropObjectUrl)URL.revokeObjectURL(cropObjectUrl);cropObjectUrl="";currentEditFile=null;
+    reject(Error(error.message||"Could not start the photo editor."));
+   }
+  };
+  img.onerror=()=>{
+   modal.style.display="none";cropResolve=null;
+   if(cropObjectUrl)URL.revokeObjectURL(cropObjectUrl);cropObjectUrl="";currentEditFile=null;
+   reject(Error("Image could not be opened. Please choose another photo."));
+  };
+  img.src=cropObjectUrl;
  });
 }
 async function finishImageEdit(mode){
  if(!cropResolve)return;
- const resolve=cropResolve;cropResolve=null;let result=null;
+ if(mode==="crop"&&!cropperInstance){alert("Photo editor is still loading. Please wait a moment.");return;}
+ const resolve=cropResolve;cropResolve=null;let result=null,errorMessage="";
  try{
   if(mode==="fit")result=await makeFitImage(currentEditFile,currentEditAspectRatio);
   if(mode==="crop"){
-   const cropOptions={fillColor:"#f7f4ef",imageSmoothingEnabled:true,imageSmoothingQuality:"high"};
-   if(!Number.isNaN(currentEditAspectRatio)){
-    cropOptions.width=1000;
-    cropOptions.height=Math.round(1000/currentEditAspectRatio);
-   }
-   const canvas=cropperInstance&&cropperInstance.getCroppedCanvas(cropOptions);
-   if(!canvas)throw Error("Could not crop this image.");
-   const blob=await new Promise(ok=>canvas.toBlob(ok,"image/jpeg",.92));
-   if(!blob)throw Error("Could not crop this image.");
-   result=new File([blob],"lunera-photo.jpg",{type:"image/jpeg",lastModified:Date.now()});
+   const cropOptions={fillColor:"#f7f4ef",imageSmoothingEnabled:true,imageSmoothingQuality:"high",maxWidth:4000,maxHeight:4000};
+   if(!Number.isNaN(currentEditAspectRatio)){cropOptions.width=1000;cropOptions.height=Math.round(1000/currentEditAspectRatio);}
+   const canvas=cropperInstance.getCroppedCanvas(cropOptions);
+   if(!canvas)throw Error("Could not crop this image. Please adjust the crop area and try again.");
+   const blob=await new Promise(ok=>canvas.toBlob(ok,"image/jpeg",.94));
+   if(!blob)throw Error("Could not prepare the cropped photo.");
+   result=new File([blob],"lunera-founder-photo.jpg",{type:"image/jpeg",lastModified:Date.now()});
   }
- }catch(e){alert(e.message||"Image editing failed.");}
- document.getElementById("imageEditorModal").style.display="none";
+ }catch(e){errorMessage=e.message||"Image editing failed.";}
+ const modal=document.getElementById("imageEditorModal");if(modal)modal.style.display="none";
  if(cropperInstance){cropperInstance.destroy();cropperInstance=null;}
  if(cropObjectUrl)URL.revokeObjectURL(cropObjectUrl);
- cropObjectUrl="";currentEditFile=null;currentEditAspectRatio=4/5;resolve(result);
+ cropObjectUrl="";currentEditFile=null;currentEditAspectRatio=4/5;
+ if(errorMessage){alert(errorMessage);resolve(null);}else resolve(result);
 }
-
 
 function loadArray(key,fallback){
 try{
