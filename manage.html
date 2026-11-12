@@ -251,10 +251,10 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 <label>Introduction</label><textarea id="storyIntroInput"></textarea>
 <label>Sonu Qureshi — heading</label><input id="sonuTitleInput">
 <label>Sonu Qureshi — story</label><textarea id="sonuBodyInput" style="min-height:150px"></textarea>
-<div class="upload-box small-upload"><strong>SONU QURESHI — FOUNDER PHOTO</strong><p class="intro" style="margin:8px 0 14px">Original photo is kept in its natural shape; no 4:5 crop is applied.</p><img id="sonuStoryPhotoPreview" class="upload-preview" alt="Sonu Qureshi photo preview"><input id="sonuStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('sonu',event)"><label for="sonuStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="sonuStoryPhotoStatus" class="upload-status"></div></div>
+<div class="upload-box small-upload"><strong>SONU QURESHI — FOUNDER PHOTO</strong><p class="intro" style="margin:8px 0 14px">Choose how the founder photo should be displayed.</p><label for="sonuStoryPhotoMode">PHOTO SIZE / CROP</label><select id="sonuStoryPhotoMode"><option value="original">Original Size — No Crop</option><option value="portrait">Portrait — 4:5</option><option value="custom">Custom Crop — Adjust Freely</option></select><img id="sonuStoryPhotoPreview" class="upload-preview" alt="Sonu Qureshi photo preview"><input id="sonuStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('sonu',event)"><label for="sonuStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="sonuStoryPhotoStatus" class="upload-status"></div></div>
 <label>Your name — heading</label><input id="adeebTitleInput">
 <label>Your story</label><textarea id="adeebBodyInput" style="min-height:150px"></textarea>
-<div class="upload-box small-upload"><strong>ADEEB QURESHI — FOUNDER PHOTO</strong><p class="intro" style="margin:8px 0 14px">Original photo is kept in its natural shape; no 4:5 crop is applied.</p><img id="adeebStoryPhotoPreview" class="upload-preview" alt="Adeeb Qureshi photo preview"><input id="adeebStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('adeeb',event)"><label for="adeebStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="adeebStoryPhotoStatus" class="upload-status"></div></div>
+<div class="upload-box small-upload"><strong>ADEEB QURESHI — FOUNDER PHOTO</strong><p class="intro" style="margin:8px 0 14px">Choose how the founder photo should be displayed.</p><label for="adeebStoryPhotoMode">PHOTO SIZE / CROP</label><select id="adeebStoryPhotoMode"><option value="original">Original Size — No Crop</option><option value="portrait">Portrait — 4:5</option><option value="custom">Custom Crop — Adjust Freely</option></select><img id="adeebStoryPhotoPreview" class="upload-preview" alt="Adeeb Qureshi photo preview"><input id="adeebStoryPhotoFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="selectStoryPortrait('adeeb',event)"><label for="adeebStoryPhotoFile" class="choose-image">EDIT / CHANGE PHOTO</label><div id="adeebStoryPhotoStatus" class="upload-status"></div></div>
 <label>Closing line</label><textarea id="storyClosingInput"></textarea>
 <div class="actions"><button id="saveStoryButton" class="save" onclick="saveStory()">SAVE OUR STORY</button><button class="secondary" onclick="resetStoryFields()">RESET STORY TEXT</button></div>
 <div id="storySaveStatus" class="upload-status"></div>
@@ -347,7 +347,7 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
   <p class="image-editor-help">Photo poori rakhne ke liye FIT FULL PHOTO chunein. Manual crop ke liye image drag/zoom karein aur CROP &amp; USE dabayein.</p>
   <div class="image-editor-stage"><img id="imageEditorImage" alt="Image being edited"></div>
   <div class="image-editor-actions">
-   <button type="button" class="secondary" onclick="finishImageEdit('fit')">FIT FULL PHOTO</button>
+   <button type="button" class="secondary" id="imageEditorFitButton" onclick="finishImageEdit('fit')">FIT FULL PHOTO</button>
    <button type="button" class="save" onclick="finishImageEdit('crop')">CROP &amp; USE PHOTO</button>
    <button type="button" class="danger" onclick="finishImageEdit('cancel')">CANCEL</button>
   </div>
@@ -413,7 +413,18 @@ function openImageEditor(file,aspectRatio=4/5){
  return new Promise((resolve,reject)=>{
   if(!window.Cropper){reject(Error("Image editor is loading. Please refresh."));return;}
   currentEditFile=file;currentEditAspectRatio=aspectRatio;cropResolve=resolve;cropObjectUrl=URL.createObjectURL(file);
-  const title=document.getElementById("imageEditorTitle");if(title)title.textContent=aspectRatio>1?"Edit Image · 1005:563":"Edit Image · 4:5";
+  const title=document.getElementById("imageEditorTitle");
+  if(title){
+   title.textContent=Number.isNaN(aspectRatio)?"Edit Image · Custom Crop":aspectRatio>1?"Edit Image · 1005:563":"Edit Image · 4:5";
+  }
+  const fitButton=document.getElementById("imageEditorFitButton");
+  if(fitButton)fitButton.style.display=Number.isNaN(aspectRatio)?"none":"";
+  const help=document.querySelector("#imageEditorModal .image-editor-help");
+  if(help){
+   help.textContent=Number.isNaN(aspectRatio)
+    ?"Drag and resize the crop area freely. Choose CROP & USE when it looks right."
+    :"Photo poori rakhne ke liye FIT FULL PHOTO chunein. Manual crop ke liye image drag/zoom karein aur CROP & USE dabayein.";
+  }
   const modal=document.getElementById("imageEditorModal"),img=document.getElementById("imageEditorImage");
   modal.style.display="grid";
   img.onload=()=>{if(cropperInstance)cropperInstance.destroy();cropperInstance=new Cropper(img,{aspectRatio:currentEditAspectRatio,viewMode:0,dragMode:"move",autoCropArea:.95,background:false,responsive:true,guides:true,center:true,movable:true,zoomable:true,cropBoxMovable:true,cropBoxResizable:true,toggleDragModeOnDblclick:false});};
@@ -421,20 +432,27 @@ function openImageEditor(file,aspectRatio=4/5){
  });
 }
 async function finishImageEdit(mode){
- if(!cropResolve)return;const resolve=cropResolve;cropResolve=null;let result=null;
+ if(!cropResolve)return;
+ const resolve=cropResolve;cropResolve=null;let result=null;
  try{
   if(mode==="fit")result=await makeFitImage(currentEditFile,currentEditAspectRatio);
   if(mode==="crop"){
-   const width=1000,height=Math.round(width/currentEditAspectRatio);
-   const canvas=cropperInstance&&cropperInstance.getCroppedCanvas({width,height,fillColor:"#f7f4ef",imageSmoothingEnabled:true,imageSmoothingQuality:"high"});
+   const cropOptions={fillColor:"#f7f4ef",imageSmoothingEnabled:true,imageSmoothingQuality:"high"};
+   if(!Number.isNaN(currentEditAspectRatio)){
+    cropOptions.width=1000;
+    cropOptions.height=Math.round(1000/currentEditAspectRatio);
+   }
+   const canvas=cropperInstance&&cropperInstance.getCroppedCanvas(cropOptions);
    if(!canvas)throw Error("Could not crop this image.");
-   const blob=await new Promise(ok=>canvas.toBlob(ok,"image/jpeg",.92));if(!blob)throw Error("Could not crop this image.");
+   const blob=await new Promise(ok=>canvas.toBlob(ok,"image/jpeg",.92));
+   if(!blob)throw Error("Could not crop this image.");
    result=new File([blob],"lunera-photo.jpg",{type:"image/jpeg",lastModified:Date.now()});
   }
  }catch(e){alert(e.message||"Image editing failed.");}
  document.getElementById("imageEditorModal").style.display="none";
  if(cropperInstance){cropperInstance.destroy();cropperInstance=null;}
- if(cropObjectUrl)URL.revokeObjectURL(cropObjectUrl);cropObjectUrl="";currentEditFile=null;currentEditAspectRatio=4/5;resolve(result);
+ if(cropObjectUrl)URL.revokeObjectURL(cropObjectUrl);
+ cropObjectUrl="";currentEditFile=null;currentEditAspectRatio=4/5;resolve(result);
 }
 
 
@@ -511,18 +529,26 @@ async function saveStory(){const b=document.getElementById("saveStoryButton"),st
 async function selectStoryPortrait(kind,event){
  const input=event.target,file=input.files&&input.files[0];if(!file)return;
  const status=document.getElementById(kind+"StoryPhotoStatus");
+ const mode=document.getElementById(kind+"StoryPhotoMode")?.value||"original";
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)){status.textContent="Please choose a JPG, PNG or WebP image.";status.className="upload-status error";input.value="";return;}
  if(file.size>10*1024*1024){status.textContent="Please choose a photo smaller than 10 MB.";status.className="upload-status error";input.value="";return;}
  try{
-  status.textContent="UPLOADING ORIGINAL PHOTO — NO FIXED RATIO OR CROP...";
+  let photoToUpload=file;
+  if(mode==="portrait"||mode==="custom"){
+   status.textContent=mode==="portrait"?"OPENING 4:5 PORTRAIT CROP...":"OPENING CUSTOM PHOTO CROP...";
+   status.className="upload-status loading";
+   photoToUpload=await openImageEditor(file,mode==="portrait"?4/5:NaN);
+   if(!photoToUpload){status.textContent="PHOTO CHANGE CANCELLED — YOUR SAVED PHOTO IS UNCHANGED.";status.className="upload-status";return;}
+  }
+  status.textContent="UPLOADING FOUNDER PHOTO...";
   status.className="upload-status loading";
-  const url=await uploadImage(file,status);
+  const url=await uploadImage(photoToUpload,status);
   const nextStory={...currentStory(),[kind+"Photo"]:url};
   await window.LuneraCloud.saveCatalogue({luneraStory:nextStory});
   localStorage.setItem("luneraStory",JSON.stringify(nextStory));
   const preview=document.getElementById(kind+"StoryPhotoPreview");
   preview.src=url;preview.style.display="block";
-  status.textContent="ORIGINAL OUR STORY PHOTO SAVED.";
+  status.textContent="FOUNDER PHOTO SAVED SUCCESSFULLY.";
   status.className="upload-status success";
  }catch(error){
   status.textContent=error.message||"Photo upload failed.";
