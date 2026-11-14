@@ -1003,8 +1003,9 @@ function removeNewSelectedImage(index){
  const input=document.getElementById("newImageFile");if(input&&!selectedNewImageFiles.length)input.value="";
 }
 function renderExistingNewImagePreviews(i){
- const preview=document.getElementById("existing-new-gallery-"+i);if(!preview)return;preview.innerHTML="";
- (selectedExistingFiles[i]||[]).forEach((file,j)=>{const fig=document.createElement("figure"),img=document.createElement("img"),cut=document.createElement("button");img.src=URL.createObjectURL(file);img.alt="Additional product photo "+(j+1);cut.type="button";cut.className="image-cut";cut.title="Remove this photo";cut.setAttribute("aria-label","Remove additional product photo "+(j+1));cut.textContent="×";cut.onclick=()=>removeExistingSelectedImage(i,j);fig.appendChild(img);fig.appendChild(cut);preview.appendChild(fig);});
+ const preview=document.getElementById("existing-gallery-"+i);if(!preview)return;
+ preview.querySelectorAll('[data-new-selected-image="true"]').forEach(el=>el.remove());
+ (selectedExistingFiles[i]||[]).forEach((file,j)=>{const fig=document.createElement("figure"),img=document.createElement("img"),cut=document.createElement("button"),tag=document.createElement("span");fig.dataset.newSelectedImage="true";img.src=URL.createObjectURL(file);img.alt="New product photo "+(j+1);tag.textContent="NEW PHOTO";tag.style.cssText="display:block;font-size:9px;letter-spacing:1px;padding:5px 2px;color:#17352b;font-weight:600";cut.type="button";cut.className="image-cut";cut.title="Remove this photo";cut.setAttribute("aria-label","Remove new product photo "+(j+1));cut.textContent="×";cut.onclick=()=>removeExistingSelectedImage(i,j);fig.appendChild(img);fig.appendChild(tag);fig.appendChild(cut);preview.appendChild(fig);});
 }
 function removeExistingSelectedImage(i,j){
  if(!selectedExistingFiles[i])return;selectedExistingFiles[i].splice(j,1);renderExistingNewImagePreviews(i);
