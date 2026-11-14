@@ -299,8 +299,8 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 <label>Category</label>
 <select id="newCategorySelect"></select>
 
-<label>Available Sizes</label>
-<input id="newSizes" placeholder="S, M, L, XL">
+<label>Available Sizes <span style="font-weight:400;opacity:.65">(Optional)</span></label>
+<input id="newSizes" placeholder="S, M, L, XL — leave blank if not applicable">
 <label>Available Colours</label>
 <input id="newColors" placeholder="Beige, Lavender, Baby Pink" oninput="renderNewColorUploadFields()">
 <p class="intro" style="margin:6px 0 10px">Har colour ke neeche usi colour ki photo alag upload karein.</p>
@@ -1026,7 +1026,7 @@ async function addProduct(){
   const images=[];for(const file of selectedNewImageFiles)images.push(await uploadImage(file,status));
   const colorVariants=[];for(const color of colors){const file=selectedNewColorFiles[color];colorVariants.push({name:color,image:file?await uploadImage(file,status):""});}
   const id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now();
-  const mainColorImage=(colorVariants.find(v=>v.image)||{}).image||images[0];const orderedImages=mainColorImage?[mainColorImage,...images.filter(url=>url!==mainColorImage)]:images;products.push({id,name,price,category,sizes:sizes||"S, M, L, XL",colorVariants,image:mainColorImage,images:orderedImages,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
+  const mainColorImage=(colorVariants.find(v=>v.image)||{}).image||images[0];const orderedImages=mainColorImage?[mainColorImage,...images.filter(url=>url!==mainColorImage)]:images;products.push({id,name,price,category,sizes:sizes,colorVariants,image:mainColorImage,images:orderedImages,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
   try{await saveData();}catch(saveError){products.pop();throw saveError;}clearProductForm();render();showStatus();alert("Product and all photos added successfully.");
  }catch(error){status.textContent=error.message||"Image upload failed.";status.className="upload-status error";alert(error.message||"Product was not added.");}
  finally{button.disabled=false;button.textContent="ADD PRODUCT TO CATALOGUE";}
@@ -1054,7 +1054,7 @@ function render(){
    '<label>Product Name</label><input id="name-'+i+'" value="'+escapeAttr(p.name)+'">'+
    '<label>Price</label><input id="price-'+i+'" value="'+escapeAttr(p.price)+'">'+
    '<label>Category</label><select id="category-'+i+'">'+categoryOptions+'</select>'+
-   '<label>Available Sizes</label><input id="sizes-'+i+'" value="'+escapeAttr(Array.isArray(p.sizes)?p.sizes.join(", "):p.sizes)+'">'+
+   '<label>Available Sizes <span style="font-weight:400;opacity:.65">(Optional)</span></label><input id="sizes-'+i+'" value="'+escapeAttr(Array.isArray(p.sizes)?p.sizes.join(", "):p.sizes)+'" placeholder="Leave blank if this product has no sizes">'+
    '<label>Available Colours</label><input id="colors-'+i+'" value="'+escapeAttr((Array.isArray(p.colorVariants)?p.colorVariants.map(v=>v.name):[]).join(", "))+'" placeholder="Beige, Lavender, Baby Pink" oninput="renderExistingColorUploadFields('+i+')">'+
    '<p class="intro">Har colour ke neeche usi colour ki photo alag upload karein. Existing photos bhi yahin dikhengi.</p><div id="existingColorFields-'+i+'"></div>'+
    '<label>Add More Product Photos · 4:5</label><div class="upload-box small-upload">'+
@@ -1113,7 +1113,7 @@ async function saveProduct(i){
  const oldProduct=products[i],oldFiles=selectedExistingFiles[i],oldRemoved=removedExistingImages[i],oldColorFiles=selectedExistingColorFiles[i];
  try{
   const name=document.getElementById("name-"+i).value.trim(),price=document.getElementById("price-"+i).value.trim(),category=document.getElementById("category-"+i).value,sizes=document.getElementById("sizes-"+i).value.trim(),colors=document.getElementById("colors-"+i).value.split(",").map(x=>x.trim()).filter(Boolean);
-  if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category||!sizes){alert("Enter a product name, valid price, category and sizes.");return;}
+  if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category){alert("Enter a product name, valid price and category.");return;}
   const oldImages=Array.isArray(products[i].images)&&products[i].images.length?products[i].images:[products[i].image].filter(Boolean),removed=new Set(removedExistingImages[i]||[]);
   let images=oldImages.filter((_,index)=>!removed.has(index));
   if(button){button.disabled=true;button.textContent="SAVING PHOTOS...";}
@@ -1188,8 +1188,8 @@ document.getElementById(
 })
 );
 
-if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(parseManagePrice(p.price)) || parseManagePrice(p.price)<=0 || parseManagePrice(p.price)>10000000 || !String(p.category||"").trim() || !String(p.sizes||"").trim())){
- alert("One or more products have invalid details. Check name, positive price, category and sizes.");
+if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(parseManagePrice(p.price)) || parseManagePrice(p.price)<=0 || parseManagePrice(p.price)>10000000 || !String(p.category||"").trim())){
+ alert("One or more products have invalid details. Check name, positive price and category.");
  return;
 }
 try{await saveData();showStatus();}catch(error){products=previousProducts;alert(error.message||"Catalogue could not be saved to the shared store.");}
