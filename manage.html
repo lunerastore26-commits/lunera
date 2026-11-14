@@ -1026,7 +1026,7 @@ async function addProduct(){
   const images=[];for(const file of selectedNewImageFiles)images.push(await uploadImage(file,status));
   const colorVariants=[];for(const color of colors){const file=selectedNewColorFiles[color];colorVariants.push({name:color,image:file?await uploadImage(file,status):""});}
   const id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now();
-  products.push({id,name,price,category,sizes:sizes||"S, M, L, XL",colorVariants,image:images[0],images,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
+  const mainColorImage=(colorVariants.find(v=>v.image)||{}).image||images[0];const orderedImages=mainColorImage?[mainColorImage,...images.filter(url=>url!==mainColorImage)]:images;products.push({id,name,price,category,sizes:sizes||"S, M, L, XL",colorVariants,image:mainColorImage,images:orderedImages,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
   try{await saveData();}catch(saveError){products.pop();throw saveError;}clearProductForm();render();showStatus();alert("Product and all photos added successfully.");
  }catch(error){status.textContent=error.message||"Image upload failed.";status.className="upload-status error";alert(error.message||"Product was not added.");}
  finally{button.disabled=false;button.textContent="ADD PRODUCT TO CATALOGUE";}
@@ -1121,7 +1121,7 @@ async function saveProduct(i){
   if(!images.length){alert("A product must keep at least one photo.");return;}
   const oldVariants=Array.isArray(products[i].colorVariants)?products[i].colorVariants:[],colorFiles=selectedExistingColorFiles[i]||[];
   const colorVariants=[];for(const color of colors){const prior=oldVariants.find(v=>String(v.name||"").toLowerCase()===color.toLowerCase())||{},file=colorFiles[color];colorVariants.push({name:color,image:file?await uploadImage(file,document.getElementById("existingStatus-"+i)):prior.image||""});}
-  products[i]={...products[i],id:products[i].id,name,price,category,sizes,colorVariants,image:images[0],images,description:document.getElementById("description-"+i).value.trim()};
+  const mainColorImage=(colorVariants.find(v=>v.image)||{}).image||images[0];const orderedImages=mainColorImage?[mainColorImage,...images.filter(url=>url!==mainColorImage)]:images;products[i]={...products[i],id:products[i].id,name,price,category,sizes,colorVariants,image:mainColorImage,images:orderedImages,description:document.getElementById("description-"+i).value.trim()};
   selectedExistingFiles[i]=[];selectedExistingColorFiles[i]={};delete removedExistingImages[i];await saveData();render();showStatus();
  }catch(error){products[i]=oldProduct;selectedExistingFiles[i]=oldFiles;selectedExistingColorFiles[i]=oldColorFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Could not save product.");}
  finally{if(button){button.disabled=false;button.textContent="SAVE PRODUCT";}}
