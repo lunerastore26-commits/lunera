@@ -1144,15 +1144,7 @@ function renderCart(){
                   </div>
 
 
-                  <div class="item-meta">
-
-                    Size:
-                    ${escapeHTML(
-                      item.size ||
-                      "Standard"
-                    )}
-
-                  </div>
+                  ${item.size?`<div class="item-meta">Size: ${escapeHTML(item.size)}</div>`:""}
                   ${item.color?`<div class="item-meta">Colour: ${escapeHTML(item.color)}</div>`:""}
 
 
