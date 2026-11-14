@@ -300,6 +300,12 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 <label>Available Sizes</label>
 <input id="newSizes" placeholder="S, M, L, XL">
+<label>Available Colours</label>
+<input id="newColors" placeholder="Beige, Lavender, Baby Pink">
+<p class="intro" style="margin:6px 0 10px">Optional: upload one colour photo per colour, in the same order as the names above.</p>
+<input id="newColorImages" type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="handleNewColorImageSelect(event)">
+<div id="newColorFileName" class="file-name">No colour photos selected</div>
+<div id="newColorGalleryPreview" class="gallery-preview"></div>
 
 <label>Product Image</label>
 
@@ -388,6 +394,8 @@ let categories = loadArray(
 );
 
 let selectedNewImageFiles = [];
+let selectedNewColorFiles = [];
+let selectedExistingColorFiles = {};
 let selectedHeroFile = null;
 let selectedExistingFiles = {};
 let removedExistingImages = {};
@@ -996,25 +1004,34 @@ async function handleNewImageSelect(event){
 }
 
 
+async function handleNewColorImageSelect(event){
+ const files=Array.from(event.target.files||[]),preview=document.getElementById("newColorGalleryPreview"),name=document.getElementById("newColorFileName");selectedNewColorFiles=[];preview.innerHTML="";if(!files.length){name.textContent="No colour photos selected";return;}
+ if(files.some(f=>!["image/jpeg","image/png","image/webp"].includes(f.type))||files.some(f=>f.size>10*1024*1024)){alert("Choose JPG, PNG or WebP images under 10 MB each.");event.target.value="";return;}
+ try{for(const file of files){const edited=await openImageEditor(file);if(edited)selectedNewColorFiles.push(edited);}name.textContent=selectedNewColorFiles.length+" colour photo(s) ready · same order as colour names";selectedNewColorFiles.forEach((file,i)=>{const fig=document.createElement("figure"),img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="Colour photo "+(i+1);fig.appendChild(img);preview.appendChild(fig);});}catch(error){alert(error.message||"Colour photo editing failed.");}
+}
+
 /* ADD PRODUCT */
 
 async function addProduct(){
- const button=document.getElementById("addProductButton"),name=document.getElementById("newName").value.trim(),price=document.getElementById("newPrice").value.trim(),category=document.getElementById("newCategorySelect").value,sizes=document.getElementById("newSizes").value.trim(),description=document.getElementById("newDescription").value.trim(),status=document.getElementById("uploadStatus");
+ const button=document.getElementById("addProductButton"),name=document.getElementById("newName").value.trim(),price=document.getElementById("newPrice").value.trim(),category=document.getElementById("newCategorySelect").value,sizes=document.getElementById("newSizes").value.trim(),colors=document.getElementById("newColors").value.split(",").map(x=>x.trim()).filter(Boolean),description=document.getElementById("newDescription").value.trim(),status=document.getElementById("uploadStatus");
  if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category){alert("Enter a product name, valid price and category.");return;}
  if(!selectedNewImageFiles.length){alert("Choose at least one product photo.");return;}
+ if(selectedNewColorFiles.length&&selectedNewColorFiles.length!==colors.length){alert("Upload exactly one colour photo for each colour, in the same order.");return;}
  button.disabled=true;button.textContent="UPLOADING PHOTOS...";
  try{
   const images=[];for(const file of selectedNewImageFiles)images.push(await uploadImage(file,status));
+  const colorImages=[];for(const file of selectedNewColorFiles)colorImages.push(await uploadImage(file,status));
+  const colorVariants=colors.map((color,index)=>({name:color,image:colorImages[index]||""}));
   const id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now();
-  products.push({id,name,price,category,sizes:sizes||"S, M, L, XL",image:images[0],images,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
+  products.push({id,name,price,category,sizes:sizes||"S, M, L, XL",colorVariants,image:images[0],images,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
   try{await saveData();}catch(saveError){products.pop();throw saveError;}clearProductForm();render();showStatus();alert("Product and all photos added successfully.");
  }catch(error){status.textContent=error.message||"Image upload failed.";status.className="upload-status error";alert(error.message||"Product was not added.");}
  finally{button.disabled=false;button.textContent="ADD PRODUCT TO CATALOGUE";}
 }
 
 function clearProductForm(){
- ["newName","newPrice","newSizes","newDescription","newImageFile"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
- selectedNewImageFiles=[];document.getElementById("newImageGalleryPreview").innerHTML="";
+ ["newName","newPrice","newSizes","newColors","newDescription","newImageFile","newColorImages"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ selectedNewImageFiles=[];selectedNewColorFiles=[];document.getElementById("newImageGalleryPreview").innerHTML="";document.getElementById("newColorGalleryPreview").innerHTML="";document.getElementById("newColorFileName").textContent="No colour photos selected";
  document.getElementById("newFileName").textContent="No images selected";
  const status=document.getElementById("uploadStatus");status.textContent="";status.className="upload-status";
 }
@@ -1035,6 +1052,8 @@ function render(){
    '<label>Price</label><input id="price-'+i+'" value="'+escapeAttr(p.price)+'">'+
    '<label>Category</label><select id="category-'+i+'">'+categoryOptions+'</select>'+
    '<label>Available Sizes</label><input id="sizes-'+i+'" value="'+escapeAttr(Array.isArray(p.sizes)?p.sizes.join(", "):p.sizes)+'">'+
+   '<label>Available Colours</label><input id="colors-'+i+'" value="'+escapeAttr((Array.isArray(p.colorVariants)?p.colorVariants.map(v=>v.name):[]).join(", "))+'" placeholder="Beige, Lavender, Baby Pink">'+
+   '<p class="intro">Optional: upload one colour photo per colour, in the same order as the names.</p><input id="existingColorImages-'+i+'" type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="handleExistingColorImageSelect('+i+',event)"><div id="existingColorFileName-'+i+'" class="file-name">No new colour photos selected</div><div id="existingColorPreview-'+i+'" class="gallery-preview"></div>'+
    '<label>Add More Product Photos · 4:5</label><div class="upload-box small-upload">'+
    '<input id="existingImage-'+i+'" type="file" accept="image/jpeg,image/png,image/webp" multiple onchange="handleExistingImageSelect('+i+',event)">'+
    '<label for="existingImage-'+i+'" class="choose-image">ADD MULTIPLE PHOTOS</label>'+
@@ -1074,20 +1093,29 @@ async function handleExistingImageSelect(i,event){
  }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
 }
 
+async function handleExistingColorImageSelect(i,event){
+ const files=Array.from(event.target.files||[]),name=document.getElementById("existingColorFileName-"+i),preview=document.getElementById("existingColorPreview-"+i);selectedExistingColorFiles[i]=[];preview.innerHTML="";if(!files.length){name.textContent="No new colour photos selected";return;}
+ if(files.some(f=>!["image/jpeg","image/png","image/webp"].includes(f.type))||files.some(f=>f.size>10*1024*1024)){alert("Choose JPG, PNG or WebP images under 10 MB each.");event.target.value="";return;}
+ try{for(const file of files){const edited=await openImageEditor(file);if(edited)selectedExistingColorFiles[i].push(edited);}name.textContent=selectedExistingColorFiles[i].length+" colour photo(s) ready";selectedExistingColorFiles[i].forEach((file,j)=>{const fig=document.createElement("figure"),img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="Colour photo "+(j+1);fig.appendChild(img);preview.appendChild(fig);});}catch(error){alert(error.message||"Colour photo editing failed.");}
+}
+
 async function saveProduct(i){
  const button=document.activeElement&&document.activeElement.tagName==="BUTTON"?document.activeElement:null;
- const oldProduct=products[i],oldFiles=selectedExistingFiles[i],oldRemoved=removedExistingImages[i];
+ const oldProduct=products[i],oldFiles=selectedExistingFiles[i],oldRemoved=removedExistingImages[i],oldColorFiles=selectedExistingColorFiles[i];
  try{
-  const name=document.getElementById("name-"+i).value.trim(),price=document.getElementById("price-"+i).value.trim(),category=document.getElementById("category-"+i).value,sizes=document.getElementById("sizes-"+i).value.trim();
+  const name=document.getElementById("name-"+i).value.trim(),price=document.getElementById("price-"+i).value.trim(),category=document.getElementById("category-"+i).value,sizes=document.getElementById("sizes-"+i).value.trim(),colors=document.getElementById("colors-"+i).value.split(",").map(x=>x.trim()).filter(Boolean);
   if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category||!sizes){alert("Enter a product name, valid price, category and sizes.");return;}
   const oldImages=Array.isArray(products[i].images)&&products[i].images.length?products[i].images:[products[i].image].filter(Boolean),removed=new Set(removedExistingImages[i]||[]);
   let images=oldImages.filter((_,index)=>!removed.has(index));
   if(button){button.disabled=true;button.textContent="SAVING PHOTOS...";}
   for(const file of (selectedExistingFiles[i]||[]))images.push(await uploadImage(file,document.getElementById("existingStatus-"+i)));
   if(!images.length){alert("A product must keep at least one photo.");return;}
-  products[i]={id:products[i].id,name,price,category,sizes,image:images[0],images,description:document.getElementById("description-"+i).value.trim()};
-  selectedExistingFiles[i]=[];delete removedExistingImages[i];await saveData();render();showStatus();
- }catch(error){products[i]=oldProduct;selectedExistingFiles[i]=oldFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Could not save product.");}
+  const colorFiles=selectedExistingColorFiles[i]||[];if(colorFiles.length&&colorFiles.length!==colors.length){alert("Upload exactly one colour photo for each colour, in the same order.");return;}
+  const oldVariants=Array.isArray(products[i].colorVariants)?products[i].colorVariants:[],uploadedColorImages=[];for(const file of colorFiles)uploadedColorImages.push(await uploadImage(file,document.getElementById("existingColorFileName-"+i)));
+  const colorVariants=colors.map((color,index)=>({name:color,image:uploadedColorImages[index]||(oldVariants.find(v=>String(v.name).toLowerCase()===color.toLowerCase())||{}).image||""}));
+  products[i]={...products[i],id:products[i].id,name,price,category,sizes,colorVariants,image:images[0],images,description:document.getElementById("description-"+i).value.trim()};
+  selectedExistingFiles[i]=[];selectedExistingColorFiles[i]=[];delete removedExistingImages[i];await saveData();render();showStatus();
+ }catch(error){products[i]=oldProduct;selectedExistingFiles[i]=oldFiles;selectedExistingColorFiles[i]=oldColorFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Could not save product.");}
  finally{if(button){button.disabled=false;button.textContent="SAVE PRODUCT";}}
 }
 
@@ -1261,7 +1289,7 @@ async function loadCloudOrders(){
      <strong style="font:20px 'Cormorant Garamond'">${escapeText(id||"Order")}</strong>
      <span style="font:10px Montserrat;letter-spacing:1px">${escapeText(current)} · ${escapeText(o.paymentStatus||"Pending")}</span>
     </div>
-    <p style="font:11px/1.8 Montserrat;margin-top:10px">${escapeText(o.customer?.name||"Customer")} · ${escapeText(o.customer?.phone||"")}<br>${escapeText(o.customer?.email||"No email supplied")}<br>${escapeText([o.customer?.address,o.customer?.city,o.customer?.state,o.customer?.pin].filter(Boolean).join(", "))}<br>${(o.items||[]).map(i=>escapeText(i.name)+" × "+Number(i.quantity||1)+(i.size?" · "+escapeText(i.size):"")).join("; ")}<br><strong>Total: ₹${Number(o.total||0).toLocaleString("en-IN")}</strong></p>
+    <p style="font:11px/1.8 Montserrat;margin-top:10px">${escapeText(o.customer?.name||"Customer")} · ${escapeText(o.customer?.phone||"")}<br>${escapeText(o.customer?.email||"No email supplied")}<br>${escapeText([o.customer?.address,o.customer?.city,o.customer?.state,o.customer?.pin].filter(Boolean).join(", "))}<br>${(o.items||[]).map(i=>escapeText(i.name)+" × "+Number(i.quantity||1)+(i.size?" · "+escapeText(i.size):"")+(i.color?" · "+escapeText(i.color):"")).join("; ")}<br><strong>Total: ₹${Number(o.total||0).toLocaleString("en-IN")}</strong></p>
     <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px">
      <select id="order-status-${escapeAttr(id)}" aria-label="Order status" style="max-width:220px">
       ${["New","Confirmed","Processing","Shipped","Delivered","Cancelled"].map(s=>`<option value="${s}" ${s===current?"selected":""}>${s}</option>`).join("")}
