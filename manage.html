@@ -128,6 +128,7 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 #sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:auto;object-fit:contain;object-position:center;display:none;background:#e8e0d4}
 .gallery-preview{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px;margin-top:16px}
 .gallery-preview figure{position:relative;display:grid;grid-template-columns:1fr 1fr;align-content:start;min-width:0;width:clamp(100px,18%,140px);height:auto;aspect-ratio:auto;overflow:hidden;background:#e8e0d4;border:1px solid #e1dbd2}
+.gallery-preview figure .image-cut{position:absolute;top:5px;right:5px;z-index:2;width:28px;min-width:28px;height:28px;min-height:28px;padding:0;border-radius:50%;background:#8b3030;color:#fff;font:20px/1 Arial,sans-serif;letter-spacing:0;display:grid;place-items:center;box-shadow:0 2px 8px #0003}.gallery-preview figure .image-cut:hover{background:#5f2020}
 .gallery-preview figure img{grid-column:1 / -1;width:100%;height:auto;aspect-ratio:4 / 5;object-fit:contain;object-position:center;display:block}
 .gallery-preview figure button{display:block;width:100%;min-width:0;padding:10px 2px;font-size:8px;line-height:1.35;letter-spacing:1px;white-space:normal;overflow-wrap:anywhere}
 .image-editor-modal{position:fixed;inset:0;z-index:9999;background:#151212ee;display:none;place-items:center;padding:12px}
@@ -990,6 +991,28 @@ async function saveCategoryCovers(){
 
 /* NEW PRODUCT IMAGE */
 
+
+function renderNewImagePreviews(){
+ const preview=document.getElementById("newImageGalleryPreview");if(!preview)return;preview.innerHTML="";
+ selectedNewImageFiles.forEach((file,i)=>{const fig=document.createElement("figure"),img=document.createElement("img"),cut=document.createElement("button");img.src=URL.createObjectURL(file);img.alt="Product photo "+(i+1);cut.type="button";cut.className="image-cut";cut.title="Remove this photo";cut.setAttribute("aria-label","Remove product photo "+(i+1));cut.textContent="×";cut.onclick=()=>removeNewSelectedImage(i);fig.appendChild(img);fig.appendChild(cut);preview.appendChild(fig);});
+}
+function removeNewSelectedImage(index){
+ selectedNewImageFiles.splice(index,1);renderNewImagePreviews();
+ const name=document.getElementById("newFileName");if(name)name.textContent=selectedNewImageFiles.length?selectedNewImageFiles.length+" product photo(s) ready · 4:5":"No images selected";
+ const status=document.getElementById("uploadStatus");if(status)status.textContent=selectedNewImageFiles.length?selectedNewImageFiles.length+" IMAGE(S) READY TO UPLOAD.":"";
+ const input=document.getElementById("newImageFile");if(input&&!selectedNewImageFiles.length)input.value="";
+}
+function renderExistingNewImagePreviews(i){
+ const preview=document.getElementById("existing-new-gallery-"+i);if(!preview)return;preview.innerHTML="";
+ (selectedExistingFiles[i]||[]).forEach((file,j)=>{const fig=document.createElement("figure"),img=document.createElement("img"),cut=document.createElement("button");img.src=URL.createObjectURL(file);img.alt="Additional product photo "+(j+1);cut.type="button";cut.className="image-cut";cut.title="Remove this photo";cut.setAttribute("aria-label","Remove additional product photo "+(j+1));cut.textContent="×";cut.onclick=()=>removeExistingSelectedImage(i,j);fig.appendChild(img);fig.appendChild(cut);preview.appendChild(fig);});
+}
+function removeExistingSelectedImage(i,j){
+ if(!selectedExistingFiles[i])return;selectedExistingFiles[i].splice(j,1);renderExistingNewImagePreviews(i);
+ const name=document.getElementById("existingFileName-"+i);if(name)name.textContent=selectedExistingFiles[i].length?selectedExistingFiles[i].length+" additional product photo(s) ready · 4:5":"No new photos selected";
+ const status=document.getElementById("existingStatus-"+i);if(status)status.textContent=selectedExistingFiles[i].length?selectedExistingFiles[i].length+" PHOTO(S) READY TO ADD.":"";
+ const input=document.getElementById("existingImage-"+i);if(input&&!selectedExistingFiles[i].length)input.value="";
+}
+
 async function handleNewImageSelect(event){
  const files=Array.from(event.target.files||[]),preview=document.getElementById("newImageGalleryPreview"),name=document.getElementById("newFileName"),status=document.getElementById("uploadStatus");
  selectedNewImageFiles=[];preview.innerHTML="";status.textContent="";status.className="upload-status";
@@ -999,7 +1022,7 @@ async function handleNewImageSelect(event){
  try{
   for(const file of files){const edited=await openImageEditor(file);if(edited)selectedNewImageFiles.push(edited);}
   name.textContent=selectedNewImageFiles.length+" product photo(s) ready · 4:5";
-  selectedNewImageFiles.forEach((file,i)=>{const fig=document.createElement("figure"),img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="Product photo "+(i+1);fig.appendChild(img);preview.appendChild(fig);});
+  renderNewImagePreviews();
   status.textContent=selectedNewImageFiles.length+" IMAGE(S) READY TO UPLOAD.";
  }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
 }
@@ -1055,7 +1078,7 @@ function render(){
  if(!visible.length){container.innerHTML='<div class="empty">No products in this category yet.</div>';return;}
  container.innerHTML=visible.map(({p,index})=>{const i=index;
   const imgs=Array.isArray(p.images)&&p.images.length?p.images:[p.image].filter(Boolean);
-  const thumbs=imgs.map((url,j)=>'<figure data-existing-image-index="'+j+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" onclick="setProductMainImage('+i+','+j+')">MAKE MAIN</button><button type="button" onclick="removeProductImage('+i+','+j+')">REMOVE</button></figure>').join("");
+  const thumbs=imgs.map((url,j)=>'<figure data-existing-image-index="'+j+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" class="image-cut" title="Remove this photo" aria-label="Remove '+escapeAttr(p.name)+' photo '+(j+1)+'" onclick="removeProductImage('+i+','+j+')">×</button><button type="button" onclick="setProductMainImage('+i+','+j+')">MAKE MAIN</button></figure>').join("");
   const categoryOptions=categories.map(c=>'<option value="'+escapeAttr(c)+'" '+(c===p.category?"selected":"")+'>'+escapeHTML(c)+'</option>').join("");
   return '<div class="product-card"><div class="product-number">PRODUCT '+String(i+1).padStart(2,"0")+' · '+imgs.length+' PHOTO(S)</div>'+
    '<div class="gallery-preview" id="existing-gallery-'+i+'">'+thumbs+'</div>'+
@@ -1100,7 +1123,7 @@ async function handleExistingImageSelect(i,event){
  try{
   const edited=[];for(const file of files){const next=await openImageEditor(file);if(next)edited.push(next);}
   selectedExistingFiles[i]=edited;name.textContent=edited.length+" additional product photo(s) ready · 4:5";preview.innerHTML="";
-  edited.forEach((file,j)=>{const fig=document.createElement("figure"),img=document.createElement("img");img.src=URL.createObjectURL(file);img.alt="New product photo "+(j+1);fig.appendChild(img);preview.appendChild(fig);});
+  renderExistingNewImagePreviews(i);
   status.textContent=edited.length+" PHOTO(S) READY TO ADD.";
  }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
 }
