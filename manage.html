@@ -1053,7 +1053,7 @@ function render(){
  const count=document.getElementById("manageCategoryCount");if(count)count.textContent=selected==="__all__"?"Showing all "+visible.length+" product(s)":"Showing "+visible.length+" product(s) in "+selected;
  if(!products.length){container.innerHTML='<div class="empty">No products in the catalogue.</div>';return;}
  if(!visible.length){container.innerHTML='<div class="empty">No products in this category yet.</div>';return;}
- container.innerHTML=visible.map(({p,i:index})=>{
+ container.innerHTML=visible.map(({p,index})=>{const i=index;
   const imgs=Array.isArray(p.images)&&p.images.length?p.images:[p.image].filter(Boolean);
   const thumbs=imgs.map((url,j)=>'<figure data-existing-image-index="'+j+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" onclick="setProductMainImage('+i+','+j+')">MAKE MAIN</button><button type="button" onclick="removeProductImage('+i+','+j+')">REMOVE</button></figure>').join("");
   const categoryOptions=categories.map(c=>'<option value="'+escapeAttr(c)+'" '+(c===p.category?"selected":"")+'>'+escapeHTML(c)+'</option>').join("");
