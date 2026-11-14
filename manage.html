@@ -126,9 +126,10 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 .upload-preview{display:block;width:min(100%,420px);max-width:100%;height:auto;aspect-ratio:auto;max-height:none;object-fit:contain;object-position:center;background:#e8e0d4}
 .small-upload .upload-preview{height:auto;aspect-ratio:auto}
 #sonuStoryPhotoPreview,#adeebStoryPhotoPreview{width:min(100%,220px);height:auto;aspect-ratio:auto;object-fit:contain;object-position:center;display:none;background:#e8e0d4}
-.gallery-preview{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
-.gallery-preview figure{position:relative;width:clamp(78px,18%,120px);aspect-ratio:4 / 5;background:#e8e0d4;border:1px solid #e1dbd2}
-.gallery-preview img{width:100%;height:100%;object-fit:contain;object-position:center;display:block}
+.gallery-preview{display:flex;flex-wrap:wrap;align-items:flex-start;gap:10px;margin-top:16px}
+.gallery-preview figure{position:relative;display:grid;grid-template-columns:1fr 1fr;align-content:start;min-width:0;width:clamp(100px,18%,140px);height:auto;aspect-ratio:auto;overflow:hidden;background:#e8e0d4;border:1px solid #e1dbd2}
+.gallery-preview figure img{grid-column:1 / -1;width:100%;height:auto;aspect-ratio:4 / 5;object-fit:contain;object-position:center;display:block}
+.gallery-preview figure button{display:block;width:100%;min-width:0;padding:10px 2px;font-size:8px;line-height:1.35;letter-spacing:1px;white-space:normal;overflow-wrap:anywhere}
 .image-editor-modal{position:fixed;inset:0;z-index:9999;background:#151212ee;display:none;place-items:center;padding:12px}
 .image-editor-panel{width:min(900px,100%);max-height:94vh;overflow:auto;background:#f7f4ef;padding:clamp(16px,3vw,30px);border:1px solid #b49a6b}
 .image-editor-title{font:400 30px 'Bodoni Moda';margin-bottom:8px}
