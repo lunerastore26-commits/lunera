@@ -317,6 +317,9 @@ window.addEventListener("lunera:catalogue-updated",()=>{const q=new URLSearchPar
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 <script src="lunera-cloud.js"></script>
+<script>
+(async function(){try{if(window.LuneraCloud){await window.LuneraCloud.ready;await window.LuneraCloud.refreshCatalogue();if(typeof startPage==="function")startPage();}}catch(error){console.warn("LUNÉRA latest catalogue refresh unavailable:",error&&error.message||error);}})();
+</script>
 
 </body>
 </html>
