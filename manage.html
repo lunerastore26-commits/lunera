@@ -334,7 +334,9 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 
 <section class="section">
 <div class="section-title">Product Catalogue</div>
-
+<label for="manageCategoryFilter">SHOW PRODUCTS FROM CATEGORY</label>
+<select id="manageCategoryFilter" onchange="render()"><option value="__all__">All Products</option></select>
+<p class="intro" id="manageCategoryCount" style="margin:10px 0 18px">Showing all products</p>
 <div class="products" id="products"></div>
 
 <div class="actions">
@@ -1044,8 +1046,14 @@ function clearProductForm(){
 
 function render(){
  const container=document.getElementById("products");
+ const filter=document.getElementById("manageCategoryFilter");
+ const selected=filter?filter.value:"__all__";
+ if(filter){const current=selected;filter.innerHTML='<option value="__all__">All Products</option>'+categories.map(c=>'<option value="'+escapeAttr(c)+'">'+escapeHTML(c)+'</option>').join("");filter.value=categories.includes(current)?current:"__all__";}
+ const visible=products.map((p,index)=>({p,index})).filter(({p})=>selected==="__all__"||String(p.category||"")===selected);
+ const count=document.getElementById("manageCategoryCount");if(count)count.textContent=selected==="__all__"?"Showing all "+visible.length+" product(s)":"Showing "+visible.length+" product(s) in "+selected;
  if(!products.length){container.innerHTML='<div class="empty">No products in the catalogue.</div>';return;}
- container.innerHTML=products.map((p,i)=>{
+ if(!visible.length){container.innerHTML='<div class="empty">No products in this category yet.</div>';return;}
+ container.innerHTML=visible.map(({p,i:index})=>{
   const imgs=Array.isArray(p.images)&&p.images.length?p.images:[p.image].filter(Boolean);
   const thumbs=imgs.map((url,j)=>'<figure data-existing-image-index="'+j+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" onclick="setProductMainImage('+i+','+j+')">MAKE MAIN</button><button type="button" onclick="removeProductImage('+i+','+j+')">REMOVE</button></figure>').join("");
   const categoryOptions=categories.map(c=>'<option value="'+escapeAttr(c)+'" '+(c===p.category?"selected":"")+'>'+escapeHTML(c)+'</option>').join("");
