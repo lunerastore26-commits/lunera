@@ -1079,7 +1079,7 @@ function render(){
  if(!visible.length){container.innerHTML='<div class="empty">No products in this category yet.</div>';return;}
  container.innerHTML=visible.map(({p,index})=>{const i=index;
   const imgs=Array.isArray(p.images)&&p.images.length?p.images:[p.image].filter(Boolean);
-  const thumbs=imgs.map((url,j)=>'<figure data-existing-image-index="'+j+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" class="image-cut" title="Remove this photo" aria-label="Remove '+escapeAttr(p.name)+' photo '+(j+1)+'" onclick="removeProductImage('+i+','+j+')">×</button><button type="button" onclick="setProductMainImage('+i+','+j+')">MAKE MAIN</button></figure>').join("");
+  const thumbs=imgs.map((url,j)=>'<figure data-existing-image-url="'+escapeAttr(url)+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" class="image-cut" title="Remove this photo" aria-label="Remove '+escapeAttr(p.name)+' photo '+(j+1)+'" onclick="removeProductImage('+i+',this)">×</button><button type="button" onclick="setProductMainImage('+i+',this)">MAKE MAIN</button></figure>').join("");
   const categoryOptions=categories.map(c=>'<option value="'+escapeAttr(c)+'" '+(c===p.category?"selected":"")+'>'+escapeHTML(c)+'</option>').join("");
   return '<div class="product-card"><div class="product-number">PRODUCT '+String(i+1).padStart(2,"0")+' · '+imgs.length+' PHOTO(S)</div>'+
    '<div class="gallery-preview" id="existing-gallery-'+i+'">'+thumbs+'</div>'+
@@ -1097,22 +1097,32 @@ function render(){
    '<label>Description</label><textarea id="description-'+i+'">'+escapeHTML(p.description||"")+'</textarea>'+
    '<div class="actions"><button class="save" onclick="saveProduct('+i+')">SAVE PRODUCT</button><button class="danger" onclick="deleteProduct('+i+')">DELETE PRODUCT</button></div></div>';
  }).join("");
- products.forEach((p,i)=>renderExistingColorUploadFields(i));
+ products.forEach((p,i)=>{renderExistingColorUploadFields(i);if(selectedExistingFiles[i]&&selectedExistingFiles[i].length)renderExistingNewImagePreviews(i);});
 }
-function removeProductImage(i,j){
- const gallery=document.getElementById("existing-gallery-"+i),fig=gallery&&gallery.querySelector('[data-existing-image-index="'+j+'"]');
- if(!fig)return;if(gallery.querySelectorAll("figure").length<=1){alert("A product must keep at least one photo.");return;}
- if(!removedExistingImages[i])removedExistingImages[i]=[];removedExistingImages[i].push(j);fig.remove();
+function removeProductImage(i,button){
+ const fig=button&&button.closest("figure"),gallery=document.getElementById("existing-gallery-"+i);
+ const url=fig&&fig.getAttribute("data-existing-image-url");
+ if(!fig||!url)return;
+ if(gallery.querySelectorAll('figure[data-existing-image-url]').length<=1){alert("A product must keep at least one photo.");return;}
+ if(!Array.isArray(removedExistingImages[i]))removedExistingImages[i]=[];
+ if(!removedExistingImages[i].includes(url))removedExistingImages[i].push(url);
+ fig.remove();
 }
-async function setProductMainImage(i,j){
+async function setProductMainImage(i,button){
+ const fig=button&&button.closest("figure"),chosen=fig&&fig.getAttribute("data-existing-image-url");
  const source=Array.isArray(products[i].images)&&products[i].images.length?products[i].images:[products[i].image].filter(Boolean);
- const removed=new Set(removedExistingImages[i]||[]),available=source.filter((_,index)=>!removed.has(index));
- const chosen=source[j];if(!chosen||removed.has(j))return;
- const oldProduct=products[i],oldFiles=selectedExistingFiles[i],oldRemoved=removedExistingImages[i];
- const reordered=[chosen,...available.filter(url=>url!==chosen)];
- products[i]={...products[i],image:reordered[0],images:reordered};
- selectedExistingFiles[i]=[];delete removedExistingImages[i];
- try{await saveData();render();showStatus();}catch(error){products[i]=oldProduct;selectedExistingFiles[i]=oldFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Could not update the main product photo.");}
+ if(!chosen||!source.includes(chosen))return;
+ const oldProduct=products[i];
+ const reordered=[chosen,...source.filter(url=>url!==chosen)];
+ products[i]={...products[i],image:chosen,images:reordered};
+ try{
+  await saveData();
+  render();
+  const gallery=document.getElementById("existing-gallery-"+i);
+  (removedExistingImages[i]||[]).forEach(url=>{const node=gallery&&Array.from(gallery.querySelectorAll("figure[data-existing-image-url]")).find(el=>el.getAttribute("data-existing-image-url")===url);if(node)node.remove();});
+  renderExistingNewImagePreviews(i);
+  showStatus();
+ }catch(error){products[i]=oldProduct;alert(error.message||"Could not update the main product photo.");}
 }
 
 
@@ -1152,13 +1162,13 @@ async function saveProduct(i){
   const name=document.getElementById("name-"+i).value.trim(),price=document.getElementById("price-"+i).value.trim(),category=document.getElementById("category-"+i).value,sizes=document.getElementById("sizes-"+i).value.trim(),colors=document.getElementById("colors-"+i).value.split(",").map(x=>x.trim()).filter(Boolean);
   if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category){alert("Enter a product name, valid price and category.");return;}
   const oldImages=Array.isArray(products[i].images)&&products[i].images.length?products[i].images:[products[i].image].filter(Boolean),removed=new Set(removedExistingImages[i]||[]);
-  let images=oldImages.filter((_,index)=>!removed.has(index));
+  let images=oldImages.filter(url=>!removed.has(url));
   if(button){button.disabled=true;button.textContent="SAVING PHOTOS...";}
   for(const file of (selectedExistingFiles[i]||[]))images.push(await uploadImage(file,document.getElementById("existingStatus-"+i)));
   if(!images.length){alert("A product must keep at least one photo.");return;}
   const oldVariants=Array.isArray(products[i].colorVariants)?products[i].colorVariants:[],colorFiles=selectedExistingColorFiles[i]||[];
   const colorVariants=[];for(const color of colors){const prior=oldVariants.find(v=>String(v.name||"").toLowerCase()===color.toLowerCase())||{},file=colorFiles[color];colorVariants.push({name:color,image:file?await uploadImage(file,document.getElementById("existingStatus-"+i)):prior.image||""});}
-  const mainColorImage=(colorVariants.find(v=>v.image)||{}).image||images[0];const orderedImages=mainColorImage?[mainColorImage,...images.filter(url=>url!==mainColorImage)]:images;products[i]={...products[i],id:products[i].id,name,price,category,sizes,colorVariants,image:mainColorImage,images:orderedImages,description:document.getElementById("description-"+i).value.trim()};
+  const preferredMain=products[i].image&&images.includes(products[i].image)?products[i].image:images[0];const orderedImages=[preferredMain,...images.filter(url=>url!==preferredMain)];products[i]={...products[i],id:products[i].id,name,price,category,sizes,colorVariants,image:preferredMain,images:orderedImages,description:document.getElementById("description-"+i).value.trim()};
   selectedExistingFiles[i]=[];selectedExistingColorFiles[i]={};delete removedExistingImages[i];await saveData();render();showStatus();
  }catch(error){products[i]=oldProduct;selectedExistingFiles[i]=oldFiles;selectedExistingColorFiles[i]=oldColorFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Could not save product.");}
  finally{if(button){button.disabled=false;button.textContent="SAVE PRODUCT";}}
