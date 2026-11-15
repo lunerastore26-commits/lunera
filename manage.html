@@ -1219,16 +1219,16 @@ async function saveAll(){
     const name=nameField.value.trim(),price=priceField.value.trim(),originalText=originalField.value.trim(),originalPrice=originalText?parseManagePrice(originalText):0,category=categoryField.value,sizes=sizesField.value.trim(),description=descriptionField.value.trim();
     if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||(originalText&&(!Number.isFinite(originalPrice)||originalPrice<=parseManagePrice(price)||originalPrice>10000000))||!category)throw Error("Product "+(i+1)+" has invalid details. Check its name, selling price, cut price and category.");
     current.name=name;current.price=price;current.originalPrice=originalPrice;current.category=category;current.sizes=sizes;current.description=description;
-    const colourNames=getColourNames(colorsField.value);
-    const oldVariants=Array.isArray(current.colorVariants)?current.colorVariants:[];
-    const pendingColourFiles=selectedExistingColorFiles[i]||{};
-    current.colorVariants=[];
-    for(const colour of colourNames){
-     const prior=oldVariants.find(v=>String(v.name||"").toLowerCase()===colour.toLowerCase())||{};
-     const file=pendingColourFiles[colour];
-     const image=file?await uploadImage(file,status):prior.image||"";
-     current.colorVariants.push({name:colour,image});
-    }
+   }
+   const oldVariants=Array.isArray(current.colorVariants)?current.colorVariants:[];
+   const colourNames=colorsField?getColourNames(colorsField.value):oldVariants.map(v=>v.name).filter(Boolean);
+   const pendingColourFiles=selectedExistingColorFiles[i]||{};
+   current.colorVariants=[];
+   for(const colour of colourNames){
+    const prior=oldVariants.find(v=>String(v.name||"").toLowerCase()===colour.toLowerCase())||{};
+    const file=pendingColourFiles[colour];
+    const image=file?await uploadImage(file,status):prior.image||"";
+    current.colorVariants.push({name:colour,image});
    }
    const removed=new Set(removedExistingImages[i]||[]);
    let images=(Array.isArray(current.images)&&current.images.length?current.images:[current.image].filter(Boolean)).filter(url=>!removed.has(url));
