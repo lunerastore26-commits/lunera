@@ -1100,7 +1100,7 @@ function render(){
    '<label>Description</label><textarea id="description-'+i+'">'+escapeHTML(p.description||"")+'</textarea>'+
    '<div class="actions"><button class="save" onclick="saveProduct('+i+')">SAVE PRODUCT</button><button class="danger" onclick="deleteProduct('+i+')">DELETE PRODUCT</button></div></div>';
  }).join("");
- products.forEach((p,i)=>{renderExistingColorUploadFields(i);if(selectedExistingFiles[i]&&selectedExistingFiles[i].length)renderExistingNewImagePreviews(i);});
+ products.forEach((p,i)=>{renderExistingColorUploadFields(i);if(selectedExistingFiles[i]&&selectedExistingFiles[i].length)renderExistingNewImagePreviews(i);if(selectedExistingColorFiles[i]&&Object.keys(selectedExistingColorFiles[i]).length)renderExistingColorSelectedPreviews(i);});
 }
 function removeProductImage(i,button){
  const fig=button&&button.closest("figure"),gallery=document.getElementById("existing-gallery-"+i);
@@ -1153,10 +1153,16 @@ function renderExistingColorUploadFields(i){
  const names=getColourNames(document.getElementById("colors-"+i).value),old=Array.isArray(products[i].colorVariants)?products[i].colorVariants:[];
  host.innerHTML=names.map((name,index)=>{const prior=old.find(v=>String(v.name||"").toLowerCase()===name.toLowerCase())||{},preview=prior.image?'<img src="'+escapeAttr(prior.image)+'" alt="'+escapeAttr(name)+' photo" style="width:90px;height:110px;object-fit:contain;background:#eee9e1;display:block;margin:8px 0">':"";return '<div class="colour-upload-row" style="padding:12px 0;border-bottom:1px solid #e5ded4"><label>'+escapeHTML(name)+' Photo</label>'+preview+'<input type="file" accept="image/jpeg,image/png,image/webp" onchange="handleExistingColorImageSelect('+i+','+index+',event)"><div class="file-name">'+(selectedExistingColorFiles[i]&&selectedExistingColorFiles[i][name]?'New photo selected':prior.image?'Current photo saved':'No photo selected')+'</div></div>';}).join("");
 }
+function renderExistingColorSelectedPreviews(i){
+ const gallery=document.getElementById("existing-gallery-"+i);if(!gallery)return;
+ gallery.querySelectorAll("[data-new-selected-colour=true]").forEach(node=>node.remove());
+ const pending=selectedExistingColorFiles[i]||{};
+ Object.entries(pending).forEach(([name,file])=>{if(!file)return;const figure=document.createElement("figure"),img=document.createElement("img"),tag=document.createElement("span"),remove=document.createElement("button");figure.dataset.newSelectedColour="true";img.src=URL.createObjectURL(file);img.alt=name+" colour photo";tag.textContent=name.toUpperCase()+" · NEW COLOUR PHOTO";tag.style.cssText="display:block;font-size:9px;letter-spacing:.8px;padding:5px 2px;color:#17352b;font-weight:600";remove.type="button";remove.className="image-cut";remove.textContent="×";remove.title="Remove selected "+name+" photo";remove.onclick=()=>{delete selectedExistingColorFiles[i][name];renderExistingColorSelectedPreviews(i);renderExistingColorUploadFields(i);};figure.appendChild(img);figure.appendChild(tag);figure.appendChild(remove);gallery.appendChild(figure);});
+}
 async function handleExistingColorImageSelect(i,index,event){
  const name=getColourNames(document.getElementById("colors-"+i).value)[index],file=event.target.files&&event.target.files[0];if(!name||!file)return;
  if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>10*1024*1024){alert("Choose a JPG, PNG or WebP photo under 10 MB.");event.target.value="";return;}
- try{const edited=await openImageEditor(file);if(edited){if(!selectedExistingColorFiles[i])selectedExistingColorFiles[i]={};selectedExistingColorFiles[i][name]=edited;const row=event.target.closest(".colour-upload-row");if(row)row.querySelector(".file-name").textContent="New photo ready: "+file.name;}}catch(error){alert(error.message||"Colour photo editing failed.");}
+ try{const edited=await openImageEditor(file);if(edited){if(!selectedExistingColorFiles[i])selectedExistingColorFiles[i]={};selectedExistingColorFiles[i][name]=edited;const row=event.target.closest(".colour-upload-row");if(row)row.querySelector(".file-name").textContent="New photo ready: "+file.name;renderExistingColorSelectedPreviews(i);}}catch(error){alert(error.message||"Colour photo editing failed.");}finally{event.target.value="";}
 }
 
 async function saveProduct(i){
