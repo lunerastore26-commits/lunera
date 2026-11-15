@@ -1117,15 +1117,20 @@ async function setProductMainImage(i,j){
 
 
 async function handleExistingImageSelect(i,event){
- const files=Array.from(event.target.files||[]),name=document.getElementById("existingFileName-"+i),status=document.getElementById("existingStatus-"+i),preview=document.getElementById("existing-new-gallery-"+i);
- if(!files.length){selectedExistingFiles[i]=[];name.textContent="No new photos selected";preview.innerHTML="";status.textContent="";return;}
+ const files=Array.from(event.target.files||[]),name=document.getElementById("existingFileName-"+i),status=document.getElementById("existingStatus-"+i);
+ if(!files.length)return;
  if(files.some(f=>!["image/jpeg","image/png","image/webp"].includes(f.type))){alert("Choose JPG, PNG or WebP images only.");event.target.value="";return;}
  if(files.some(f=>f.size>10*1024*1024)){alert("Each image must be smaller than 10 MB.");event.target.value="";return;}
+ // Clear the input so the same file can be selected again, but keep all previously queued photos.
+ event.target.value="";
  try{
   const edited=[];for(const file of files){const next=await openImageEditor(file);if(next)edited.push(next);}
-  selectedExistingFiles[i]=edited;name.textContent=edited.length+" additional product photo(s) ready · 4:5";preview.innerHTML="";
+  if(!Array.isArray(selectedExistingFiles[i]))selectedExistingFiles[i]=[];
+  selectedExistingFiles[i].push(...edited);
+  name.textContent=selectedExistingFiles[i].length+" additional product photo(s) ready · 4:5";
   renderExistingNewImagePreviews(i);
-  status.textContent=edited.length+" PHOTO(S) READY TO ADD.";
+  status.textContent=selectedExistingFiles[i].length+" PHOTO(S) READY TO ADD. SAVE PRODUCT TO KEEP THEM.";
+  status.className="upload-status";
  }catch(error){status.textContent=error.message||"Image editing failed.";status.className="upload-status error";}
 }
 
