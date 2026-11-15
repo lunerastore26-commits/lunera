@@ -294,8 +294,10 @@ small,.eyebrow,.footer-heading,.footer-links a,.footer-bottom,label,button,nav a
 <label>Product Name</label>
 <input id="newName" placeholder="Example: The Silk Essential">
 
-<label>Price</label>
-<input id="newPrice" placeholder="₹1,499">
+<label>Cut Price / MRP (Optional)</label>
+<input id="newOriginalPrice" inputmode="decimal" placeholder="₹999 — shown crossed out">
+<label>Selling Price</label>
+<input id="newPrice" inputmode="decimal" placeholder="₹400 — customer pays this">
 
 <label>Category</label>
 <select id="newCategorySelect"></select>
@@ -1044,22 +1046,22 @@ async function handleNewColorImageSelect(index,event){
 /* ADD PRODUCT */
 
 async function addProduct(){
- const button=document.getElementById("addProductButton"),name=document.getElementById("newName").value.trim(),price=document.getElementById("newPrice").value.trim(),category=document.getElementById("newCategorySelect").value,sizes=document.getElementById("newSizes").value.trim(),colors=document.getElementById("newColors").value.split(",").map(x=>x.trim()).filter(Boolean),description=document.getElementById("newDescription").value.trim(),status=document.getElementById("uploadStatus");
- if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category){alert("Enter a product name, valid price and category.");return;}
+ const button=document.getElementById("addProductButton"),name=document.getElementById("newName").value.trim(),price=document.getElementById("newPrice").value.trim(),originalPrice=document.getElementById("newOriginalPrice").value.trim(),category=document.getElementById("newCategorySelect").value,sizes=document.getElementById("newSizes").value.trim(),colors=document.getElementById("newColors").value.split(",").map(x=>x.trim()).filter(Boolean),description=document.getElementById("newDescription").value.trim(),status=document.getElementById("uploadStatus");
+ if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||(originalPrice&&(!Number.isFinite(parseManagePrice(originalPrice))||parseManagePrice(originalPrice)<=parseManagePrice(price)||parseManagePrice(originalPrice)>10000000))||!category){alert("Enter a valid selling price. Cut price must be higher than selling price.");return;}
  if(!selectedNewImageFiles.length){alert("Choose at least one product photo.");return;}
  button.disabled=true;button.textContent="UPLOADING PHOTOS...";
  try{
   const images=[];for(const file of selectedNewImageFiles)images.push(await uploadImage(file,status));
   const colorVariants=[];for(const color of colors){const file=selectedNewColorFiles[color];colorVariants.push({name:color,image:file?await uploadImage(file,status):""});}
   const id=name.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"")+"-"+Date.now();
-  const mainColorImage=(colorVariants.find(v=>v.image)||{}).image||images[0];const orderedImages=mainColorImage?[mainColorImage,...images.filter(url=>url!==mainColorImage)]:images;products.push({id,name,price,category,sizes:sizes,colorVariants,image:mainColorImage,images:orderedImages,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
+  const mainColorImage=(colorVariants.find(v=>v.image)||{}).image||images[0];const orderedImages=mainColorImage?[mainColorImage,...images.filter(url=>url!==mainColorImage)]:images;products.push({id,name,price,originalPrice:originalPrice?parseManagePrice(originalPrice):0,createdAt:Date.now(),category,sizes:sizes,colorVariants,image:mainColorImage,images:orderedImages,description:description||"Refined LUNÉRA design created around comfort and timeless elegance."});
   try{await saveData();}catch(saveError){products.pop();throw saveError;}clearProductForm();render();showStatus();alert("Product and all photos added successfully.");
  }catch(error){status.textContent=error.message||"Image upload failed.";status.className="upload-status error";alert(error.message||"Product was not added.");}
  finally{button.disabled=false;button.textContent="ADD PRODUCT TO CATALOGUE";}
 }
 
 function clearProductForm(){
- ["newName","newPrice","newSizes","newColors","newDescription","newImageFile"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+ ["newName","newOriginalPrice","newPrice","newSizes","newColors","newDescription","newImageFile"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
  selectedNewImageFiles=[];selectedNewColorFiles={};document.getElementById("newImageGalleryPreview").innerHTML="";document.getElementById("newColorUploadFields").innerHTML="";
  document.getElementById("newFileName").textContent="No images selected";
  const status=document.getElementById("uploadStatus");status.textContent="";status.className="upload-status";
@@ -1084,7 +1086,7 @@ function render(){
   return '<div class="product-card"><div class="product-number">PRODUCT '+String(i+1).padStart(2,"0")+' · '+imgs.length+' PHOTO(S)</div>'+
    '<div class="gallery-preview" id="existing-gallery-'+i+'">'+thumbs+'</div>'+
    '<label>Product Name</label><input id="name-'+i+'" value="'+escapeAttr(p.name)+'">'+
-   '<label>Price</label><input id="price-'+i+'" value="'+escapeAttr(p.price)+'">'+
+   '<label>Cut Price / MRP (Optional)</label><input id="originalPrice-'+i+'" inputmode="decimal" value="'+escapeAttr(p.originalPrice||"") +'" placeholder="₹999 — shown crossed out"><label>Selling Price</label><input id="price-'+i+'" inputmode="decimal" value="'+escapeAttr(p.price)+'">'+
    '<label>Category</label><select id="category-'+i+'">'+categoryOptions+'</select>'+
    '<label>Available Sizes <span style="font-weight:400;opacity:.65">(Optional)</span></label><input id="sizes-'+i+'" value="'+escapeAttr(Array.isArray(p.sizes)?p.sizes.join(", "):p.sizes)+'" placeholder="Leave blank if this product has no sizes">'+
    '<label>Available Colours</label><input id="colors-'+i+'" value="'+escapeAttr((Array.isArray(p.colorVariants)?p.colorVariants.map(v=>v.name):[]).join(", "))+'" placeholder="Beige, Lavender, Baby Pink" oninput="renderExistingColorUploadFields('+i+')">'+
@@ -1159,8 +1161,8 @@ async function saveProduct(i){
  const button=document.activeElement&&document.activeElement.tagName==="BUTTON"?document.activeElement:null;
  const oldProduct=products[i],oldFiles=selectedExistingFiles[i],oldRemoved=removedExistingImages[i],oldColorFiles=selectedExistingColorFiles[i];
  try{
-  const name=document.getElementById("name-"+i).value.trim(),price=document.getElementById("price-"+i).value.trim(),category=document.getElementById("category-"+i).value,sizes=document.getElementById("sizes-"+i).value.trim(),colors=document.getElementById("colors-"+i).value.split(",").map(x=>x.trim()).filter(Boolean);
-  if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||!category){alert("Enter a product name, valid price and category.");return;}
+  const name=document.getElementById("name-"+i).value.trim(),price=document.getElementById("price-"+i).value.trim(),originalPrice=document.getElementById("originalPrice-"+i).value.trim(),category=document.getElementById("category-"+i).value,sizes=document.getElementById("sizes-"+i).value.trim(),colors=document.getElementById("colors-"+i).value.split(",").map(x=>x.trim()).filter(Boolean);
+  if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||(originalPrice&&(!Number.isFinite(parseManagePrice(originalPrice))||parseManagePrice(originalPrice)<=parseManagePrice(price)||parseManagePrice(originalPrice)>10000000))||!category){alert("Enter a valid selling price. Cut price must be higher than selling price.");return;}
   const oldImages=Array.isArray(products[i].images)&&products[i].images.length?products[i].images:[products[i].image].filter(Boolean),removed=new Set(removedExistingImages[i]||[]);
   let images=oldImages.filter(url=>!removed.has(url));
   if(button){button.disabled=true;button.textContent="SAVING PHOTOS...";}
@@ -1168,7 +1170,7 @@ async function saveProduct(i){
   if(!images.length){alert("A product must keep at least one photo.");return;}
   const oldVariants=Array.isArray(products[i].colorVariants)?products[i].colorVariants:[],colorFiles=selectedExistingColorFiles[i]||[];
   const colorVariants=[];for(const color of colors){const prior=oldVariants.find(v=>String(v.name||"").toLowerCase()===color.toLowerCase())||{},file=colorFiles[color];colorVariants.push({name:color,image:file?await uploadImage(file,document.getElementById("existingStatus-"+i)):prior.image||""});}
-  const preferredMain=products[i].image&&images.includes(products[i].image)?products[i].image:images[0];const orderedImages=[preferredMain,...images.filter(url=>url!==preferredMain)];products[i]={...products[i],id:products[i].id,name,price,category,sizes,colorVariants,image:preferredMain,images:orderedImages,description:document.getElementById("description-"+i).value.trim()};
+  const preferredMain=products[i].image&&images.includes(products[i].image)?products[i].image:images[0];const orderedImages=[preferredMain,...images.filter(url=>url!==preferredMain)];products[i]={...products[i],id:products[i].id,name,price,originalPrice:originalPrice?parseManagePrice(originalPrice):0,category,sizes,colorVariants,image:preferredMain,images:orderedImages,description:document.getElementById("description-"+i).value.trim()};
   selectedExistingFiles[i]=[];selectedExistingColorFiles[i]={};delete removedExistingImages[i];await saveData();render();showStatus();
  }catch(error){products[i]=oldProduct;selectedExistingFiles[i]=oldFiles;selectedExistingColorFiles[i]=oldColorFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Could not save product.");}
  finally{if(button){button.disabled=false;button.textContent="SAVE PRODUCT";}}
@@ -1199,43 +1201,17 @@ async function saveAll(){
 
 const previousProducts=products;
 products =
-products.map(
-(p,i)=>({
+products.map((p,i)=>({
+...p,
+name:document.getElementById("name-"+i).value.trim(),
+price:document.getElementById("price-"+i).value.trim(),
+originalPrice:document.getElementById("originalPrice-"+i).value.trim()?parseManagePrice(document.getElementById("originalPrice-"+i).value):0,
+category:document.getElementById("category-"+i).value,
+sizes:document.getElementById("sizes-"+i).value.trim(),
+description:document.getElementById("description-"+i).value.trim()
+}));
 
-id:p.id,
-
-name:
-document.getElementById(
-"name-"+i
-).value.trim(),
-
-price:
-document.getElementById(
-"price-"+i
-).value.trim(),
-
-category:
-document.getElementById(
-"category-"+i
-).value,
-
-sizes:
-document.getElementById(
-"sizes-"+i
-).value.trim(),
-
-image:p.image,
-images:Array.isArray(p.images)?p.images:[p.image].filter(Boolean),
-
-description:
-document.getElementById(
-"description-"+i
-).value.trim()
-
-})
-);
-
-if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(parseManagePrice(p.price)) || parseManagePrice(p.price)<=0 || parseManagePrice(p.price)>10000000 || !String(p.category||"").trim())){
+if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(parseManagePrice(p.price)) || parseManagePrice(p.price)<=0 || parseManagePrice(p.price)>10000000 || (p.originalPrice&&(!Number.isFinite(parseManagePrice(p.originalPrice))||parseManagePrice(p.originalPrice)<=parseManagePrice(p.price)||parseManagePrice(p.originalPrice)>10000000)) || !String(p.category||"").trim())){
  alert("One or more products have invalid details. Check name, positive price and category.");
  return;
 }
