@@ -1081,9 +1081,10 @@ function render(){
  if(!visible.length){container.innerHTML='<div class="empty">No products in this category yet.</div>';return;}
  container.innerHTML=visible.map(({p,index})=>{const i=index;
   const imgs=Array.isArray(p.images)&&p.images.length?p.images:[p.image].filter(Boolean);
-  const thumbs=imgs.map((url,j)=>'<figure data-existing-image-url="'+escapeAttr(url)+'"><img src="'+escapeAttr(url)+'" alt="'+escapeAttr(p.name)+' photo '+(j+1)+'"><button type="button" class="image-cut" title="Remove this photo" aria-label="Remove '+escapeAttr(p.name)+' photo '+(j+1)+'" onclick="removeProductImage('+i+',this)">×</button><button type="button" onclick="setProductMainImage('+i+',this)">MAKE MAIN</button></figure>').join("");
+  const galleryItems=[...imgs.map(url=>({url,label:"PRODUCT PHOTO"})),...(Array.isArray(p.colorVariants)?p.colorVariants.filter(v=>v&&v.image).map(v=>({url:v.image,label:String(v.name||"COLOUR")+" COLOUR"})):[])].filter((item,index,list)=>item.url&&list.findIndex(other=>other.url===item.url)===index);
+  const thumbs=galleryItems.map((item,j)=>'<figure data-existing-image-url="'+escapeAttr(item.url)+'"><img src="'+escapeAttr(item.url)+'" alt="'+escapeAttr(p.name)+' '+escapeAttr(item.label)+' photo"><span style="display:block;font-size:9px;letter-spacing:.8px;padding:5px 2px;color:#17352b;font-weight:600">'+escapeHTML(item.label)+'</span><button type="button" class="image-cut" title="Remove this photo" aria-label="Remove '+escapeAttr(p.name)+' photo '+(j+1)+'" onclick="removeProductImage('+i+',this)">×</button><button type="button" onclick="setProductMainImage('+i+',this)">MAKE MAIN</button></figure>').join("");
   const categoryOptions=categories.map(c=>'<option value="'+escapeAttr(c)+'" '+(c===p.category?"selected":"")+'>'+escapeHTML(c)+'</option>').join("");
-  return '<div class="product-card"><div class="product-number">PRODUCT '+String(i+1).padStart(2,"0")+' · '+imgs.length+' PHOTO(S)</div>'+
+  return '<div class="product-card"><div class="product-number">PRODUCT '+String(i+1).padStart(2,"0")+' · '+galleryItems.length+' PHOTO(S) INCLUDING COLOURS</div>'+
    '<div class="gallery-preview" id="existing-gallery-'+i+'">'+thumbs+'</div>'+
    '<label>Product Name</label><input id="name-'+i+'" value="'+escapeAttr(p.name)+'">'+
    '<label>Cut Price / MRP (Optional)</label><input id="originalPrice-'+i+'" inputmode="decimal" value="'+escapeAttr(p.originalPrice||"") +'" placeholder="₹999 — shown crossed out"><label>Selling Price</label><input id="price-'+i+'" inputmode="decimal" value="'+escapeAttr(p.price)+'">'+
@@ -1113,7 +1114,8 @@ function removeProductImage(i,button){
 async function setProductMainImage(i,button){
  const fig=button&&button.closest("figure"),chosen=fig&&fig.getAttribute("data-existing-image-url");
  const source=Array.isArray(products[i].images)&&products[i].images.length?products[i].images:[products[i].image].filter(Boolean);
- if(!chosen||!source.includes(chosen))return;
+ const allGalleryUrls=[...source,...(Array.isArray(products[i].colorVariants)?products[i].colorVariants.map(v=>v&&v.image||""):[])].filter(Boolean);
+ if(!chosen||!allGalleryUrls.includes(chosen))return;
  const oldProduct=products[i];
  const reordered=[chosen,...source.filter(url=>url!==chosen)];
  products[i]={...products[i],image:chosen,images:reordered};
@@ -1169,7 +1171,7 @@ async function saveProduct(i){
   for(const file of (selectedExistingFiles[i]||[]))images.push(await uploadImage(file,document.getElementById("existingStatus-"+i)));
   if(!images.length){alert("A product must keep at least one photo.");return;}
   const oldVariants=Array.isArray(products[i].colorVariants)?products[i].colorVariants:[],colorFiles=selectedExistingColorFiles[i]||[];
-  const colorVariants=[];for(const color of colors){const prior=oldVariants.find(v=>String(v.name||"").toLowerCase()===color.toLowerCase())||{},file=colorFiles[color];colorVariants.push({name:color,image:file?await uploadImage(file,document.getElementById("existingStatus-"+i)):prior.image||""});}
+  const colorVariants=[];for(const color of colors){const prior=oldVariants.find(v=>String(v.name||"").toLowerCase()===color.toLowerCase())||{},file=colorFiles[color],colourImage=file?await uploadImage(file,document.getElementById("existingStatus-"+i)):prior.image||"";colorVariants.push({name:color,image:removed.has(colourImage)?"":colourImage});}
   const preferredMain=products[i].image&&images.includes(products[i].image)?products[i].image:images[0];const orderedImages=[preferredMain,...images.filter(url=>url!==preferredMain)];products[i]={...products[i],id:products[i].id,name,price,originalPrice:originalPrice?parseManagePrice(originalPrice):0,category,sizes,colorVariants,image:preferredMain,images:orderedImages,description:document.getElementById("description-"+i).value.trim()};
   selectedExistingFiles[i]=[];selectedExistingColorFiles[i]={};delete removedExistingImages[i];await saveData();render();showStatus();
  }catch(error){products[i]=oldProduct;selectedExistingFiles[i]=oldFiles;selectedExistingColorFiles[i]=oldColorFiles;if(oldRemoved)removedExistingImages[i]=oldRemoved;alert(error.message||"Could not save product.");}
@@ -1228,7 +1230,7 @@ async function saveAll(){
     const prior=oldVariants.find(v=>String(v.name||"").toLowerCase()===colour.toLowerCase())||{};
     const file=pendingColourFiles[colour];
     const image=file?await uploadImage(file,status):prior.image||"";
-    current.colorVariants.push({name:colour,image});
+    current.colorVariants.push({name:colour,image:removedExistingImages[i]?.includes(image)?"":image});
    }
    const removed=new Set(removedExistingImages[i]||[]);
    let images=(Array.isArray(current.images)&&current.images.length?current.images:[current.image].filter(Boolean)).filter(url=>!removed.has(url));
