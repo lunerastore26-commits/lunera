@@ -1198,24 +1198,60 @@ showStatus();
 }
 
 async function saveAll(){
-
-const previousProducts=products;
-products =
-products.map((p,i)=>({
-...p,
-name:document.getElementById("name-"+i).value.trim(),
-price:document.getElementById("price-"+i).value.trim(),
-originalPrice:document.getElementById("originalPrice-"+i).value.trim()?parseManagePrice(document.getElementById("originalPrice-"+i).value):0,
-category:document.getElementById("category-"+i).value,
-sizes:document.getElementById("sizes-"+i).value.trim(),
-description:document.getElementById("description-"+i).value.trim()
-}));
-
-if(products.some(p=>!String(p.name||"").trim() || !Number.isFinite(parseManagePrice(p.price)) || parseManagePrice(p.price)<=0 || parseManagePrice(p.price)>10000000 || (p.originalPrice&&(!Number.isFinite(parseManagePrice(p.originalPrice))||parseManagePrice(p.originalPrice)<=parseManagePrice(p.price)||parseManagePrice(p.originalPrice)>10000000)) || !String(p.category||"").trim())){
- alert("One or more products have invalid details. Check name, positive price and category.");
- return;
-}
-try{await saveData();showStatus();}catch(error){products=previousProducts;alert(error.message||"Catalogue could not be saved to the shared store.");}
+ const button=document.querySelector('button[onclick="saveAll()"]');
+ const status=document.getElementById("status");
+ const previousProducts=products;
+ const nextProducts=products.map(p=>({...p,images:Array.isArray(p.images)?[...p.images]:[p.image].filter(Boolean),colorVariants:Array.isArray(p.colorVariants)?p.colorVariants.map(v=>({...v})):[]}));
+ const originalText=button?button.textContent:"SAVE ALL CHANGES";
+ if(button){button.disabled=true;button.textContent="SAVING ALL CHANGES...";}
+ if(status){status.textContent="SAVING ALL PRODUCT DETAILS AND PHOTOS...";status.classList.add("show");}
+ try{
+  for(let i=0;i<nextProducts.length;i++){
+   const current=nextProducts[i];
+   const nameField=document.getElementById("name-"+i);
+   const priceField=document.getElementById("price-"+i);
+   const categoryField=document.getElementById("category-"+i);
+   const sizesField=document.getElementById("sizes-"+i);
+   const descriptionField=document.getElementById("description-"+i);
+   const originalField=document.getElementById("originalPrice-"+i);
+   const colorsField=document.getElementById("colors-"+i);
+   if(nameField&&priceField&&categoryField&&sizesField&&descriptionField&&originalField&&colorsField){
+    const name=nameField.value.trim(),price=priceField.value.trim(),originalText=originalField.value.trim(),originalPrice=originalText?parseManagePrice(originalText):0,category=categoryField.value,sizes=sizesField.value.trim(),description=descriptionField.value.trim();
+    if(!name||!Number.isFinite(parseManagePrice(price))||parseManagePrice(price)<=0||parseManagePrice(price)>10000000||(originalText&&(!Number.isFinite(originalPrice)||originalPrice<=parseManagePrice(price)||originalPrice>10000000))||!category)throw Error("Product "+(i+1)+" has invalid details. Check its name, selling price, cut price and category.");
+    current.name=name;current.price=price;current.originalPrice=originalPrice;current.category=category;current.sizes=sizes;current.description=description;
+    const colourNames=getColourNames(colorsField.value);
+    const oldVariants=Array.isArray(current.colorVariants)?current.colorVariants:[];
+    const pendingColourFiles=selectedExistingColorFiles[i]||{};
+    current.colorVariants=[];
+    for(const colour of colourNames){
+     const prior=oldVariants.find(v=>String(v.name||"").toLowerCase()===colour.toLowerCase())||{};
+     const file=pendingColourFiles[colour];
+     const image=file?await uploadImage(file,status):prior.image||"";
+     current.colorVariants.push({name:colour,image});
+    }
+   }
+   const removed=new Set(removedExistingImages[i]||[]);
+   let images=(Array.isArray(current.images)&&current.images.length?current.images:[current.image].filter(Boolean)).filter(url=>!removed.has(url));
+   for(const file of (selectedExistingFiles[i]||[]))images.push(await uploadImage(file,status));
+   if(!images.length)throw Error("Product "+(i+1)+" must keep at least one photo.");
+   const mainImage=current.image&&images.includes(current.image)?current.image:images[0];
+   current.image=mainImage;
+   current.images=[mainImage,...images.filter(url=>url!==mainImage)];
+  }
+  products=nextProducts;
+  await saveData();
+  selectedExistingFiles={};
+  selectedExistingColorFiles={};
+  removedExistingImages={};
+  render();
+  if(status){status.textContent="ALL PRODUCT CHANGES, NEW PHOTOS, REMOVALS AND COLOUR PHOTOS SAVED SUCCESSFULLY.";status.classList.add("show");}
+ }catch(error){
+  products=previousProducts;
+  if(status){status.textContent="SAVE FAILED — "+(error.message||"Please try again.");status.classList.add("show");}
+  alert(error.message||"Some changes could not be saved. Your pending photo selections have been kept; please try again.");
+ }finally{
+  if(button){button.disabled=false;button.textContent=originalText;}
+ }
 }
 
 
